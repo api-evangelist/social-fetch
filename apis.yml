@@ -1,0 +1,63 @@
+name: Social Fetch
+description: >-
+  Hosted social-media scraper API returning structured JSON for public profiles, posts, comments, engagement metrics,
+  transcripts, and search across ~23 platforms. Offers a REST API with public OpenAPI contract, a hosted MCP server, an
+  llms.txt file set, published agent skills, and x402 pay-per-call payments.
+url: https://raw.githubusercontent.com/api-evangelist/social-fetch/refs/heads/main/apis.yml
+created: '2026-09-10'
+modified: '2026-09-10'
+specificationVersion: '0.21'
+tags:
+  - social media
+  - web scraping
+  - data extraction
+  - social listening
+  - monitoring
+  - structured data
+  - JSON API
+  - REST
+  - MCP
+  - agent-native
+  - TypeScript SDK
+  - transcripts
+  - ads intelligence
+apis:
+  - name: Social Fetch REST API
+    description: >-
+      Synchronous REST API for scraping public social media data across ~23 platforms, returning structured JSON. 206
+      operations under /v1. API-key auth via x-api-key header. Supports x402 USDC-on-Base pay-per-call.
+    humanURL: https://www.socialfetch.dev/docs
+    baseURL: https://api.socialfetch.dev
+    tags:
+      - social media
+      - web scraping
+      - data extraction
+      - social listening
+      - monitoring
+      - structured data
+      - JSON API
+      - REST
+      - MCP
+      - agent-native
+      - TypeScript SDK
+      - transcripts
+      - ads intelligence
+    properties:
+      - type: OpenAPI
+        url: https://www.socialfetch.dev/openapi.json
+      - type: Documentation
+        url: https://www.socialfetch.dev/docs
+      - type: LLMsTxt
+        url: https://www.socialfetch.dev/llms.txt
+      - type: MCPServer
+        url: https://api.socialfetch.dev/mcp
+      - type: AgentSkill
+        url: https://www.socialfetch.dev/docs/integrations/skills.mdx
+maintainers:
+  - FN: Social Fetch
+    url: https://www.socialfetch.dev
+generated:
+  by: apis.io/add
+  model: claude-opus-4-8
+  confidence: 97
+  at: '2026-09-10T22:01:43.630Z'
