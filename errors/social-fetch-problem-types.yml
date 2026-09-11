@@ -1,0 +1,61 @@
+generated: '2026-09-11'
+method: searched
+source: >-
+  Derived from OpenAPI 4xx/5xx responses in openapi/social-fetch-openapi.json and
+  enriched from https://www.socialfetch.dev/docs/errors.mdx (read 2026-09-11).
+format: custom-envelope
+envelope:
+  success: '{ data, meta }  — meta carries requestId, creditsCharged, version'
+  error: '{ error: { code, message, requestId } }'
+  note: >-
+    NOT RFC 9457 problem+json. On HTTP 200 many routes carry a domain outcome in
+    data.lookupStatus (found | not_found | private | restricted) — 200 does not
+    imply "found", and not_found / private outcomes still charge credits.
+problem_types:
+  - status: 400
+    code: bad_request
+    title: Invalid request
+    detail: Malformed request or a known limitation (e.g. transcript_target_not_video). Fix the request before retrying.
+  - status: 401
+    code: unauthorized
+    title: Missing or invalid API key
+    detail: Send a valid x-api-key (sfk_...) header.
+  - status: 402
+    code: insufficient_credits
+    title: Credits exhausted
+    detail: Metered routes return 402 when the credit balance is empty. Top up or enable auto top-up.
+  - status: 402
+    code: payment_required
+    title: Payment required (x402 walk-up)
+    detail: Returned on payable resources when no API key is supplied; pay via x402 USDC-on-Base to proceed.
+  - status: 402
+    code: payment_settlement_failed
+    title: USDC settlement failed
+    detail: The x402 on-chain settlement did not complete.
+  - status: 403
+    code: forbidden
+    title: Forbidden
+    detail: Caller is authenticated but not permitted for this resource.
+  - status: 404
+    code: not_found
+    title: Route not found
+    detail: Unknown path. Note that a missing social target returns 200 with data.lookupStatus=not_found, not HTTP 404.
+  - status: 429
+    code: temporarily_unavailable
+    title: Rate limited
+    detail: Per-key rate limit — applies to free routes (whoami, balance). Paid metered routes have no request quota (credits are the only limit).
+  - status: 500
+    code: internal_error
+    title: Internal error
+    detail: Unexpected server error.
+  - status: 502
+    code: lookup_failed
+    title: Lookup failed
+    detail: The upstream lookup could not be completed. Not charged.
+  - status: 503
+    code: temporarily_unavailable
+    title: Service briefly unavailable
+    detail: Safe to retry; honor the Retry-After header. Not charged on metered routes.
+retry_guidance: >-
+  Honor Retry-After on 503; exponential backoff otherwise. Do not blindly retry
+  4xx — fix the request first. 502/503 on metered routes are not charged.

@@ -1,0 +1,38 @@
+generated: '2026-09-11'
+method: searched
+source: https://www.socialfetch.dev/docs/credits.mdx and docs/errors.mdx (read 2026-09-11)
+model: credit-metered (no request-per-second quota on paid routes)
+limit_count: 2
+limits:
+  - scope: per-key (free routes only)
+    applies_to: [GET /v1/whoami, GET /v1/balance]
+    window: unspecified
+    limit: unspecified
+    status_on_exhaustion: 429
+    code: temporarily_unavailable
+    detail: Free auth/balance routes enforce a per-key rate limit and return 429 when exceeded.
+  - scope: concurrency (paid metered routes)
+    window: instantaneous
+    limit: "~500 concurrent requests (recommended ceiling, not a hard quota)"
+    status_on_exhaustion: 503
+    code: temporarily_unavailable
+    detail: >-
+      Paid metered /v1/* routes have no request quota — credits are the only
+      limit. Under extreme load the API returns 503 with Retry-After (not
+      charged). Stay below ~500 concurrent requests.
+response_headers:
+  ratelimit_headers: []
+  retry_after:
+    trigger_status: 503
+    detail: Present on 503 temporarily_unavailable; honor it before retrying.
+  note: >-
+    No X-RateLimit-* / RateLimit-* headers are documented or returned; balance is
+    polled via GET /v1/balance (data.balance, data.billingAlert).
+exhaustion_credits:
+  status: 402
+  code: insufficient_credits
+  detail: When the credit balance is empty, metered routes return 402 insufficient_credits.
+notes: >-
+  The runtime signal for capacity is credits (meta.creditsCharged, GET
+  /v1/balance) rather than rate-limit headers; 429 is scoped to the free routes,
+  503+Retry-After signals transient overload.

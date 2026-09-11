@@ -1,0 +1,56 @@
+generated: '2026-09-11'
+method: searched
+source: https://www.socialfetch.dev/pricing
+plan_count: 4
+model: credit-based (pay-as-you-go one-time packs + optional monthly/annual subscriptions)
+currency: USD
+free_tier:
+  name: Free
+  credits: 100
+  card_required: false
+  detail: 100 free credits on signup; same endpoints and response format as paid plans. whoami and balance are free.
+plans:
+  - name: Starter
+    type: one-time credit pack
+    price: 14.00
+    currency: USD
+    billing_period: one-time
+    included_credits: 1000
+    cost_per_1k_requests: 14.00
+    subscription_monthly_credits: 15000
+  - name: Growth
+    type: one-time credit pack
+    price: 47.00
+    currency: USD
+    billing_period: one-time
+    included_credits: 25000
+    cost_per_1k_requests: 1.88
+    subscription_monthly_credits: 50000
+  - name: Scale
+    type: one-time credit pack
+    price: 379.00
+    currency: USD
+    billing_period: one-time
+    included_credits: 230000
+    cost_per_1k_requests: 1.64
+    subscription_monthly_credits: 150000
+metering:
+  unit: credit
+  detail: >-
+    Most lookups cost 1 credit; heavier routes (e.g. Twitter/X search) cost more.
+    Metered routes bill on successful lookup, INCLUDING not_found and private
+    outcomes returned on HTTP 200. Cache hits (meta.cached:true) still charge.
+    Failed validations and infrastructure errors (lookup_failed, 502/503) are not
+    charged.
+  expiration: none (pay-as-you-go credits do not expire)
+  auto_top_up: available, enabled by default after first purchase
+subscriptions:
+  detail: >-
+    Optional monthly (-8%) and annual (-15%) subscriptions add monthly credit
+    resets (Starter 15k, Growth 50k, Scale 150k). Exact subscription list prices
+    were not fully enumerated on the pricing page this pass.
+alternative_payment:
+  x402: USDC-on-Base walk-up pay-per-call, no API key or account required (see well-known/social-fetch-x402.json).
+notes: >-
+  No hard request rate limits on paid metered routes — "credits are the only
+  limit". Enterprise/custom pricing is not advertised as a separate contact-us tier.

@@ -1,0 +1,97 @@
+# Social Fetch — AI agent and crawler access file
+# Last updated: 2026-09-08
+
+## What Social Fetch is
+Social Fetch is a hosted social media scraper API over synchronous REST: structured public social and web data as JSON.
+One API key (x-api-key: sfk_...), one { data, meta } response envelope, 206 documented operations. Strong coverage for Reddit, TikTok, and Instagram, plus X/Twitter, YouTube, Facebook, LinkedIn, Threads, Telegram, GitHub, Spotify, Rumble, and general web pages.
+Hosted MCP: https://api.socialfetch.dev/mcp (OAuth by default, or x-api-key if the client never prompts). TypeScript SDK: @socialfetch/sdk.
+Docs: https://www.socialfetch.dev/docs · Pricing: https://www.socialfetch.dev/pricing · Credits: https://www.socialfetch.dev/docs/credits.mdx
+Platform hubs: https://www.socialfetch.dev/platforms (Reddit: https://www.socialfetch.dev/platforms/reddit).
+
+## Key capabilities for agents
+- Fetch profiles, posts, comments, transcripts, search, commerce, ads, and web extraction as JSON (no DIY scraper fleet)
+- Unified envelope and consistent field naming across platforms (no HTML parsing)
+- Explicit lookupStatus on many routes so HTTP 200 does not imply found
+- Cursor pagination via data.page.nextCursor / data.page.hasMore and query cursor
+- Hosted MCP at https://api.socialfetch.dev/mcp for Cursor, Claude, VS Code, and other MCP clients — OAuth, or x-api-key from an env var if the client never prompts
+- Agent Skills: `npx skills add social-freak-ltd/socialfetch -s socialfetch` — https://www.socialfetch.dev/docs/integrations/skills.mdx
+- 100 free credits on signup; whoami and balance are free
+
+## Instructions
+
+- Authenticate every /v1/** request with the x-api-key header. Never put the key in the URL or query string.
+- Never invent endpoint paths. Start with https://www.socialfetch.dev/llms.txt, pick a platform file under /llms-{platform}.txt, or use https://www.socialfetch.dev/llms-endpoints.txt for the full list with markdown doc links.
+- Prefer the linked per-route .mdx docs page (or Accept: text/markdown on /docs/**) over parsing OpenAPI for routine integration work.
+- Published blog posts also have markdown twins: append .mdx to /blog/{slug} (or Accept: text/markdown on the HTML URL).
+- Paginate list routes the same way: read data.page.nextCursor, send it back as the cursor query parameter, stop when data.page.hasMore is false. Never build or decode a cursor yourself.
+- On HTTP 200, inspect lookupStatus (found / not_found / private / …) when present before treating the payload as a successful find.
+- On non-200 responses, parse the shared { error } envelope and keep requestId from meta for support. See errors docs.
+- Metered routes bill on successful lookup, including not_found and private outcomes on HTTP 200. Plan batch jobs against the credits guide.
+- For AI IDE tool calling, prefer MCP (OAuth, or x-api-key if the client never prompts). For server-side pipelines, prefer @socialfetch/sdk or REST with an API key.
+
+## Endpoint categories
+Counts from the live registry (https://www.socialfetch.dev/llms.json). Per-platform files list parameters, credits, and example curls:
+- Amazon (1): https://www.socialfetch.dev/llms-amazon.txt
+- Apple Music (4): https://www.socialfetch.dev/llms-apple-music.txt
+- Auth (2): https://www.socialfetch.dev/llms-auth.txt
+- Bluesky (3): https://www.socialfetch.dev/llms-bluesky.txt
+- Facebook (21): https://www.socialfetch.dev/llms-facebook.txt
+- GitHub (10): https://www.socialfetch.dev/llms-github.txt
+- Google (3): https://www.socialfetch.dev/llms-google.txt
+- Hacker News (13): https://www.socialfetch.dev/llms-hackernews.txt
+- Instagram (20): https://www.socialfetch.dev/llms-instagram.txt
+- LinkedIn (13): https://www.socialfetch.dev/llms-linkedin.txt
+- Linktree (1): https://www.socialfetch.dev/llms-linktree.txt
+- Monitors (18): https://www.socialfetch.dev/llms-monitors.txt
+- Pinterest (4): https://www.socialfetch.dev/llms-pinterest.txt
+- Reddit (7): https://www.socialfetch.dev/llms-reddit.txt
+- Rumble (5): https://www.socialfetch.dev/llms-rumble.txt
+- SoundCloud (3): https://www.socialfetch.dev/llms-soundcloud.txt
+- Spotify (3): https://www.socialfetch.dev/llms-spotify.txt
+- System (2): https://www.socialfetch.dev/llms-system.txt
+- Telegram (3): https://www.socialfetch.dev/llms-telegram.txt
+- Threads (5): https://www.socialfetch.dev/llms-threads.txt
+- TikTok (29): https://www.socialfetch.dev/llms-tiktok.txt
+- Truth Social (3): https://www.socialfetch.dev/llms-truthsocial.txt
+- Twitch (4): https://www.socialfetch.dev/llms-twitch.txt
+- X / Twitter (9): https://www.socialfetch.dev/llms-twitter.txt
+- Web (7): https://www.socialfetch.dev/llms-web.txt
+- YouTube (13): https://www.socialfetch.dev/llms-youtube.txt
+
+## Authentication
+REST / SDK: x-api-key header required on /v1/** unless the operation is anonymous.
+MCP (https://api.socialfetch.dev/mcp): OAuth in the browser by default. If the client never prompts, send the same x-api-key header. Do not put the key in the URL or in Authorization.
+Create a key: https://app.socialfetch.dev/api-keys (100 free credits on signup).
+
+## Base URL
+https://api.socialfetch.dev
+
+## Quick start
+```bash
+curl -sS -H "x-api-key: $SOCIALFETCH_API_KEY" https://api.socialfetch.dev/v1/whoami
+```
+
+## Documentation
+- Orientation: https://www.socialfetch.dev/llms.txt
+- Agents file (this page): https://www.socialfetch.dev/agents.txt
+- Full endpoint catalog: https://www.socialfetch.dev/llms-endpoints.txt
+- Structured inventory: https://www.socialfetch.dev/llms.json
+- Quickstart: https://www.socialfetch.dev/docs/quickstart.mdx
+- MCP overview: https://www.socialfetch.dev/mcp
+- MCP docs: https://www.socialfetch.dev/docs/integrations/mcp.mdx
+- Agent Skills: https://www.socialfetch.dev/docs/integrations/skills.mdx
+- SDK: https://www.socialfetch.dev/docs/sdk.mdx
+- Errors: https://www.socialfetch.dev/docs/errors.mdx
+- Credits: https://www.socialfetch.dev/docs/credits.mdx
+- Pricing: https://www.socialfetch.dev/pricing
+- Platforms: https://www.socialfetch.dev/platforms
+- OpenAPI (codegen only): https://www.socialfetch.dev/openapi.json
+
+## Contact
+- Contact form: https://www.socialfetch.dev/contact
+- Email: support@socialfetch.dev
+
+## Allowed for AI crawlers
+Public marketing and docs content at /, /docs, /blog, /guides, /tools, /use-cases, /pricing, /compare, /integrations, /ask, /mcp, /about, /careers, /contact, /privacy, /terms, /security, /dpa, /dpa.txt, /subprocessors is free to index and cite.
+https://www.socialfetch.dev/openapi.json, https://www.socialfetch.dev/llms.txt, https://www.socialfetch.dev/llms-endpoints.txt, https://www.socialfetch.dev/llms.json, https://www.socialfetch.dev/agents.txt, and /llms-{platform}.txt are fetchable without auth.
+Do not crawl authenticated app surfaces (app.socialfetch.dev dashboard), /api private routes, or live /v1 data endpoints as a substitute for the public API with a key.

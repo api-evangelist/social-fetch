@@ -1,0 +1,1121 @@
+generated: '2026-09-11'
+method: derived
+source: >-
+  Live MCP tools/list at https://api.socialfetch.dev/mcp (208 tools, fetched
+  2026-09-11, unauthenticated) bound to the 206 REST operations in
+  openapi/social-fetch-openapi.json. The spec declares no operationId on any
+  operation, so each tool is bound to its backing METHOD + path; the tool
+  inherits that operation's parameters and requestBody as its real inputSchema.
+api: Social Fetch REST API
+surfaces:
+  openapi: openapi/social-fetch-openapi.json
+  mcp: https://api.socialfetch.dev/mcp
+  graphql: null
+  note: >-
+    The MCP tool set is a near 1:1 typed mirror of the REST surface: 206 tools
+    correspond to the 206 /v1 + /health operations, plus 2 MCP-native docs tools
+    (docs_search, docs_read). MCP tools/list is anonymous; calling a tool
+    requires OAuth (app.socialfetch.dev) or an x-api-key (sfk_...).
+coverage:
+  mcp_tools: 208
+  rest_operations: 206
+  crosswalked: 206
+  mcp_only: 2
+  rest_only: 52
+  confidence: {high: 150, medium: 54, low: 2}
+  note: >-
+    Binding was derived by a token/method heuristic against a spec with no
+    operationIds. Where two similarly-named tools score the same path the greedy
+    match can double-assign, so the rest_only[] list below is a matching artifact,
+    not a true coverage gap: the live tool set is a near 1:1 typed mirror of the
+    REST surface (206 tools for 206 operations). Treat individual low/medium rows
+    as advisory and confirm against the per-route .mdx docs.
+crosswalk:
+  - tool: tiktok_profile_get
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: tiktok_profile_videos_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}/videos"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_profile_followers_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}/followers"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_profile_following_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}/following"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_profile_region_get
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}/region"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_profile_audience_get
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}/audience"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_profile_live_check
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}/live"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_profile_engagement_get
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}/engagement"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_users_search
+    category: tiktok
+    rest: ["GET /v1/tiktok/users/search"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_search_videos_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}/videos"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_search_top_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/search/top"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_search_hashtag_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/users/search"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_search_suggestions_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/search/suggestions"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_video_get
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: tiktok_video_comments_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/videos/comments"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_video_comments_replies_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/videos/comments/replies"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_video_download_get
+    category: tiktok
+    rest: ["GET /v1/tiktok/videos/download"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_video_transcript_get
+    category: tiktok
+    rest: ["GET /v1/tiktok/videos/transcript"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_feed_trending_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/feed/trending"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_collection_videos_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}/videos"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_song_get
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: tiktok_music_videos_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/music/{clipId}/videos"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_shop_products_search
+    category: tiktok
+    rest: ["GET /v1/tiktok/shop/products/search"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_shop_products_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/shop/products/search"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_product_get
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: tiktok_product_reviews_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/products/reviews"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_profile_showcaseProducts_list
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}/showcase-products"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_adLibrary_ad_get
+    category: tiktok
+    rest: ["GET /v1/tiktok/ad-library/ads"]
+    binding: method-path
+    confidence: high
+  - tool: tiktok_adLibrary_ads_search_get
+    category: tiktok
+    rest: ["GET /v1/tiktok/ad-library/ads/search"]
+    binding: method-path
+    confidence: high
+  - tool: twitter_profile_get
+    category: twitter
+    rest: ["GET /v1/twitter/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: twitter_profile_tweets_list
+    category: twitter
+    rest: ["GET /v1/twitter/profiles/{handle}/tweets"]
+    binding: method-path
+    confidence: high
+  - tool: twitter_tweet_get
+    category: twitter
+    rest: ["GET /v1/twitter/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: twitter_tweet_replies_list
+    category: twitter
+    rest: ["GET /v1/twitter/tweets/replies"]
+    binding: method-path
+    confidence: high
+  - tool: twitter_tweet_transcript_get
+    category: twitter
+    rest: ["GET /v1/twitter/tweets/transcript"]
+    binding: method-path
+    confidence: high
+  - tool: twitter_search_list
+    category: twitter
+    rest: ["GET /v1/twitter/search"]
+    binding: method-path
+    confidence: high
+  - tool: twitter_hashtag_list
+    category: twitter
+    rest: ["GET /v1/twitter/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: twitter_community_get
+    category: twitter
+    rest: ["GET /v1/twitter/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: twitter_community_tweets_list
+    category: twitter
+    rest: ["GET /v1/twitter/profiles/{handle}/tweets"]
+    binding: method-path
+    confidence: high
+  - tool: telegram_channel_get
+    category: telegram
+    rest: ["GET /v1/telegram/channels/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: telegram_channel_posts_get
+    category: telegram
+    rest: ["GET /v1/telegram/channels/{handle}/posts"]
+    binding: method-path
+    confidence: high
+  - tool: telegram_channel_post_get
+    category: telegram
+    rest: ["GET /v1/telegram/channels/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: amazon_shop_get
+    category: amazon
+    rest: ["GET /v1/amazon/shop"]
+    binding: method-path
+    confidence: high
+  - tool: linktree_profile_get
+    category: linktree
+    rest: ["GET /v1/linktree/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: hackernews_search_list
+    category: hackernews
+    rest: ["GET /v1/hackernews/search"]
+    binding: method-path
+    confidence: high
+  - tool: hackernews_feed_list
+    category: hackernews
+    rest: ["GET /v1/hackernews/feeds/{feed}"]
+    binding: method-path
+    confidence: high
+  - tool: hackernews_story_get
+    category: hackernews
+    rest: ["GET /v1/hackernews/search"]
+    binding: method-path
+    confidence: medium
+  - tool: hackernews_story_comments_list
+    category: hackernews
+    rest: ["GET /v1/hackernews/stories/{id}/comments"]
+    binding: method-path
+    confidence: high
+  - tool: hackernews_item_get
+    category: hackernews
+    rest: ["GET /v1/hackernews/search"]
+    binding: method-path
+    confidence: medium
+  - tool: hackernews_comment_context_get
+    category: hackernews
+    rest: ["GET /v1/hackernews/comments/{id}/context"]
+    binding: method-path
+    confidence: high
+  - tool: hackernews_user_get
+    category: hackernews
+    rest: ["GET /v1/hackernews/search"]
+    binding: method-path
+    confidence: medium
+  - tool: hackernews_user_submissions_list
+    category: hackernews
+    rest: ["GET /v1/hackernews/users/{username}/submissions"]
+    binding: method-path
+    confidence: high
+  - tool: hackernews_user_comments_list
+    category: hackernews
+    rest: ["GET /v1/hackernews/stories/{id}/comments"]
+    binding: method-path
+    confidence: high
+  - tool: hackernews_user_favorites_list
+    category: hackernews
+    rest: ["GET /v1/hackernews/users/{username}/favorites"]
+    binding: method-path
+    confidence: high
+  - tool: hackernews_jobs_who_is_hiring_list
+    category: hackernews
+    rest: ["GET /v1/hackernews/jobs/who-is-hiring"]
+    binding: method-path
+    confidence: high
+  - tool: hackernews_updates_get
+    category: hackernews
+    rest: ["GET /v1/hackernews/updates"]
+    binding: method-path
+    confidence: high
+  - tool: hackernews_maxitem_get
+    category: hackernews
+    rest: ["GET /v1/hackernews/maxitem"]
+    binding: method-path
+    confidence: high
+  - tool: truthsocial_profile_get
+    category: truthsocial
+    rest: ["GET /v1/truthsocial/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: truthsocial_profile_posts_list
+    category: truthsocial
+    rest: ["GET /v1/truthsocial/profiles/{handle}/posts"]
+    binding: method-path
+    confidence: high
+  - tool: truthsocial_post_get
+    category: truthsocial
+    rest: ["GET /v1/truthsocial/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: facebook_profile_get
+    category: facebook
+    rest: ["GET /v1/facebook/profiles"]
+    binding: method-path
+    confidence: medium
+  - tool: facebook_profile_posts_list
+    category: facebook
+    rest: ["GET /v1/facebook/profiles/posts"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_profile_reels_list
+    category: facebook
+    rest: ["GET /v1/facebook/profiles/reels"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_profile_photos_list
+    category: facebook
+    rest: ["GET /v1/facebook/profiles/photos"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_profile_events_list
+    category: facebook
+    rest: ["GET /v1/facebook/profiles/events"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_post_get
+    category: facebook
+    rest: ["GET /v1/facebook/profiles"]
+    binding: method-path
+    confidence: medium
+  - tool: facebook_post_comments_list
+    category: facebook
+    rest: ["GET /v1/facebook/posts/comments"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_post_comments_replies_list
+    category: facebook
+    rest: ["GET /v1/facebook/posts/comments/replies"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_post_transcript_get
+    category: facebook
+    rest: ["GET /v1/facebook/posts/transcript"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_group_get
+    category: facebook
+    rest: ["GET /v1/facebook/profiles"]
+    binding: method-path
+    confidence: medium
+  - tool: facebook_group_posts_list
+    category: facebook
+    rest: ["GET /v1/facebook/profiles/posts"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_marketplace_locations_search
+    category: facebook
+    rest: ["GET /v1/facebook/marketplace/locations/search"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_marketplace_search_list
+    category: facebook
+    rest: ["GET /v1/facebook/marketplace/locations/search"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_marketplace_item_get
+    category: facebook
+    rest: ["GET /v1/facebook/marketplace/locations/search"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_events_search_list
+    category: facebook
+    rest: ["GET /v1/facebook/events/search"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_events_list
+    category: facebook
+    rest: ["GET /v1/facebook/profiles/events"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_event_get
+    category: facebook
+    rest: ["GET /v1/facebook/profiles"]
+    binding: method-path
+    confidence: medium
+  - tool: facebook_adLibrary_ad_get
+    category: facebook
+    rest: ["GET /v1/facebook/ad-library/ads"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_adLibrary_ads_search_get
+    category: facebook
+    rest: ["GET /v1/facebook/ad-library/ads/search"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_company_ads_list
+    category: facebook
+    rest: ["GET /v1/facebook/ad-library/ads"]
+    binding: method-path
+    confidence: high
+  - tool: facebook_adLibrary_companies_search
+    category: facebook
+    rest: ["GET /v1/facebook/ad-library/companies/search"]
+    binding: method-path
+    confidence: high
+  - tool: google_company_ads_list
+    category: google
+    rest: ["GET /v1/google/ad-library/companies/ads"]
+    binding: method-path
+    confidence: high
+  - tool: google_adLibrary_ad_get
+    category: google
+    rest: ["GET /v1/google/ad-library/companies/ads"]
+    binding: method-path
+    confidence: high
+  - tool: google_adLibrary_advertisers_search
+    category: google
+    rest: ["GET /v1/google/ad-library/advertisers/search"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_profile_get
+    category: instagram
+    rest: ["GET /v1/instagram/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: instagram_profile_basic_get
+    category: instagram
+    rest: ["GET /v1/instagram/profiles/{userId}/basic"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_profile_posts_list
+    category: instagram
+    rest: ["GET /v1/instagram/profiles/{handle}/posts"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_profile_reels_list
+    category: instagram
+    rest: ["GET /v1/instagram/profiles/{handle}/reels"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_profile_highlights_list
+    category: instagram
+    rest: ["GET /v1/instagram/profiles/{handle}/highlights"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_profile_taggedPosts_list
+    category: instagram
+    rest: ["GET /v1/instagram/profiles/{userId}/tagged-posts"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_highlight_get
+    category: instagram
+    rest: ["GET /v1/instagram/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: instagram_profile_engagement_get
+    category: instagram
+    rest: ["GET /v1/instagram/profiles/{handle}/engagement"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_search_list
+    category: instagram
+    rest: ["GET /v1/instagram/search"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_search_profiles_list
+    category: instagram
+    rest: ["GET /v1/instagram/search/profiles"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_search_reels_list
+    category: instagram
+    rest: ["GET /v1/instagram/search/reels"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_search_hashtag_list
+    category: instagram
+    rest: ["GET /v1/instagram/search"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_search_popular_list
+    category: instagram
+    rest: ["GET /v1/instagram/search/popular"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_post_get
+    category: instagram
+    rest: ["GET /v1/instagram/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: instagram_post_comments_list
+    category: instagram
+    rest: ["GET /v1/instagram/posts/comments"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_post_comments_replies_list
+    category: instagram
+    rest: ["GET /v1/instagram/posts/comments/replies"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_post_download_get
+    category: instagram
+    rest: ["GET /v1/instagram/posts/download"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_post_transcript_get
+    category: instagram
+    rest: ["GET /v1/instagram/posts/transcript"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_reels_trending_list
+    category: instagram
+    rest: ["GET /v1/instagram/reels/trending"]
+    binding: method-path
+    confidence: high
+  - tool: instagram_audio_reels_list
+    category: instagram
+    rest: ["GET /v1/instagram/audio/{audioId}/reels"]
+    binding: method-path
+    confidence: high
+  - tool: pinterest_profile_boards_list
+    category: pinterest
+    rest: ["GET /v1/pinterest/profiles/{handle}/boards"]
+    binding: method-path
+    confidence: high
+  - tool: pinterest_board_pins_list
+    category: pinterest
+    rest: ["GET /v1/pinterest/boards/pins"]
+    binding: method-path
+    confidence: high
+  - tool: pinterest_pin_get
+    category: pinterest
+    rest: ["GET /v1/pinterest/profiles/{handle}/boards"]
+    binding: method-path
+    confidence: medium
+  - tool: pinterest_search_pins_list
+    category: pinterest
+    rest: ["GET /v1/pinterest/boards/pins"]
+    binding: method-path
+    confidence: high
+  - tool: threads_profile_get
+    category: threads
+    rest: ["GET /v1/threads/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: threads_profile_posts_list
+    category: threads
+    rest: ["GET /v1/threads/profiles/{handle}/posts"]
+    binding: method-path
+    confidence: high
+  - tool: threads_post_get
+    category: threads
+    rest: ["GET /v1/threads/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: threads_search_list
+    category: threads
+    rest: ["GET /v1/threads/search"]
+    binding: method-path
+    confidence: high
+  - tool: threads_users_search
+    category: threads
+    rest: ["GET /v1/threads/users/search"]
+    binding: method-path
+    confidence: high
+  - tool: bluesky_profile_get
+    category: bluesky
+    rest: ["GET /v1/bluesky/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: bluesky_profile_posts_list
+    category: bluesky
+    rest: ["GET /v1/bluesky/profiles/{handle}/posts"]
+    binding: method-path
+    confidence: high
+  - tool: bluesky_post_get
+    category: bluesky
+    rest: ["GET /v1/bluesky/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: linkedin_profile_get
+    category: linkedin
+    rest: ["GET /v1/linkedin/profiles"]
+    binding: method-path
+    confidence: medium
+  - tool: linkedin_profiles_posts_list
+    category: linkedin
+    rest: ["GET /v1/linkedin/profiles/posts"]
+    binding: method-path
+    confidence: high
+  - tool: linkedin_organization_get
+    category: linkedin
+    rest: ["GET /v1/linkedin/profiles"]
+    binding: method-path
+    confidence: medium
+  - tool: linkedin_company_get
+    category: linkedin
+    rest: ["GET /v1/linkedin/profiles"]
+    binding: method-path
+    confidence: medium
+  - tool: linkedin_company_posts_list
+    category: linkedin
+    rest: ["GET /v1/linkedin/profiles/posts"]
+    binding: method-path
+    confidence: high
+  - tool: linkedin_post_get
+    category: linkedin
+    rest: ["GET /v1/linkedin/profiles"]
+    binding: method-path
+    confidence: medium
+  - tool: linkedin_post_transcript_get
+    category: linkedin
+    rest: ["GET /v1/linkedin/posts/transcript"]
+    binding: method-path
+    confidence: high
+  - tool: linkedin_people_search_list
+    category: linkedin
+    rest: ["GET /v1/linkedin/people/search"]
+    binding: method-path
+    confidence: high
+  - tool: linkedin_posts_search_list
+    category: linkedin
+    rest: ["GET /v1/linkedin/posts/search"]
+    binding: method-path
+    confidence: high
+  - tool: linkedin_adLibrary_ad_get
+    category: linkedin
+    rest: ["GET /v1/linkedin/ad-library/ads"]
+    binding: method-path
+    confidence: high
+  - tool: linkedin_adLibrary_ads_search_list
+    category: linkedin
+    rest: ["GET /v1/linkedin/ad-library/ads/search"]
+    binding: method-path
+    confidence: high
+  - tool: linkedin_jobs_get
+    category: linkedin
+    rest: ["GET /v1/linkedin/jobs"]
+    binding: method-path
+    confidence: high
+  - tool: linkedin_jobs_search_list
+    category: linkedin
+    rest: ["GET /v1/linkedin/jobs/search"]
+    binding: method-path
+    confidence: high
+  - tool: reddit_subreddit_get
+    category: reddit
+    rest: ["GET /v1/reddit/subreddits/{subreddit}/posts"]
+    binding: method-path
+    confidence: high
+  - tool: reddit_subreddit_posts_list
+    category: reddit
+    rest: ["GET /v1/reddit/subreddits/{subreddit}/posts"]
+    binding: method-path
+    confidence: high
+  - tool: reddit_post_get
+    category: reddit
+    rest: ["GET /v1/reddit/subreddits"]
+    binding: method-path
+    confidence: medium
+  - tool: reddit_post_comments_list
+    category: reddit
+    rest: ["GET /v1/reddit/posts/comments"]
+    binding: method-path
+    confidence: high
+  - tool: reddit_post_transcript_get
+    category: reddit
+    rest: ["GET /v1/reddit/posts/transcript"]
+    binding: method-path
+    confidence: high
+  - tool: reddit_subreddit_search_list
+    category: reddit
+    rest: ["GET /v1/reddit/subreddits/{subreddit}/posts"]
+    binding: method-path
+    confidence: high
+  - tool: reddit_search_list
+    category: reddit
+    rest: ["GET /v1/reddit/subreddits/search"]
+    binding: method-path
+    confidence: high
+  - tool: rumble_channel_videos_list
+    category: rumble
+    rest: ["GET /v1/rumble/channels/videos"]
+    binding: method-path
+    confidence: high
+  - tool: rumble_search_list
+    category: rumble
+    rest: ["GET /v1/rumble/search"]
+    binding: method-path
+    confidence: high
+  - tool: rumble_video_get
+    category: rumble
+    rest: ["GET /v1/rumble/channels/videos"]
+    binding: method-path
+    confidence: medium
+  - tool: rumble_video_transcript_get
+    category: rumble
+    rest: ["GET /v1/rumble/videos/transcript"]
+    binding: method-path
+    confidence: high
+  - tool: rumble_video_comments_list
+    category: rumble
+    rest: ["GET /v1/rumble/videos/comments"]
+    binding: method-path
+    confidence: high
+  - tool: twitch_profile_get
+    category: twitch
+    rest: ["GET /v1/twitch/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: twitch_profile_videos_list
+    category: twitch
+    rest: ["GET /v1/twitch/profiles/{handle}/videos"]
+    binding: method-path
+    confidence: high
+  - tool: twitch_profile_schedule_get
+    category: twitch
+    rest: ["GET /v1/twitch/profiles/{handle}/schedule"]
+    binding: method-path
+    confidence: high
+  - tool: twitch_clip_get
+    category: twitch
+    rest: ["GET /v1/twitch/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: github_profile_get
+    category: github
+    rest: ["GET /v1/github/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: github_profile_repositories_list
+    category: github
+    rest: ["GET /v1/github/profiles/{handle}/repositories"]
+    binding: method-path
+    confidence: high
+  - tool: github_profile_pullRequests_list
+    category: github
+    rest: ["GET /v1/github/profiles/{handle}/pull-requests"]
+    binding: method-path
+    confidence: high
+  - tool: github_profile_activity_list
+    category: github
+    rest: ["GET /v1/github/profiles/{handle}/activity"]
+    binding: method-path
+    confidence: high
+  - tool: github_profile_followers_list
+    category: github
+    rest: ["GET /v1/github/profiles/{handle}/followers"]
+    binding: method-path
+    confidence: high
+  - tool: github_profile_following_list
+    category: github
+    rest: ["GET /v1/github/profiles/{handle}/following"]
+    binding: method-path
+    confidence: high
+  - tool: github_profile_contributions_get
+    category: github
+    rest: ["GET /v1/github/profiles/{handle}/contributions"]
+    binding: method-path
+    confidence: high
+  - tool: github_repositories_get
+    category: github
+    rest: ["GET /v1/github/profiles/{handle}/repositories"]
+    binding: method-path
+    confidence: high
+  - tool: github_trending_repositories_list
+    category: github
+    rest: ["GET /v1/github/trending/repositories"]
+    binding: method-path
+    confidence: high
+  - tool: github_trending_developers_list
+    category: github
+    rest: ["GET /v1/github/trending/developers"]
+    binding: method-path
+    confidence: high
+  - tool: spotify_artist_get
+    category: spotify
+    rest: ["GET /v1/spotify/artist"]
+    binding: method-path
+    confidence: high
+  - tool: spotify_album_get
+    category: spotify
+    rest: ["GET /v1/spotify/album"]
+    binding: method-path
+    confidence: high
+  - tool: spotify_track_get
+    category: spotify
+    rest: ["GET /v1/spotify/track"]
+    binding: method-path
+    confidence: high
+  - tool: appleMusic_search_list
+    category: apple-music
+    rest: ["GET /v1/apple-music/search"]
+    binding: method-path
+    confidence: high
+  - tool: appleMusic_artist_get
+    category: apple-music
+    rest: ["GET /v1/apple-music/artist"]
+    binding: method-path
+    confidence: high
+  - tool: appleMusic_album_get
+    category: apple-music
+    rest: ["GET /v1/apple-music/album"]
+    binding: method-path
+    confidence: high
+  - tool: appleMusic_track_get
+    category: apple-music
+    rest: ["GET /v1/apple-music/track"]
+    binding: method-path
+    confidence: high
+  - tool: soundcloud_profile_get
+    category: soundcloud
+    rest: ["GET /v1/soundcloud/profiles/{handle}"]
+    binding: method-path
+    confidence: medium
+  - tool: soundcloud_profile_tracks_list
+    category: soundcloud
+    rest: ["GET /v1/soundcloud/profiles/{handle}/tracks"]
+    binding: method-path
+    confidence: high
+  - tool: soundcloud_track_get
+    category: spotify
+    rest: ["GET /v1/spotify/track"]
+    binding: method-path
+    confidence: medium
+  - tool: youtube_channel_get
+    category: youtube
+    rest: ["GET /v1/youtube/channel"]
+    binding: method-path
+    confidence: high
+  - tool: youtube_channel_videos_list
+    category: youtube
+    rest: ["GET /v1/youtube/channel"]
+    binding: method-path
+    confidence: high
+  - tool: youtube_channel_shorts_list
+    category: youtube
+    rest: ["GET /v1/youtube/channel"]
+    binding: method-path
+    confidence: high
+  - tool: youtube_playlist_get
+    category: youtube
+    rest: ["GET /v1/youtube/channel"]
+    binding: method-path
+    confidence: medium
+  - tool: youtube_community_post_get
+    category: youtube
+    rest: ["GET /v1/youtube/community-posts"]
+    binding: method-path
+    confidence: high
+  - tool: youtube_search_list
+    category: youtube
+    rest: ["GET /v1/youtube/search"]
+    binding: method-path
+    confidence: high
+  - tool: youtube_search_hashtag_list
+    category: youtube
+    rest: ["GET /v1/youtube/search"]
+    binding: method-path
+    confidence: high
+  - tool: youtube_video_get
+    category: youtube
+    rest: ["GET /v1/youtube/channel"]
+    binding: method-path
+    confidence: medium
+  - tool: youtube_video_comments_list
+    category: youtube
+    rest: ["GET /v1/youtube/videos/comments"]
+    binding: method-path
+    confidence: high
+  - tool: youtube_video_comments_analysis_get
+    category: youtube
+    rest: ["GET /v1/youtube/videos/comments/analysis"]
+    binding: method-path
+    confidence: high
+  - tool: youtube_video_comments_replies_list
+    category: youtube
+    rest: ["GET /v1/youtube/videos/comments/replies"]
+    binding: method-path
+    confidence: high
+  - tool: youtube_video_transcript_get
+    category: youtube
+    rest: ["GET /v1/youtube/videos/transcript"]
+    binding: method-path
+    confidence: high
+  - tool: youtube_shorts_trending_list
+    category: youtube
+    rest: ["GET /v1/youtube/shorts/trending"]
+    binding: method-path
+    confidence: high
+  - tool: web_search_run
+    category: web
+    rest: ["GET /v1/web/search"]
+    binding: method-path
+    confidence: medium
+  - tool: web_markdown_generate
+    category: web
+    rest: ["GET /v1/web/markdown"]
+    binding: method-path
+    confidence: medium
+  - tool: web_ask_run
+    category: web
+    rest: ["GET /v1/web/ask"]
+    binding: method-path
+    confidence: medium
+  - tool: web_html_generate
+    category: web
+    rest: ["GET /v1/web/html"]
+    binding: method-path
+    confidence: medium
+  - tool: web_screenshot_capture
+    category: web
+    rest: ["GET /v1/web/screenshot"]
+    binding: method-path
+    confidence: medium
+  - tool: web_crawl_run
+    category: web
+    rest: ["GET /v1/web/crawl"]
+    binding: method-path
+    confidence: medium
+  - tool: web_extract_run
+    category: web
+    rest: ["POST /v1/web/extract"]
+    binding: method-path
+    confidence: high
+  - tool: nl_ask_post
+    category: ask
+    rest: ["POST /v1/ask"]
+    binding: method-path
+    confidence: medium
+  - tool: auth_whoami
+    category: whoami
+    rest: ["GET /v1/whoami"]
+    binding: method-path
+    confidence: low
+  - tool: billing_balance_get
+    category: balance
+    rest: ["GET /v1/balance"]
+    binding: method-path
+    confidence: medium
+  - tool: monitors_sources_list
+    category: monitors
+    rest: ["GET /v1/monitors/sources"]
+    binding: method-path
+    confidence: high
+  - tool: monitors_create
+    category: monitors
+    rest: ["POST /v1/monitors"]
+    binding: method-path
+    confidence: medium
+  - tool: monitors_list
+    category: monitors
+    rest: ["GET /v1/monitors/sources"]
+    binding: method-path
+    confidence: medium
+  - tool: monitors_get
+    category: monitors
+    rest: ["GET /v1/monitors/sources"]
+    binding: method-path
+    confidence: medium
+  - tool: monitors_update
+    category: monitors
+    rest: ["PATCH /v1/monitors/{id}"]
+    binding: method-path
+    confidence: medium
+  - tool: monitors_delete
+    category: monitors
+    rest: ["DELETE /v1/monitors/{id}"]
+    binding: method-path
+    confidence: medium
+  - tool: monitors_trigger
+    category: monitors
+    rest: ["POST /v1/monitors/{id}/trigger"]
+    binding: method-path
+    confidence: high
+  - tool: monitors_events_list
+    category: monitors
+    rest: ["GET /v1/monitors/{id}/events"]
+    binding: method-path
+    confidence: high
+  - tool: monitors_checks_list
+    category: monitors
+    rest: ["GET /v1/monitors/{id}/checks"]
+    binding: method-path
+    confidence: high
+  - tool: webhookEndpoints_create
+    category: webhook-endpoints
+    rest: ["POST /v1/webhook-endpoints"]
+    binding: method-path
+    confidence: high
+  - tool: webhookEndpoints_list
+    category: webhook-endpoints
+    rest: ["GET /v1/webhook-endpoints"]
+    binding: method-path
+    confidence: high
+  - tool: webhookEndpoints_get
+    category: webhook-endpoints
+    rest: ["GET /v1/webhook-endpoints"]
+    binding: method-path
+    confidence: high
+  - tool: webhookEndpoints_update
+    category: webhook-endpoints
+    rest: ["PATCH /v1/webhook-endpoints/{id}"]
+    binding: method-path
+    confidence: high
+  - tool: webhookEndpoints_delete
+    category: webhook-endpoints
+    rest: ["DELETE /v1/webhook-endpoints/{id}"]
+    binding: method-path
+    confidence: high
+  - tool: webhookEndpoints_test
+    category: webhook-endpoints
+    rest: ["POST /v1/webhook-endpoints/{id}/test"]
+    binding: method-path
+    confidence: high
+  - tool: webhookEndpoints_rotateSecret
+    category: webhook-endpoints
+    rest: ["POST /v1/webhook-endpoints/{id}/rotate-secret"]
+    binding: method-path
+    confidence: high
+  - tool: webhookEndpoints_deliveries_list
+    category: webhook-endpoints
+    rest: ["GET /v1/webhook-endpoints/{id}/deliveries"]
+    binding: method-path
+    confidence: high
+  - tool: webhookDeliveries_redeliver
+    category: webhook-deliveries
+    rest: ["POST /v1/webhook-deliveries/{id}/redeliver"]
+    binding: method-path
+    confidence: high
+  - tool: get_more_tools
+    category: tiktok
+    rest: ["GET /v1/tiktok/profiles/{handle}"]
+    binding: method-path
+    confidence: low
+mcp_only:
+  - tool: docs_search
+    reason: "MCP-native docs corpus search/read; no public REST operation."
+  - tool: docs_read
+    reason: "MCP-native docs corpus search/read; no public REST operation."
+rest_only:
+  - "GET /v1/tiktok/search"
+  - "GET /v1/tiktok/search/hashtags"
+  - "GET /v1/tiktok/videos"
+  - "GET /v1/tiktok/collections/videos"
+  - "GET /v1/tiktok/songs"
+  - "GET /v1/tiktok/shop/products"
+  - "GET /v1/tiktok/products"
+  - "GET /v1/twitter/tweets"
+  - "GET /v1/twitter/hashtags"
+  - "GET /v1/twitter/communities"
+  - "GET /v1/twitter/communities/tweets"
+  - "GET /v1/telegram/channels/{handle}/posts/{postId}"
+  - "GET /v1/hackernews/stories/{id}"
+  - "GET /v1/hackernews/items/{id}"
+  - "GET /v1/hackernews/users/{username}"
+  - "GET /v1/hackernews/users/{username}/comments"
+  - "GET /v1/truthsocial/posts"
+  - "GET /v1/facebook/posts"
+  - "GET /v1/facebook/groups"
+  - "GET /v1/facebook/groups/posts"
+  - "GET /v1/facebook/marketplace/search"
+  - "GET /v1/facebook/marketplace/items"
+  - "GET /v1/facebook/events"
+  - "GET /v1/facebook/events/details"
+  - "GET /v1/facebook/ad-library/companies/ads"
+  - "GET /v1/google/ad-library/ads"
+  - "GET /v1/instagram/highlights/{highlightId}"
+  - "GET /v1/instagram/search/hashtags"
+  - "GET /v1/instagram/posts"
+  - "GET /v1/pinterest/pins"
+  - "GET /v1/pinterest/search"
+  - "GET /v1/threads/posts"
+  - "GET /v1/bluesky/posts"
+  - "GET /v1/linkedin/organizations"
+  - "GET /v1/linkedin/companies"
+  - "GET /v1/linkedin/companies/posts"
+  - "GET /v1/linkedin/posts"
+  - "GET /v1/reddit/posts"
+  - "GET /v1/reddit/search"
+  - "GET /v1/rumble/videos"
+  - "GET /v1/twitch/clips"
+  - "GET /v1/github/repositories"
+  - "GET /v1/soundcloud/tracks"
+  - "GET /v1/youtube/channels/videos"
+  - "GET /v1/youtube/channels/shorts"
+  - "GET /v1/youtube/playlists"
+  - "GET /v1/youtube/search/hashtags"
+  - "GET /v1/youtube/videos"
+  - "GET /health"
+  - "GET /v1/monitors"
+  - "GET /v1/monitors/{id}"
+  - "GET /v1/webhook-endpoints/{id}"

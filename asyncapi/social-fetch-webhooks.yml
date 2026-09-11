@@ -1,0 +1,50 @@
+generated: '2026-09-11'
+method: searched
+source: >-
+  openapi/social-fetch-openapi.json (/v1/monitors, /v1/webhook-endpoints,
+  /v1/webhook-deliveries), docs/monitors/quickstart.mdx, and the live MCP tool
+  descriptions for monitors_* / webhookEndpoints_* (read 2026-09-11).
+type: Webhooks
+asyncapi_spec: null
+detail: >-
+  Social Fetch ships an event/webhook surface via "Monitors": you watch a social
+  account or search, and when a new item appears the monitor delivers a SIGNED
+  webhook to a configured endpoint. Baseline checks establish what already exists
+  (those do not fire), so only subsequent discoveries deliver events. There is no
+  published AsyncAPI document — the event surface is described by REST management
+  routes and prose docs.
+delivery:
+  semantics: at-least-once
+  deduplication: event id (consumer-side dedup)
+  signing: true
+  signing_detail: >-
+    Deliveries are signed; the docs state a delivery can be verified "the same way
+    as in production". Signing secret is rotated via
+    POST /v1/webhook-endpoints/{id}/rotate-secret with a 24h overlap window.
+    Exact signature header name not enumerated in the docs excerpt.
+  retries: automatic with manual redelivery via POST /v1/webhook-deliveries/{id}/redeliver
+management_operations:
+  monitors:
+    - GET /v1/monitors/sources        # list every public operation Monitors can watch
+    - POST /v1/monitors               # create a monitor (watch + signed webhook)
+    - GET /v1/monitors                # list caller's monitors
+    - GET /v1/monitors/{id}
+    - PATCH /v1/monitors/{id}
+    - DELETE /v1/monitors/{id}
+    - POST /v1/monitors/{id}/trigger  # queue an immediate check (>=60s apart)
+    - GET /v1/monitors/{id}/events    # pull API for events
+    - GET /v1/monitors/{id}/checks    # why a webhook did/didn't fire
+  webhook_endpoints:
+    - POST /v1/webhook-endpoints                      # create delivery target (kind=http | sink)
+    - GET /v1/webhook-endpoints
+    - GET /v1/webhook-endpoints/{id}
+    - PATCH /v1/webhook-endpoints/{id}
+    - DELETE /v1/webhook-endpoints/{id}
+    - POST /v1/webhook-endpoints/{id}/test            # send a realistic sample event
+    - POST /v1/webhook-endpoints/{id}/rotate-secret   # 24h overlap
+    - GET /v1/webhook-endpoints/{id}/deliveries
+    - POST /v1/webhook-deliveries/{id}/redeliver
+notes: >-
+  Events are also available by pull (GET /v1/monitors/{id}/events), so the webhook
+  is a push convenience over a queryable event log rather than the only path. No
+  streaming firehose. AsyncAPI: N/A (none published) — not fabricated.

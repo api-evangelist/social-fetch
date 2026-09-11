@@ -1,0 +1,31 @@
+generated: '2026-09-11'
+method: searched
+source: >-
+  OAuth 2.0 / OpenID Connect discovery documents served at
+  api.socialfetch.dev/.well-known/openid-configuration and
+  app.socialfetch.dev, plus docs/integrations/mcp.mdx. Read 2026-09-11.
+docs: https://www.socialfetch.dev/docs/integrations/mcp.mdx
+authorization_server: https://app.socialfetch.dev
+grant_types:
+  - authorization_code
+  - client_credentials
+  - refresh_token
+pkce: S256
+scopes:
+  - name: openid
+    description: OpenID Connect authentication (issue an ID token).
+  - name: profile
+    description: Access basic profile claims (name, picture, given/family name).
+  - name: email
+    description: Access email and email_verified claims.
+  - name: offline_access
+    description: Issue a refresh token for long-lived access.
+  - name: socialfetch:read
+    description: >-
+      Read access to Social Fetch data operations — the scope MCP/OAuth clients
+      request to call /v1 read routes on the user's behalf.
+notes: >-
+  The REST OpenAPI itself declares only an apiKey scheme (x-api-key, sfk_...); the
+  OAuth scopes above govern the hosted MCP endpoint and are advertised via the
+  served authorization-server metadata. scopes_supported is identical on the api
+  and app hosts.

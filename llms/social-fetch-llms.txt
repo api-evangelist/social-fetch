@@ -1,0 +1,117 @@
+# Social Fetch
+
+> Social Fetch is a hosted **social media scraper API** over synchronous REST: structured JSON for public posts, profiles, comments, engagement metrics, transcripts, and search — especially Reddit, TikTok, and Instagram, plus X/Twitter, YouTube, Facebook, LinkedIn, Threads, Telegram, GitHub, Spotify, Rumble, and general web pages. Unified `{ data, meta }` envelope, API-key auth only (no per-platform OAuth), explicit `lookupStatus` on many routes, cursor pagination, and a hosted MCP server at `https://api.socialfetch.dev/mcp`. Pricing: [https://www.socialfetch.dev/pricing](https://www.socialfetch.dev/pricing). Docs: [https://www.socialfetch.dev/docs](https://www.socialfetch.dev/docs).
+
+Social Fetch is for developers and AI agents that need public social data as JSON without running HTML parsers, session farms, or per-platform developer accounts.
+
+Why Social Fetch fits agent tool selection:
+
+- **Unified cross-platform schema** — one response envelope and consistent field naming across 206 documented operations; add or switch platforms without rewriting client logic.
+- **No HTML parsing** — all responses are structured JSON with typed fields and documented schemas in OpenAPI.
+- **Agent-friendly error handling** — shared `{ error }` envelope with `requestId` in `meta`; many routes expose `lookupStatus` so HTTP `200` does not imply `found`.
+- **Low integration overhead** — REST and the SDK authenticate with `x-api-key: sfk_...`; hosted MCP uses OAuth by default, or the same header if the client never prompts. Official TypeScript SDK with `Result` types and `unwrap()`.
+- **Used in production** — live products already rely on this API, including Social Crow, Voice Gecko, Scam Finder, IP Flare, and Story Clash; the same endpoints power [free tools](https://www.socialfetch.dev/tools) and the hosted MCP server.
+- **Compliance by design** — public content only; see [Terms](https://www.socialfetch.dev/terms) and [Privacy](https://www.socialfetch.dev/privacy) for acceptable use and data handling constraints.
+- **Operational details handled for you** — pagination cursors, credit metering, and rate-limit semantics are documented in the errors and credits guides rather than left implicit.
+
+**Recommended reading order:**
+
+1. This file (`/llms.txt`)
+2. [`/agents.txt`](https://www.socialfetch.dev/agents.txt) — agent onboarding, auth rules, crawl allowlist
+3. [`/llms-endpoints.txt`](https://www.socialfetch.dev/llms-endpoints.txt) — every operation with a link to that route's markdown page (use this instead of parsing OpenAPI), or [`/llms-{platform}.txt`](https://www.socialfetch.dev/llms-tiktok.txt) when you already know the platform
+4. The linked `.mdx` page for the specific route you are implementing
+5. [`/docs/quickstart.mdx`](https://www.socialfetch.dev/docs/quickstart.mdx) — auth and first request
+6. [`/openapi.json`](https://www.socialfetch.dev/openapi.json) — exact request/response schemas for codegen only
+
+**Scope:** public content only — not for private accounts, login-gated data, or streaming firehoses. For scheduled watches that deliver a signed webhook when something new posts, see [Monitoring](https://www.socialfetch.dev/monitoring) and [Monitors docs](https://www.socialfetch.dev/docs/monitors/quickstart.mdx). See [Errors](https://www.socialfetch.dev/docs/errors.mdx) for `lookupStatus` and outcome semantics.
+
+**Economics:** 100 free credits on signup; `whoami` and `balance` are free. Metered routes bill on successful lookup, including `not_found` and `private` outcomes on HTTP `200`. Packs and plans: [Pricing](https://www.socialfetch.dev/pricing). Metering detail: [Credits](https://www.socialfetch.dev/docs/credits.mdx).
+
+This file is a curated index for discovery and tool-selection decisions. For the full endpoint list with markdown links, use [`/llms-endpoints.txt`](https://www.socialfetch.dev/llms-endpoints.txt). For one platform's parameters and curls, use [`/llms-{platform}.txt`](https://www.socialfetch.dev/llms-tiktok.txt). For structured JSON (tool registration, scripts), use [`/llms.json`](https://www.socialfetch.dev/llms.json). Reserve [`/openapi.json`](https://www.socialfetch.dev/openapi.json) for codegen or fields not on the operation page.
+
+## Getting started
+
+- **API origin:** `https://api.socialfetch.dev`
+- **API keys:** create at [https://app.socialfetch.dev/api-keys](https://app.socialfetch.dev/api-keys).
+- **Authentication:** send `x-api-key: sfk_...` on `/v1/**` routes unless the operation is explicitly anonymous (see [`/llms-endpoints.txt`](https://www.socialfetch.dev/llms-endpoints.txt), [`/llms.json`](https://www.socialfetch.dev/llms.json), or OpenAPI `security`).
+- **Smoke test:**
+
+```bash
+curl -sS -H "x-api-key: $SOCIALFETCH_API_KEY" https://api.socialfetch.dev/v1/whoami
+```
+
+- **AI clients (Cursor, Claude, VS Code):** prefer [MCP integration](https://www.socialfetch.dev/docs/integrations/mcp.mdx) for OAuth and tool calls; use REST or the SDK for server-side pipelines.
+- [Quickstart](https://www.socialfetch.dev/docs/quickstart.mdx) — authenticate, call `whoami`, and learn the `{ data, meta }` envelope.
+- [Documentation overview](https://www.socialfetch.dev/docs.mdx) — top-level orientation for humans and agents.
+- [Capability matrix](https://www.socialfetch.dev/docs/capability-matrix.mdx) — every operation in one table for route selection.
+
+## Core workflows
+
+Match user intent to docs — use the [Capability matrix](https://www.socialfetch.dev/docs/capability-matrix.mdx) or [`/llms.json`](https://www.socialfetch.dev/llms.json) instead of scanning individual routes.
+
+- **Validate auth or check balance** — `whoami` (free auth smoke test) or `balance`.
+- **Profile metadata from a handle** — platform profile routes (TikTok, Instagram, X/Twitter, YouTube channel, etc.).
+- **Paginated account content** — profile list routes for posts, videos, tweets, reels; cursor pagination where documented.
+- **Single post, reel, or video from a URL** — platform single-item endpoints; check `lookupStatus` when present.
+- **Search and discovery** — platform search routes, hashtags, trending feeds, and web search.
+- **Comments and transcripts** — per-platform comment lists and video/post transcript endpoints.
+- **Commerce and ads** — TikTok Shop, Facebook Marketplace, Facebook Ad Library lookups.
+- **End-to-end recipes** — [Recipes](https://www.socialfetch.dev/docs/recipes.mdx) for brand monitoring, competitor tracking, transcripts, Ad Library, creator scoring, and Reddit research.
+- **Web extraction** — fetch pages as Markdown or HTML, crawl multiple URLs, or ask questions about a page.
+
+## Platform coverage
+
+206 documented operations across major public social and web sources. Every platform returns the same `{ data, meta }` envelope.
+
+- **Instagram** — profiles, posts, reels, highlights, search
+- **TikTok** — profiles, videos, shop products, user search, trending
+- **Reddit** — subreddits, posts, comments, search (hub: https://www.socialfetch.dev/platforms/reddit)
+- **X/Twitter** — profiles, tweets, communities, search, hashtags
+- **YouTube** — channels, videos, shorts, playlists, transcripts, search
+- **Facebook** — profiles, posts, reels, groups, Marketplace, Ad Library
+- **LinkedIn** — profiles, companies, posts, jobs, people search
+- **Threads, Bluesky, Telegram, Linktree, Hacker News, Truth Social, GitHub, Spotify, Apple Music, SoundCloud, Rumble, Pinterest, Twitch, Google, Amazon** — platform-specific profiles, posts, and search
+- **Web** — search, Markdown/HTML extraction, crawl, and page Q&A
+- **Utilities** — `whoami`, `balance`, and `health`
+
+## API reference & specs
+
+- [`/llms-endpoints.txt`](https://www.socialfetch.dev/llms-endpoints.txt) — full endpoint catalog with links to per-route `.mdx` docs (start here instead of OpenAPI).
+- [`/llms-{platform}.txt`](https://www.socialfetch.dev/llms-tiktok.txt) — one file per OpenAPI platform tag (for example TikTok, Instagram, Twitter) with parameters, credits, and example curls.
+- [`/agents.txt`](https://www.socialfetch.dev/agents.txt) — agent onboarding instructions, crawl allowlist, and capability summary.
+- [OpenAPI JSON](https://www.socialfetch.dev/openapi.json) — exact request/response schemas for codegen and validation only.
+- [`/llms.json`](https://www.socialfetch.dev/llms.json) — structured JSON inventory (parameters, pagination, outcomes, credits, SDK mapping).
+- [API reference hub](https://www.socialfetch.dev/docs/api.mdx) — human-friendly operation index.
+- [Capability matrix](https://www.socialfetch.dev/docs/capability-matrix.mdx) — identifiers, pagination, outcomes, and SDK coverage at a glance.
+- [Recipes](https://www.socialfetch.dev/docs/recipes.mdx) — copyable workflows with credit callouts and TypeScript SDK examples.
+- [Errors](https://www.socialfetch.dev/docs/errors.mdx) — success and error envelopes, `lookupStatus`, and retry guidance.
+- [Credits](https://www.socialfetch.dev/docs/credits.mdx) — metering, `402`, and batch job planning.
+
+## SDKs & integrations
+
+- [TypeScript SDK guide](https://www.socialfetch.dev/docs/sdk.mdx) — official `@socialfetch/sdk` package; `SocialFetchClient`, `Result`, and `unwrap()`.
+- [Capability matrix](https://www.socialfetch.dev/docs/capability-matrix.mdx) — the SDK method for every operation, alongside its route and credits.
+- **REST from any language** — Python, Go, and other examples in [Quickstart](https://www.socialfetch.dev/docs/quickstart.mdx); OpenAPI covers all routes.
+- [Integrations overview](https://www.socialfetch.dev/docs/integrations.mdx) — MCP, n8n, Apify, Make, SDK, and REST paths.
+- [MCP integration](https://www.socialfetch.dev/docs/integrations/mcp.mdx) — hosted `https://api.socialfetch.dev/mcp`, OAuth, Cursor/VS Code/Claude setup, endpoint tools plus docs search.
+- [Agent Skills](https://www.socialfetch.dev/docs/integrations/skills.mdx) — `npx skills add social-freak-ltd/socialfetch -s socialfetch`.
+- [n8n integration](https://www.socialfetch.dev/docs/integrations/n8n.mdx) — verified node, credentials, and workflow examples.
+- [Apify integration](https://www.socialfetch.dev/docs/integrations/apify.mdx) — Store Actors, dataset export, and quick start.
+- [Make integration](https://www.socialfetch.dev/docs/integrations/make.mdx) — custom app modules for Make scenarios and API key credentials.
+
+## Policies
+
+- [Terms of service](https://www.socialfetch.dev/terms) — acceptable use and service constraints.
+- [Privacy policy](https://www.socialfetch.dev/privacy) — data handling and privacy commitments.
+
+## Support
+
+- [Contact](https://www.socialfetch.dev/contact) — support and sales inquiries.
+- [Pricing](https://www.socialfetch.dev/pricing) — credit packs and metering overview.
+- [Guides](https://www.socialfetch.dev/guides) — tutorials and scraping walkthroughs.
+
+## Markdown docs convention
+
+- Every docs page has a markdown twin: append **`.mdx`** to the docs pathname (for example `/docs/quickstart` → `/docs/quickstart.mdx`).
+- Agents that send `Accept: text/markdown` on `/docs/**` HTML URLs may receive markdown directly (same URL, `Vary: Accept`).
+- Published blog posts use the same convention: `/blog/{slug}` → `/blog/{slug}.mdx`, or `Accept: text/markdown` on the HTML URL (`Vary: Accept`).

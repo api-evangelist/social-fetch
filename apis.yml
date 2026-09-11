@@ -5,7 +5,7 @@ description: >-
   llms.txt file set, published agent skills, and x402 pay-per-call payments.
 url: https://raw.githubusercontent.com/api-evangelist/social-fetch/refs/heads/main/apis.yml
 created: '2026-09-10'
-modified: '2026-09-10'
+modified: '2026-09-11'
 specificationVersion: '0.21'
 tags:
   - social media
@@ -23,6 +23,7 @@ tags:
   - ads intelligence
 apis:
   - name: Social Fetch REST API
+    image: https://www.socialfetch.dev/og-default.png
     description: >-
       Synchronous REST API for scraping public social media data across ~23 platforms, returning structured JSON. 206
       operations under /v1. API-key auth via x-api-key header. Supports x402 USDC-on-Base pay-per-call.
@@ -53,11 +54,84 @@ apis:
         url: https://api.socialfetch.dev/mcp
       - type: AgentSkill
         url: https://www.socialfetch.dev/docs/integrations/skills.mdx
+      - type: APIReference
+        url: https://www.socialfetch.dev/docs/api.mdx
+      - type: GettingStarted
+        url: https://www.socialfetch.dev/docs/quickstart
 maintainers:
   - FN: Social Fetch
+    email: support@socialfetch.dev
     url: https://www.socialfetch.dev
-generated:
+x-generated:
   by: apis.io/add
   model: claude-opus-4-8
   confidence: 97
   at: '2026-09-10T22:01:43.630Z'
+common:
+- type: Website
+  url: https://www.socialfetch.dev
+- type: x-ToolCrosswalk
+  url: mcp/social-fetch-tool-crosswalk.yml
+- type: TrustCenter
+  url: security/social-fetch-trust-center.yml
+- type: VulnerabilityDisclosure
+  url: security/social-fetch-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/social-fetch-domain-security.yml
+- type: Authentication
+  url: authentication/social-fetch-authentication.yml
+- type: Security
+  url: security/social-fetch-vulnerability-disclosure.yml
+- type: WellKnown
+  url: well-known/social-fetch-well-known.yml
+- type: SecurityTxt
+  url: well-known/social-fetch-well-known.yml
+- type: LLMsTxt
+  url: llms/social-fetch-llms.yml
+- type: Packages
+  url: packages/social-fetch-packages.yml
+- type: SDKs
+  url: packages/social-fetch-packages.yml
+- type: Conformance
+  url: conformance/social-fetch-conformance.yml
+- type: ErrorCatalog
+  url: errors/social-fetch-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/social-fetch-lifecycle.yml
+- type: OAuthScopes
+  url: scopes/social-fetch-scopes.yml
+- type: Conventions
+  url: conventions/social-fetch-conventions.yml
+- type: Plans
+  url: plans/social-fetch-plans-pricing.yml
+- type: RateLimits
+  url: rate-limits/social-fetch-rate-limits.yml
+- type: Webhooks
+  url: asyncapi/social-fetch-webhooks.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Overlay
+  url: overlays/social-fetch-openapi-overlay.yaml
+- type: MCPServer
+  url: mcp/social-fetch-mcp.yml
+- type: DeveloperPortal
+  url: https://www.socialfetch.dev/docs
+- type: Pricing
+  url: https://www.socialfetch.dev/pricing
+- type: SignUp
+  url: https://app.socialfetch.dev/api-keys
+- type: TermsOfService
+  url: https://www.socialfetch.dev/terms
+- type: PrivacyPolicy
+  url: https://www.socialfetch.dev/privacy
+- type: Blog
+  url: https://www.socialfetch.dev/blog
+- type: Support
+  url: https://www.socialfetch.dev/contact
+- type: GitHubOrganization
+  url: https://github.com/social-freak-ltd
+x-enrichment:
+  date: '2026-09-11'
+  status: enriched
+  artifacts_added: 19
+  pass: local-v3

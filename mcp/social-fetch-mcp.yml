@@ -1,0 +1,66 @@
+generated: '2026-09-11'
+method: probed
+source: >-
+  Live hosted MCP server probed 2026-09-11 at https://api.socialfetch.dev/mcp.
+  initialize and tools/list both returned HTTP 200 (Streamable HTTP / SSE),
+  advertising serverInfo.name "socialfetch" and 208 tools with real inputSchemas.
+  Auth model confirmed from oauth-protected-resource (RFC 9728) + docs.
+name: Social Fetch MCP
+description: >-
+  Typed social-data tools (TikTok, Instagram, YouTube, X, Reddit, and 20+ more
+  platforms) plus live docs search, exposed over a hosted remote MCP server. The
+  tool surface is a near 1:1 typed mirror of the 206 REST operations, plus
+  docs_search / docs_read.
+deployment:
+  mode: remote
+  endpoint: https://api.socialfetch.dev/mcp
+  auth: oauth
+  verified: probed
+  note: >-
+    Remote Streamable-HTTP endpoint an MCP client POSTs to. OAuth by default
+    (authorization server https://app.socialfetch.dev, RFC 9728 protected-resource
+    metadata served at api.socialfetch.dev/.well-known/oauth-protected-resource);
+    clients that never prompt may instead send x-api-key (sfk_...). tools/list is
+    anonymous; invoking a tool requires credentials. No stdio package is published.
+protocol:
+  transport: streamable-http
+  protocolVersion: '2025-06-18'
+  serverInfo:
+    name: socialfetch
+    title: Social Fetch
+capabilities:
+  resources:
+    listChanged: true
+  tools:
+    listChanged: true
+tools_count: 208
+tools_file: mcp/social-fetch-mcp-tools.json
+tool_categories:
+  - tiktok
+  - twitter
+  - instagram
+  - facebook
+  - youtube
+  - linkedin
+  - reddit
+  - threads
+  - bluesky
+  - telegram
+  - truthsocial
+  - hackernews
+  - github
+  - spotify
+  - apple-music
+  - soundcloud
+  - rumble
+  - twitch
+  - pinterest
+  - google
+  - amazon
+  - linktree
+  - web
+  - monitors
+  - webhook-endpoints
+  - docs (docs_search, docs_read — MCP-native)
+  - system (whoami, balance)
+docs: https://www.socialfetch.dev/docs/integrations/mcp.mdx

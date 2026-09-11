@@ -1,0 +1,74 @@
+generated: '2026-09-11'
+method: probed
+source: >-
+  Probed /.well-known/* on every host the record knows: the api origin
+  (api.socialfetch.dev), the marketing/docs host (www.socialfetch.dev), the apex
+  (socialfetch.dev, which 307-redirects to www), and the OAuth authorization
+  server host named in oauth-protected-resource.authorization_servers
+  (app.socialfetch.dev).
+hosts:
+  - host: api.socialfetch.dev
+    documents:
+      - path: /.well-known/openid-configuration
+        status: 200
+        file: social-fetch-openid-configuration.json
+      - path: /.well-known/oauth-authorization-server
+        status: 200
+        file: social-fetch-oauth-authorization-server.json
+      - path: /.well-known/oauth-protected-resource
+        status: 200
+        file: social-fetch-oauth-protected-resource.json
+      - path: /.well-known/x402
+        status: 200
+        file: social-fetch-x402.json
+      - path: /.well-known/security.txt
+        status: 404
+      - path: /.well-known/api-catalog
+        status: 404
+      - path: /.well-known/ai-plugin.json
+        status: 404
+      - path: /.well-known/agent-card.json
+        status: 404
+      - path: /.well-known/agent.json
+        status: 404
+  - host: www.socialfetch.dev
+    documents:
+      - path: /.well-known/security.txt
+        status: 200
+        file: social-fetch-security.txt
+      - path: /.well-known/openid-configuration
+        status: 404
+        note: SPA HTML shell (soft-404), not a document.
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+        note: SPA HTML shell (soft-404), not a document.
+      - path: /.well-known/api-catalog
+        status: 404
+        note: SPA HTML shell (soft-404).
+      - path: /.well-known/ai-plugin.json
+        status: 404
+        note: SPA HTML shell (soft-404).
+  - host: app.socialfetch.dev
+    documents:
+      - path: /.well-known/oauth-authorization-server
+        status: 200
+        file: social-fetch-app-oauth-authorization-server.json
+        note: >-
+          Authorization server issuer (https://app.socialfetch.dev) named by
+          api.socialfetch.dev's oauth-protected-resource document. Identical
+          metadata is also served at /.well-known/openid-configuration.
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+        note: SPA HTML shell (soft-404).
+  - host: socialfetch.dev
+    documents:
+      - path: /.well-known/security.txt
+        status: 307
+        note: Apex 307-redirects all /.well-known/* to www.socialfetch.dev.
+notes: >-
+  Real served documents: OAuth 2.0 Authorization Server Metadata (RFC 8414) and
+  OpenID Connect discovery on both api.socialfetch.dev and app.socialfetch.dev;
+  OAuth 2.0 Protected Resource Metadata (RFC 9728) pointing the MCP endpoint at
+  the app.socialfetch.dev issuer; a served security.txt (RFC 9116) on www; and an
+  x402 payment-discovery document on api. No api-catalog or ai-plugin.json served
+  anywhere (SPA soft-404).

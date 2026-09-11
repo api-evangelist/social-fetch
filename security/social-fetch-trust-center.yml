@@ -1,0 +1,24 @@
+generated: '2026-09-11'
+method: searched
+source: https://www.socialfetch.dev/security
+url: https://www.socialfetch.dev/security
+certifications: []
+compliance_alignment:
+  - name: GDPR (UK & EU)
+    formal_certification: false
+    detail: >-
+      "Designed to support" UK and EU GDPR — the page states this is its own
+      privacy practice, "not a third-party GDPR certification".
+detail: >-
+  A security-practices page exists but claims NO third-party certifications. The
+  page states verbatim: "We do not hold SOC 2 or ISO 27001 certification. This
+  page describes our current practices." It describes a responsible-disclosure
+  process (see social-fetch-vulnerability-disclosure.yml).
+correction_note: >-
+  An earlier automated keyword probe flagged SOC 2 / ISO 27001 / GDPR as
+  certifications; that was a FALSE POSITIVE — those strings appear on the page only
+  inside a negation ("we do not hold..."). Corrected on manual read 2026-09-11.
+  No Compliance pointer is emitted because no compliance program is published.
+evidence:
+  - source: https://www.socialfetch.dev/security
+    quote: '"We do not hold SOC 2 or ISO 27001 certification. This page describes our current practices."'

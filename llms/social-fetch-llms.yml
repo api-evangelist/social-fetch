@@ -1,0 +1,30 @@
+generated: '2026-09-11'
+method: searched
+source: https://www.socialfetch.dev/llms.txt
+type: LLMsTxt
+files:
+  - path: llms/social-fetch-llms.txt
+    url: https://www.socialfetch.dev/llms.txt
+    status: 200
+    description: Curated discovery + tool-selection index (11 KB).
+  - path: llms/social-fetch-agents.txt
+    url: https://www.socialfetch.dev/agents.txt
+    status: 200
+    description: >-
+      AI agent / crawler access file — onboarding, auth rules, cursor-pagination
+      rules, crawl allowlist, and per-platform endpoint counts (last updated
+      2026-09-08).
+  - url: https://www.socialfetch.dev/llms-endpoints.txt
+    status: 200
+    description: Full 206-operation catalog, each linking that route's markdown page (30 KB, not stored).
+  - url: https://www.socialfetch.dev/llms.json
+    status: 200
+    description: >-
+      Structured JSON inventory — parameters, pagination, outcomes, credits, SDK
+      mapping (436 KB, not stored; llms-full not committed per repo policy).
+notes: >-
+  Social Fetch ships an unusually complete agent file set: llms.txt, agents.txt,
+  a per-operation llms-endpoints.txt, per-platform llms-{platform}.txt files, and
+  a structured llms.json. Docs pages also serve markdown twins (append .mdx, or
+  Accept: text/markdown with Vary: Accept). The large llms.json / llms-full dumps
+  are intentionally not committed (see .gitignore *-llms-full.txt).

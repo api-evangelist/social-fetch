@@ -1,0 +1,40 @@
+generated: '2026-09-11'
+method: searched
+source: >-
+  npm registry metadata (registry.npmjs.org) + docs SDK/integrations pages, read
+  2026-09-11. PyPI has no socialfetch package (404).
+packages:
+  - name: '@socialfetch/sdk'
+    registry: npm
+    official: true
+    language: TypeScript
+    version: 0.28.1
+    published: '2026-09-02'
+    description: >-
+      Official TypeScript SDK for Social Fetch. SocialFetchClient with Result
+      types and unwrap(); authenticates with x-api-key (sfk_...).
+    homepage: https://www.socialfetch.dev/docs/sdk
+    repository: https://github.com/social-freak-ltd/socialfetch-sdk
+    registry_url: https://www.npmjs.com/package/@socialfetch/sdk
+    docs: https://www.socialfetch.dev/docs/sdk.mdx
+  - name: n8n-nodes-socialfetch
+    registry: npm
+    official: true
+    language: TypeScript
+    version: 0.20.0
+    published: null
+    description: >-
+      Verified n8n community node to fetch social media and web data with the
+      Social Fetch API. Published under the provider's own scope/handle and
+      documented as a first-party integration.
+    registry_url: https://www.npmjs.com/package/n8n-nodes-socialfetch
+    docs: https://www.socialfetch.dev/docs/integrations/n8n.mdx
+    note: >-
+      published date not captured from registry metadata this pass; version read
+      from the npm search index.
+notes: >-
+  No first-party Python/Go/Ruby/Java client found (PyPI 404); the docs point
+  non-TypeScript consumers at REST + OpenAPI. Agent Skills are distributed via the
+  skills CLI (npx skills add social-freak-ltd/socialfetch), not an npm package.
+  Additional low-code integrations (Apify Store Actors, Make custom app) are
+  documented but not published as installable registry packages.

@@ -1,0 +1,29 @@
+generated: '2026-09-11'
+method: searched
+source: >-
+  openapi/social-fetch-openapi.json (info.version, /v1 path prefix) and
+  socialfetch.dev docs, probed 2026-09-11.
+versioning:
+  scheme: url-path
+  current: v1
+  detail: >-
+    All operations live under /v1. OpenAPI info.version is 1.0.0. No prior or
+    deprecated versions are documented.
+deprecation:
+  policy_url: null
+  detail: >-
+    No published deprecation policy and no RFC 8594 Sunset/Deprecation header
+    convention documented. No operation in the OpenAPI is marked deprecated:true.
+status_page:
+  present: false
+  detail: >-
+    No status page found — status.socialfetch.dev does not resolve and
+    www.socialfetch.dev/status returns 404. A free GET /health endpoint exists in
+    the API for liveness checks.
+sla:
+  present: false
+  detail: No published SLA. Docs describe best-effort availability with 503 + Retry-After under load.
+notes: >-
+  Lifecycle posture is thin: single stable /v1, no formal deprecation/sunset
+  policy, no status page or SLA. The changelog is referenced in docs navigation
+  but did not resolve to a dated entries page on this pass.

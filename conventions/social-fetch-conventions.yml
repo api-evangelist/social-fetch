@@ -1,0 +1,72 @@
+generated: '2026-09-11'
+method: searched
+source: >-
+  https://www.socialfetch.dev/agents.txt, docs/errors.mdx, docs/credits.mdx,
+  docs/monitors/quickstart.mdx and openapi/social-fetch-openapi.json. Read 2026-09-11.
+authentication:
+  style: api-key
+  header: 'x-api-key: sfk_...'
+  anonymous_routes: [GET /v1/whoami, GET /v1/balance, GET /health]
+  mcp: OAuth (app.socialfetch.dev) by default, or x-api-key if the client never prompts.
+  x402: USDC-on-Base walk-up pay-per-call with no API key on payable resources.
+pagination:
+  style: cursor
+  request_param: cursor
+  response_fields: [data.page.nextCursor, data.page.hasMore]
+  detail: >-
+    Read data.page.nextCursor, send it back as the cursor query parameter, stop
+    when data.page.hasMore is false. Cursors are opaque — never build or decode one.
+request_id:
+  field: meta.requestId
+  detail: Every response carries meta.requestId; include it in support and vulnerability reports.
+error_envelope:
+  shape: '{ error: { code, message, requestId } }'
+  problem_json: false
+  outcome_field: data.lookupStatus (found | not_found | private | restricted) on 200
+metadata:
+  fields: [meta.requestId, meta.creditsCharged, meta.version, meta.cached]
+rate_limit_signaling:
+  headers: []
+  detail: >-
+    No X-RateLimit-*/RateLimit-* headers. Paid metered routes have no request
+    quota (credits are the limit); free routes (whoami, balance) enforce a
+    per-key limit and return 429. Under extreme load routes return 503 with
+    Retry-After. See rate-limits/social-fetch-rate-limits.yml.
+versioning:
+  scheme: url-path
+  current: v1
+idempotency:
+  coverage: none
+  scope: []
+  detail: >-
+    No documented request-level idempotency (no Idempotency-Key header) on the
+    mutating surface (monitors, webhook-endpoints). HTTP PATCH/DELETE on config
+    resources are naturally idempotent, and webhook DELIVERY is at-least-once with
+    event-id deduplication on the consumer side, but there is no replay-safe
+    write-key mechanism for POST creates. The data-read surface is side-effect-free.
+reversibility:
+  grade: documented
+  detail: >-
+    The data surface is read-only (scraping GETs have no side effects → na). The
+    management surface is reversible in the ordinary sense — monitors and
+    webhook-endpoints can be updated, disabled (enabled:false), and deleted — but
+    DELETE is explicitly permanent ("Cannot be undone" on monitors_delete and
+    webhookEndpoints_delete), so there is no restore/undo window for deletion.
+  reversal_operations:
+    - operation: PATCH /v1/monitors/{id}
+      note: Update or pause a monitor (spec/schedule/enabled) instead of deleting.
+    - operation: PATCH /v1/webhook-endpoints/{id}
+      note: Disable a webhook endpoint (enabled:false) rather than delete it.
+    - operation: POST /v1/webhook-endpoints/{id}/rotate-secret
+      window: 24h overlap window during which the old signing secret still verifies
+      note: The one stated reversal window — old secret remains valid for 24h after rotation.
+    - operation: POST /v1/webhook-deliveries/{id}/redeliver
+      note: Re-queue a past delivery attempt.
+  irreversible:
+    - DELETE /v1/monitors/{id}
+    - DELETE /v1/webhook-endpoints/{id}
+cross_links:
+  errors: errors/social-fetch-problem-types.yml
+  lifecycle: lifecycle/social-fetch-lifecycle.yml
+  authentication: authentication/social-fetch-authentication.yml
+  rate_limits: rate-limits/social-fetch-rate-limits.yml

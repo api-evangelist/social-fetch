@@ -1,0 +1,5 @@
+Contact: mailto:support@socialfetch.dev
+Preferred-Languages: en
+Policy: https://www.socialfetch.dev/security
+Canonical: https://www.socialfetch.dev/.well-known/security.txt
+Expires: 2027-06-18T23:59:59.000Z

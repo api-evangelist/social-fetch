@@ -1,0 +1,59 @@
+generated: '2026-09-11'
+method: searched
+source: >-
+  Derived from openapi/social-fetch-openapi.json, the served /.well-known
+  discovery documents, docs/errors.mdx and docs/credits.mdx, probed 2026-09-11.
+conformance:
+  - id: oauth2
+    conforms: true
+    evidence: >-
+      MCP endpoint is an OAuth 2.0 protected resource; authorization server
+      metadata (RFC 6749 / RFC 8414) served at
+      api.socialfetch.dev/.well-known/oauth-authorization-server and
+      app.socialfetch.dev, with authorization_code, client_credentials and
+      refresh_token grants and S256 PKCE.
+  - id: oidc
+    conforms: true
+    evidence: >-
+      OpenID Connect discovery document served at
+      api.socialfetch.dev/.well-known/openid-configuration (issuer
+      https://app.socialfetch.dev), with userinfo, jwks and EdDSA id_token signing.
+  - id: rfc8414
+    conforms: true
+    evidence: OAuth 2.0 Authorization Server Metadata served on api + app hosts.
+  - id: rfc9728
+    conforms: true
+    evidence: >-
+      OAuth 2.0 Protected Resource Metadata served at
+      api.socialfetch.dev/.well-known/oauth-protected-resource, naming
+      https://api.socialfetch.dev/mcp as the resource and app.socialfetch.dev as
+      the authorization server.
+  - id: rfc9116
+    conforms: true
+    evidence: security.txt served at www.socialfetch.dev/.well-known/security.txt (Expires 2027-06-18).
+  - id: rfc9457
+    conforms: false
+    evidence: >-
+      Errors use a custom { error: { code, message, requestId } } envelope, NOT
+      application/problem+json; docs/errors.mdx states this explicitly.
+  - id: pagination
+    conforms: true
+    evidence: >-
+      Uniform cursor pagination across list routes — data.page.nextCursor /
+      data.page.hasMore in responses, cursor query parameter on requests
+      (documented in agents.txt and per-route docs).
+  - id: x402
+    conforms: true
+    domain_standard: true
+    evidence: >-
+      x402 (HTTP 402 machine-payable) pay-per-call is a first-class surface: an
+      x402 discovery document is served at
+      api.socialfetch.dev/.well-known/x402 (version 1, listing /mcp and the
+      /v1/** payable resources), and the OpenAPI declares 402
+      insufficient_credits / payment_required / payment_settlement_failed
+      responses for USDC-on-Base walk-up payment with no API key. This is the
+      domain-standard signature for the agent-native pay-per-call market.
+notes: >-
+  Reward-only assertions grounded in served documents and the contract. No FHIR,
+  SCIM, OData, PSD2, FAPI or JSON:API surface — none applies to a public social
+  scraping API, so none is asserted.

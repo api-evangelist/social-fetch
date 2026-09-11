@@ -1,0 +1,26 @@
+generated: '2026-09-11'
+method: generated
+source: >-
+  Grounded in real routes from openapi/social-fetch-openapi.json and the live MCP
+  tool set, plus conventions/errors/credits docs. The provider also publishes an
+  installable Agent Skill (see provider_published below); its source repo
+  (social-freak-ltd/socialfetch) is private, so it could not be saved verbatim.
+provider_published:
+  install: 'npx skills add social-freak-ltd/socialfetch -s socialfetch'
+  handle: social-freak-ltd/socialfetch
+  docs: https://www.socialfetch.dev/docs/integrations/skills.mdx
+  saved_verbatim: false
+  note: >-
+    Publisher-provided skill teaches a durable workflow (read /llms.txt +
+    /agents.txt, connect the hosted MCP, explore with POST /v1/ask, then pin typed
+    routes) rather than wrapping fixed operationIds.
+skills:
+  - file: social-fetch-profile-lookup.md
+    name: social-fetch-profile-lookup
+    description: Resolve a social handle to profile metrics and recent posts across any supported platform.
+  - file: social-fetch-brand-monitoring.md
+    name: social-fetch-brand-monitoring
+    description: Watch an account or keyword and receive a signed webhook when something new posts.
+  - file: social-fetch-transcripts.md
+    name: social-fetch-transcripts
+    description: Pull the spoken transcript of a video post from a URL.

@@ -1,0 +1,50 @@
+overlay: 1.0.0
+info:
+  title: Social Fetch — API Evangelist enrichment overlay
+  version: 1.0.0
+extends: ../openapi/social-fetch-openapi.json
+x-provenance:
+  generated: '2026-09-11'
+  method: generated
+  source: >-
+    Enhancements derived from the served OpenAPI, agents.txt, docs/errors.mdx and
+    docs/credits.mdx. This overlay never mutates the original spec.
+actions:
+  - target: $.info
+    description: >-
+      Annotate the API with cross-cutting agent-readiness semantics that the
+      published spec leaves to prose docs.
+    update:
+      x-response-envelope:
+        success: '{ data, meta }'
+        error: '{ error: { code, message, requestId } }'
+        outcome_field: data.lookupStatus (found | not_found | private | restricted) on HTTP 200
+        problem_json: false
+      x-authentication:
+        rest: 'x-api-key: sfk_...'
+        mcp: OAuth (app.socialfetch.dev) or x-api-key fallback
+        x402: USDC-on-Base walk-up pay-per-call on payable resources
+      x-pagination:
+        style: cursor
+        request_param: cursor
+        response_fields: [data.page.nextCursor, data.page.hasMore]
+      x-agent-surfaces:
+        mcp: https://api.socialfetch.dev/mcp
+        llms_txt: https://www.socialfetch.dev/llms.txt
+        agents_txt: https://www.socialfetch.dev/agents.txt
+        skills: 'npx skills add social-freak-ltd/socialfetch -s socialfetch'
+      x-metering:
+        unit: credit
+        note: >-
+          Metered routes bill on successful lookup, including not_found/private
+          outcomes on 200; cache hits still charge. 502/503 not charged.
+  - target: $.info
+    description: >-
+      Flag the enrichment finding that the source spec declares no operationId on
+      any of its 206 operations and no top-level tags, so codegen/tool-binding
+      must key on METHOD + path.
+    update:
+      x-enrichment-notes:
+        missing_operation_ids: true
+        missing_tags: true
+        binding_key: method+path
