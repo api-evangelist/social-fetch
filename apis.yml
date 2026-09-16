@@ -8,6 +8,20 @@ created: '2026-09-10'
 modified: '2026-09-11'
 specificationVersion: '0.21'
 tags:
+  - Social-Media
+  - Web Scraping
+  - Data Extraction
+  - Social Listening
+  - Monitoring
+  - Structured Data
+  - JSON:API
+  - REST
+  - MCP
+  - agent-native
+  - TypeScript SDK
+  - Transcripts
+  - ads intelligence
+tags_raw:
   - social media
   - web scraping
   - data extraction
@@ -22,42 +36,474 @@ tags:
   - transcripts
   - ads intelligence
 apis:
-  - name: Social Fetch REST API
-    image: https://www.socialfetch.dev/og-default.png
-    description: >-
-      Synchronous REST API for scraping public social media data across ~23 platforms, returning structured JSON. 206
-      operations under /v1. API-key auth via x-api-key header. Supports x402 USDC-on-Base pay-per-call.
-    humanURL: https://www.socialfetch.dev/docs
-    baseURL: https://api.socialfetch.dev
-    tags:
-      - social media
-      - web scraping
-      - data extraction
-      - social listening
-      - monitoring
-      - structured data
-      - JSON API
-      - REST
-      - MCP
-      - agent-native
-      - TypeScript SDK
-      - transcripts
-      - ads intelligence
-    properties:
-      - type: OpenAPI
-        url: https://www.socialfetch.dev/openapi.json
-      - type: Documentation
-        url: https://www.socialfetch.dev/docs
-      - type: LLMsTxt
-        url: https://www.socialfetch.dev/llms.txt
-      - type: MCPServer
-        url: https://api.socialfetch.dev/mcp
-      - type: AgentSkill
-        url: https://www.socialfetch.dev/docs/integrations/skills.mdx
-      - type: APIReference
-        url: https://www.socialfetch.dev/docs/api.mdx
-      - type: GettingStarted
-        url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-amazon-api
+  name: Social Fetch Amazon API
+  description: The Amazon API from Social Fetch — 1 operation(s) for amazon.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Amazon
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-amazon-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-apple-music-api
+  name: Social Fetch Apple Music API
+  description: The Apple Music API from Social Fetch — 4 operation(s) for apple music.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Apple Music
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-apple-music-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-auth-api
+  name: Social Fetch Auth API
+  description: The Auth API from Social Fetch — 2 operation(s) for auth.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Auth
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-auth-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-bluesky-api
+  name: Social Fetch Bluesky API
+  description: The Bluesky API from Social Fetch — 3 operation(s) for bluesky.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Bluesky
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-bluesky-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-facebook-api
+  name: Social Fetch Facebook API
+  description: The Facebook API from Social Fetch — 21 operation(s) for facebook.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Facebook
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-facebook-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-github-api
+  name: Social Fetch Git Hub API
+  description: The GitHub API from Social Fetch — 10 operation(s) for github.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - GitHub
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-github-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-google-api
+  name: Social Fetch Google API
+  description: The Google API from Social Fetch — 3 operation(s) for google.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Google
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-google-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-hacker-news-api
+  name: Social Fetch Hacker News API
+  description: The Hacker News API from Social Fetch — 13 operation(s) for hacker news.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Hacker News
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-hacker-news-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-instagram-api
+  name: Social Fetch Instagram API
+  description: The Instagram API from Social Fetch — 20 operation(s) for instagram.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Instagram
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-instagram-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-linkedin-api
+  name: Social Fetch Linked In API
+  description: The LinkedIn API from Social Fetch — 13 operation(s) for linkedin.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - LinkedIn
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-linkedin-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-linktree-api
+  name: Social Fetch Linktree API
+  description: The Linktree API from Social Fetch — 1 operation(s) for linktree.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Linktree
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-linktree-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-monitors-api
+  name: Social Fetch Monitors API
+  description: The Monitors API from Social Fetch — 12 operation(s) for monitors.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Monitors
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-monitors-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-pinterest-api
+  name: Social Fetch Pinterest API
+  description: The Pinterest API from Social Fetch — 4 operation(s) for pinterest.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Pinterest
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-pinterest-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-reddit-api
+  name: Social Fetch Reddit API
+  description: The Reddit API from Social Fetch — 7 operation(s) for reddit.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Reddit
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-reddit-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-rumble-api
+  name: Social Fetch Rumble API
+  description: The Rumble API from Social Fetch — 5 operation(s) for rumble.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Rumble
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-rumble-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-soundcloud-api
+  name: Social Fetch Sound Cloud API
+  description: The SoundCloud API from Social Fetch — 3 operation(s) for soundcloud.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - SoundCloud
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-soundcloud-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-spotify-api
+  name: Social Fetch Spotify API
+  description: The Spotify API from Social Fetch — 3 operation(s) for spotify.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Spotify
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-spotify-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-system-api
+  name: Social Fetch System API
+  description: The System API from Social Fetch — 2 operation(s) for system.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - System
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-system-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-telegram-api
+  name: Social Fetch Telegram API
+  description: The Telegram API from Social Fetch — 3 operation(s) for telegram.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Telegram
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-telegram-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-threads-api
+  name: Social Fetch Threads API
+  description: The Threads API from Social Fetch — 5 operation(s) for threads.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Threads
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-threads-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-tiktok-api
+  name: Social Fetch Tik Tok API
+  description: The TikTok API from Social Fetch — 29 operation(s) for tiktok.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - TikTok
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-tiktok-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-truth-social-api
+  name: Social Fetch Truth Social API
+  description: The Truth Social API from Social Fetch — 3 operation(s) for truth social.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Truth Social
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-truth-social-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-twitch-api
+  name: Social Fetch Twitch API
+  description: The Twitch API from Social Fetch — 4 operation(s) for twitch.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Twitch
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-twitch-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-twitter-api
+  name: Social Fetch Twitter API
+  description: The Twitter API from Social Fetch — 9 operation(s) for twitter.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Twitter
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-twitter-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-web-api
+  name: Social Fetch Web API
+  description: The Web API from Social Fetch — 7 operation(s) for web.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Web
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-web-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-youtube-api
+  name: Social Fetch You Tube API
+  description: The YouTube API from Social Fetch — 13 operation(s) for youtube.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - YouTube
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-youtube-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
 maintainers:
   - FN: Social Fetch
     email: support@socialfetch.dev
@@ -68,6 +514,10 @@ x-generated:
   confidence: 97
   at: '2026-09-10T22:01:43.630Z'
 common:
+- type: MCPServer
+  url: https://api.socialfetch.dev/mcp
+- type: AgentSkill
+  url: https://www.socialfetch.dev/docs/integrations/skills.mdx
 - type: Website
   url: https://www.socialfetch.dev
 - type: x-ToolCrosswalk
