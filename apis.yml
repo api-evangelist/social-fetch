@@ -198,24 +198,6 @@ apis:
     url: https://www.socialfetch.dev/docs/api.mdx
   - type: GettingStarted
     url: https://www.socialfetch.dev/docs/quickstart
-- aid: social-fetch:social-fetch-linkedin-api
-  name: Social Fetch Linked In API
-  description: The LinkedIn API from Social Fetch — 13 operation(s) for linkedin.
-  humanURL: https://www.socialfetch.dev/docs
-  baseURL: https://api.socialfetch.dev
-  tags:
-  - LinkedIn
-  properties:
-  - type: OpenAPI
-    url: openapi/social-fetch-linkedin-api-openapi.yml
-  - type: Documentation
-    url: https://www.socialfetch.dev/docs
-  - type: LLMsTxt
-    url: https://www.socialfetch.dev/llms.txt
-  - type: APIReference
-    url: https://www.socialfetch.dev/docs/api.mdx
-  - type: GettingStarted
-    url: https://www.socialfetch.dev/docs/quickstart
 - aid: social-fetch:social-fetch-linktree-api
   name: Social Fetch Linktree API
   description: The Linktree API from Social Fetch — 1 operation(s) for linktree.
@@ -414,24 +396,6 @@ apis:
     url: https://www.socialfetch.dev/docs/api.mdx
   - type: GettingStarted
     url: https://www.socialfetch.dev/docs/quickstart
-- aid: social-fetch:social-fetch-truth-social-api
-  name: Social Fetch Truth Social API
-  description: The Truth Social API from Social Fetch — 3 operation(s) for truth social.
-  humanURL: https://www.socialfetch.dev/docs
-  baseURL: https://api.socialfetch.dev
-  tags:
-  - Truth Social
-  properties:
-  - type: OpenAPI
-    url: openapi/social-fetch-truth-social-api-openapi.yml
-  - type: Documentation
-    url: https://www.socialfetch.dev/docs
-  - type: LLMsTxt
-    url: https://www.socialfetch.dev/llms.txt
-  - type: APIReference
-    url: https://www.socialfetch.dev/docs/api.mdx
-  - type: GettingStarted
-    url: https://www.socialfetch.dev/docs/quickstart
 - aid: social-fetch:social-fetch-twitch-api
   name: Social Fetch Twitch API
   description: The Twitch API from Social Fetch — 4 operation(s) for twitch.
@@ -496,6 +460,42 @@ apis:
   properties:
   - type: OpenAPI
     url: openapi/social-fetch-youtube-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-linked-in-api
+  name: Social Fetch Linked In API
+  description: The Linked In API from Social Fetch — 13 operation(s) for linked in.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - Linked In
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-linked-in-api-openapi.yml
+  - type: Documentation
+    url: https://www.socialfetch.dev/docs
+  - type: LLMsTxt
+    url: https://www.socialfetch.dev/llms.txt
+  - type: APIReference
+    url: https://www.socialfetch.dev/docs/api.mdx
+  - type: GettingStarted
+    url: https://www.socialfetch.dev/docs/quickstart
+- aid: social-fetch:social-fetch-truthsocial-api
+  name: Social Fetch Truthsocial API
+  description: The truthsocial API from Social Fetch — 3 operation(s) for truthsocial.
+  humanURL: https://www.socialfetch.dev/docs
+  baseURL: https://api.socialfetch.dev
+  tags:
+  - truthsocial
+  properties:
+  - type: OpenAPI
+    url: openapi/social-fetch-truthsocial-api-openapi.yml
   - type: Documentation
     url: https://www.socialfetch.dev/docs
   - type: LLMsTxt
