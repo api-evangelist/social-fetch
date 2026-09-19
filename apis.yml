@@ -78,6 +78,8 @@ apis:
   humanURL: https://www.socialfetch.dev/docs
   baseURL: https://api.socialfetch.dev
   tags:
+  - Authentication
+  tags_raw:
   - Auth
   properties:
   - type: OpenAPI
@@ -420,6 +422,8 @@ apis:
   humanURL: https://www.socialfetch.dev/docs
   baseURL: https://api.socialfetch.dev
   tags:
+  - twitter
+  tags_raw:
   - Twitter
   properties:
   - type: OpenAPI
@@ -474,6 +478,8 @@ apis:
   humanURL: https://www.socialfetch.dev/docs
   baseURL: https://api.socialfetch.dev
   tags:
+  - LinkedIn
+  tags_raw:
   - Linked In
   properties:
   - type: OpenAPI
