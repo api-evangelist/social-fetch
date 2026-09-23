@@ -1,0 +1,2307 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Pinterest API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: Pinterest
+paths:
+  /v1/pinterest/profiles/{handle}/boards:
+    get:
+      tags:
+      - Pinterest
+      summary: List Pinterest profile boards
+      description: List public boards for a Pinterest profile.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Pinterest username whose boards should be listed.
+        required: true
+        description: Pinterest username whose boards should be listed.
+        name: handle
+        in: path
+      - schema:
+          type: string
+          minLength: 1
+          description: Opaque pagination cursor returned by a previous response.
+        required: false
+        description: Opaque pagination cursor returned by a previous response.
+        name: cursor
+        in: query
+      - schema:
+          type: boolean
+          description: When true, returns a smaller response with fewer fields.
+        required: false
+        description: When true, returns a smaller response with fewer fields.
+        name: trim
+        in: query
+      responses:
+        '200':
+          description: Boards for the requested profile.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the profile was found.
+                      boards:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Pinterest board id.
+                            name:
+                              type:
+                              - string
+                              - 'null'
+                              description: Board name when available.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public board URL when available.
+                            description:
+                              type:
+                              - string
+                              - 'null'
+                              description: Board description when available.
+                            pinCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Number of pins on the board when available.
+                            followerCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Board follower count when available.
+                            coverImageUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Cover image URL when available.
+                            createdAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: When the board was created, when available.
+                            privacy:
+                              type:
+                              - string
+                              - 'null'
+                              description: Board privacy setting when available.
+                            owner:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                id:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Pinterest user id when available.
+                                username:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Pinterest username when available.
+                                fullName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Display name when available.
+                                avatarUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Profile image URL when available.
+                              required:
+                              - id
+                              - username
+                              - fullName
+                              - avatarUrl
+                              description: Board owner when available.
+                          required:
+                          - id
+                          - name
+                          - url
+                          - description
+                          - pinCount
+                          - followerCount
+                          - coverImageUrl
+                          - createdAt
+                          - privacy
+                          - owner
+                          description: A Pinterest board in a profile listing.
+                        description: Boards returned for this request.
+                      page:
+                        type: object
+                        properties:
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Cursor to pass in the next request when more results are available.
+                          hasMore:
+                            type: boolean
+                            description: Whether another page of results is available.
+                        required:
+                        - nextCursor
+                        - hasMore
+                        description: Pagination state for the current response.
+                    required:
+                    - lookupStatus
+                    - boards
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      boards:
+                      - id: '282812120289423044'
+                        name: Anthony Edwards
+                        url: https://www.pinterest.com/broadstbullycom/anthony-edwards/
+                        description: The best Anthony Edwards pins by BSB
+                        pinCount: 317
+                        followerCount: 1833
+                        coverImageUrl: https://i.pinimg.com/200x150/3f/c9/ff/3fc9ffd3ef48d11f2cea9f4cffc8ece9.jpg
+                        createdAt: Thu, 18 Apr 2024 22:56:33 +0000
+                        privacy: public
+                        owner:
+                          id: '282812189008475549'
+                          username: BroadStBullycom
+                          fullName: BSB
+                          avatarUrl: https://i.pinimg.com/75x75_RS/1c/82/f7/1c82f745249221256c71b8c04decb2c7.jpg
+                      page:
+                        nextCursor: eyJjIjoiTFQ0eU9ESTRNVEl4TWpBeU9EazBNLi4uLiJ9
+                        hasMore: true
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      boards: []
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid handle or bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1PinterestProfilesByHandleBoards
+      x-operation-id-source: derived
+  /v1/pinterest/boards/pins:
+    get:
+      tags:
+      - Pinterest
+      summary: List Pinterest board pins
+      description: List public pins on a Pinterest board by URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Link to the Pinterest board.
+        required: true
+        description: Link to the Pinterest board.
+        name: url
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          description: Opaque pagination cursor returned by a previous response.
+        required: false
+        description: Opaque pagination cursor returned by a previous response.
+        name: cursor
+        in: query
+      - schema:
+          type: boolean
+          description: When true, returns a smaller response with fewer fields.
+        required: false
+        description: When true, returns a smaller response with fewer fields.
+        name: trim
+        in: query
+      responses:
+        '200':
+          description: Pins for the requested board.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the board was found.
+                      pins:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Pinterest pin id.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public pin URL when available.
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                              description: Pin title when available.
+                            description:
+                              type:
+                              - string
+                              - 'null'
+                              description: Pin description when available.
+                            link:
+                              type:
+                              - string
+                              - 'null'
+                              description: Outbound destination link when available.
+                            domain:
+                              type:
+                              - string
+                              - 'null'
+                              description: Destination domain when available.
+                            dominantColor:
+                              type:
+                              - string
+                              - 'null'
+                              description: Dominant image color when available.
+                            createdAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: When the pin was created, when available.
+                            image:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                url:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Image URL when available.
+                                width:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Width in pixels when available.
+                                height:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Height in pixels when available.
+                              required:
+                              - url
+                              - width
+                              - height
+                              description: Primary (original) image when available.
+                            pinner:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                id:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Pinterest user id when available.
+                                username:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Pinterest username when available.
+                                fullName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Display name when available.
+                                avatarUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Profile image URL when available.
+                              required:
+                              - id
+                              - username
+                              - fullName
+                              - avatarUrl
+                              description: User who pinned this item when available.
+                            board:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                id:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Board id when available.
+                                name:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Board name when available.
+                                url:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Canonical public board URL when available.
+                              required:
+                              - id
+                              - name
+                              - url
+                              description: Board this pin belongs to when available.
+                            metrics:
+                              type: object
+                              properties:
+                                saves:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Save count when available.
+                                repins:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Repin count when available.
+                              required:
+                              - saves
+                              - repins
+                              description: Engagement metrics when available.
+                          required:
+                          - id
+                          - url
+                          - title
+                          - description
+                          - link
+                          - domain
+                          - dominantColor
+                          - createdAt
+                          - image
+                          - pinner
+                          - board
+                          - metrics
+                          description: A compact Pinterest pin.
+                        description: Pins returned for this board page.
+                      page:
+                        type: object
+                        properties:
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Cursor to pass in the next request when more results are available.
+                          hasMore:
+                            type: boolean
+                            description: Whether another page of results is available.
+                        required:
+                        - nextCursor
+                        - hasMore
+                        description: Pagination state for the current response.
+                    required:
+                    - lookupStatus
+                    - pins
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      pins:
+                      - id: '63894888471739700'
+                        url: https://www.pinterest.com/pin/63894888471739700/
+                        title: ''
+                        description: Love the bun
+                        link: https://www.shffls.com/shuffles/5371250648050349525
+                        domain: Uploaded by user
+                        dominantColor: '#ffffff'
+                        createdAt: null
+                        image:
+                          url: https://i.pinimg.com/originals/d6/92/7d/d6927d71dd2f7584453beb1e1f4052fd.jpg
+                          width: 1080
+                          height: 1920
+                        pinner:
+                          id: '63895025871749374'
+                          username: lizmrodgers
+                          fullName: Liz Rodgers - DIY | Home Decor
+                          avatarUrl: https://i.pinimg.com/75x75_RS/c2/0e/62/c20e628451b24267c68924d01e42c997.jpg
+                        board:
+                          id: '63894957152718519'
+                          name: Moms night
+                          url: https://www.pinterest.com/lizmrodgers/moms-night/
+                        metrics:
+                          saves: 149
+                          repins: 3
+                      page:
+                        nextCursor: eyJjIjoiWTJKVVJsRXdUV3N4TmxwNlZrLi4uLiJ9
+                        hasMore: true
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      pins: []
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1PinterestBoardsPins
+      x-operation-id-source: derived
+  /v1/pinterest/pins:
+    get:
+      tags:
+      - Pinterest
+      summary: Get Pinterest pin
+      description: Fetch a public Pinterest pin by URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Link to the Pinterest pin.
+        required: true
+        description: Link to the Pinterest pin.
+        name: url
+        in: query
+      - schema:
+          type: boolean
+          description: When true, returns a smaller response with fewer fields.
+        required: false
+        description: When true, returns a smaller response with fewer fields.
+        name: trim
+        in: query
+      responses:
+        '200':
+          description: Pin lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the pin was found.
+                      pin:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            minLength: 1
+                            description: Pinterest pin id.
+                          url:
+                            type:
+                            - string
+                            - 'null'
+                            description: Canonical public pin URL when available.
+                          title:
+                            type:
+                            - string
+                            - 'null'
+                            description: Pin title when available.
+                          description:
+                            type:
+                            - string
+                            - 'null'
+                            description: Pin description when available.
+                          altText:
+                            type:
+                            - string
+                            - 'null'
+                            description: Accessibility alt text when available.
+                          link:
+                            type:
+                            - string
+                            - 'null'
+                            description: Outbound destination link when available.
+                          domain:
+                            type:
+                            - string
+                            - 'null'
+                            description: Destination domain when available.
+                          dominantColor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Dominant image color when available.
+                          createdAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: When the pin was created, when available.
+                          images:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              orig:
+                                type:
+                                - object
+                                - 'null'
+                                properties:
+                                  url:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Image URL when available.
+                                  width:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Width in pixels when available.
+                                  height:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Height in pixels when available.
+                                required:
+                                - url
+                                - width
+                                - height
+                                description: Original image when available.
+                              size236:
+                                type:
+                                - object
+                                - 'null'
+                                properties:
+                                  url:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Image URL when available.
+                                  width:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Width in pixels when available.
+                                  height:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Height in pixels when available.
+                                required:
+                                - url
+                                - width
+                                - height
+                                description: 236px-wide image when available.
+                              size474:
+                                type:
+                                - object
+                                - 'null'
+                                properties:
+                                  url:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Image URL when available.
+                                  width:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Width in pixels when available.
+                                  height:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Height in pixels when available.
+                                required:
+                                - url
+                                - width
+                                - height
+                                description: 474px-wide image when available.
+                              size564:
+                                type:
+                                - object
+                                - 'null'
+                                properties:
+                                  url:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Image URL when available.
+                                  width:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Width in pixels when available.
+                                  height:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Height in pixels when available.
+                                required:
+                                - url
+                                - width
+                                - height
+                                description: 564px-wide image when available.
+                              size736:
+                                type:
+                                - object
+                                - 'null'
+                                properties:
+                                  url:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Image URL when available.
+                                  width:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Width in pixels when available.
+                                  height:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Height in pixels when available.
+                                required:
+                                - url
+                                - width
+                                - height
+                                description: 736px-wide image when available.
+                            required:
+                            - orig
+                            - size236
+                            - size474
+                            - size564
+                            - size736
+                            description: Image renditions when available.
+                          pinner:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              id:
+                                type:
+                                - string
+                                - 'null'
+                                description: Pinterest user id when available.
+                              username:
+                                type:
+                                - string
+                                - 'null'
+                                description: Pinterest username when available.
+                              fullName:
+                                type:
+                                - string
+                                - 'null'
+                                description: Display name when available.
+                              avatarUrl:
+                                type:
+                                - string
+                                - 'null'
+                                description: Profile image URL when available.
+                            required:
+                            - id
+                            - username
+                            - fullName
+                            - avatarUrl
+                            description: User who pinned this item when available.
+                          originPinner:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              id:
+                                type:
+                                - string
+                                - 'null'
+                                description: Pinterest user id when available.
+                              username:
+                                type:
+                                - string
+                                - 'null'
+                                description: Pinterest username when available.
+                              fullName:
+                                type:
+                                - string
+                                - 'null'
+                                description: Display name when available.
+                              avatarUrl:
+                                type:
+                                - string
+                                - 'null'
+                                description: Profile image URL when available.
+                            required:
+                            - id
+                            - username
+                            - fullName
+                            - avatarUrl
+                            description: Original creator when available.
+                          board:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              id:
+                                type:
+                                - string
+                                - 'null'
+                                description: Board id when available.
+                              name:
+                                type:
+                                - string
+                                - 'null'
+                                description: Board name when available.
+                              url:
+                                type:
+                                - string
+                                - 'null'
+                                description: Canonical public board URL when available.
+                            required:
+                            - id
+                            - name
+                            - url
+                            description: Board this pin belongs to when available.
+                          visualAnnotations:
+                            type: array
+                            items:
+                              type: string
+                            description: Visual annotation labels when available.
+                          metrics:
+                            type: object
+                            properties:
+                              saves:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Save count when available.
+                              comments:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Comment count when available.
+                              reactions:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Reaction count when available.
+                              repins:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Repin count when available.
+                              shares:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Share count when available.
+                            required:
+                            - saves
+                            - comments
+                            - reactions
+                            - repins
+                            - shares
+                            description: Engagement metrics when available.
+                        required:
+                        - id
+                        - url
+                        - title
+                        - description
+                        - altText
+                        - link
+                        - domain
+                        - dominantColor
+                        - createdAt
+                        - images
+                        - pinner
+                        - originPinner
+                        - board
+                        - visualAnnotations
+                        - metrics
+                        description: Pin details when found.
+                    required:
+                    - lookupStatus
+                    - pin
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      pin:
+                        id: '68747564459'
+                        url: https://www.pinterest.com/pin/68747564459/
+                        title: Italian Pot Roast (Straccato)
+                        description: Italian Pot Roast (Straccato)
+                        altText: a white bowl filled with meat and tomato sauce on top of a wooden cutting board
+                        link: https://www.closetcooking.com/italian-pot-roast-straccato/
+                        domain: closetcooking.com
+                        dominantColor: '#714426'
+                        createdAt: Thu, 06 Jun 2024 02:33:19 +0000
+                        images:
+                          orig:
+                            url: https://i.pinimg.com/originals/d9/cb/ac/d9cbac6b643a03c096f7fd0566cecaf1.jpg
+                            width: 800
+                            height: 1200
+                          size236:
+                            url: https://i.pinimg.com/236x/d9/cb/ac/d9cbac6b643a03c096f7fd0566cecaf1.jpg
+                            width: 236
+                            height: 354
+                          size474:
+                            url: https://i.pinimg.com/474x/d9/cb/ac/d9cbac6b643a03c096f7fd0566cecaf1.jpg
+                            width: 474
+                            height: 711
+                          size564:
+                            url: https://i.pinimg.com/564x/d9/cb/ac/d9cbac6b643a03c096f7fd0566cecaf1.jpg
+                            width: 564
+                            height: 846
+                          size736:
+                            url: https://i.pinimg.com/736x/d9/cb/ac/d9cbac6b643a03c096f7fd0566cecaf1.jpg
+                            width: 736
+                            height: 1104
+                        pinner:
+                          id: '206158435152'
+                          username: fluffduckie
+                          fullName: Adrienne James
+                          avatarUrl: https://i.pinimg.com/75x75_RS/00/60/87/0060871118d040a1ad20ace0148923da.jpg
+                        originPinner:
+                          id: '91268467356860596'
+                          username: ClosetCooking
+                          fullName: Closet Cooking
+                          avatarUrl: https://i.pinimg.com/75x75_RS/71/1a/ce/711ace70f2f6f846692993a7ec3da426.jpg
+                        board:
+                          id: '137438999215'
+                          name: Food & Fun
+                          url: https://www.pinterest.com/fluffduckie/food-fun/
+                        visualAnnotations:
+                        - Over The Top Recipes
+                        - Recipes Using Rump Roast
+                        - Italian Family Style Dinner
+                        metrics:
+                          saves: 49054
+                          comments: 55
+                          reactions: 694
+                          repins: 2208
+                          shares: 162
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      pin: null
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1PinterestPins
+      x-operation-id-source: derived
+  /v1/pinterest/search:
+    get:
+      tags:
+      - Pinterest
+      summary: Search Pinterest pins
+      description: Search public Pinterest pins by keyword.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Search query text for Pinterest pins.
+        required: true
+        description: Search query text for Pinterest pins.
+        name: query
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          description: Opaque pagination cursor returned by a previous response.
+        required: false
+        description: Opaque pagination cursor returned by a previous response.
+        name: cursor
+        in: query
+      - schema:
+          type: boolean
+          description: When true, returns a smaller response with fewer fields.
+        required: false
+        description: When true, returns a smaller response with fewer fields.
+        name: trim
+        in: query
+      responses:
+        '200':
+          description: Pin search results for the requested query.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      query:
+                        type: string
+                        description: Search query that was evaluated for this response.
+                      pins:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Pinterest pin id.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public pin URL when available.
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                              description: Pin title when available.
+                            description:
+                              type:
+                              - string
+                              - 'null'
+                              description: Pin description when available.
+                            link:
+                              type:
+                              - string
+                              - 'null'
+                              description: Outbound destination link when available.
+                            domain:
+                              type:
+                              - string
+                              - 'null'
+                              description: Destination domain when available.
+                            dominantColor:
+                              type:
+                              - string
+                              - 'null'
+                              description: Dominant image color when available.
+                            createdAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: When the pin was created, when available.
+                            image:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                url:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Image URL when available.
+                                width:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Width in pixels when available.
+                                height:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Height in pixels when available.
+                              required:
+                              - url
+                              - width
+                              - height
+                              description: Primary (original) image when available.
+                            pinner:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                id:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Pinterest user id when available.
+                                username:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Pinterest username when available.
+                                fullName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Display name when available.
+                                avatarUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Profile image URL when available.
+                              required:
+                              - id
+                              - username
+                              - fullName
+                              - avatarUrl
+                              description: User who pinned this item when available.
+                            board:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                id:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Board id when available.
+                                name:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Board name when available.
+                                url:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Canonical public board URL when available.
+                              required:
+                              - id
+                              - name
+                              - url
+                              description: Board this pin belongs to when available.
+                            metrics:
+                              type: object
+                              properties:
+                                saves:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Save count when available.
+                                repins:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Repin count when available.
+                              required:
+                              - saves
+                              - repins
+                              description: Engagement metrics when available.
+                          required:
+                          - id
+                          - url
+                          - title
+                          - description
+                          - link
+                          - domain
+                          - dominantColor
+                          - createdAt
+                          - image
+                          - pinner
+                          - board
+                          - metrics
+                          description: A compact Pinterest pin.
+                        description: Matching Pinterest pins.
+                      page:
+                        type: object
+                        properties:
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Cursor to pass in the next request when more results are available.
+                          hasMore:
+                            type: boolean
+                            description: Whether another page of results is available.
+                        required:
+                        - nextCursor
+                        - hasMore
+                        description: Pagination state for the current response.
+                    required:
+                    - query
+                    - pins
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                sample:
+                  value:
+                    data:
+                      query: Italian Pot Roast
+                      pins:
+                      - id: '3729612256605144'
+                        url: https://www.pinterest.com/pin/3729612256605144/
+                        title: Savory Italian Pot Roast
+                        description: 'Italian Pot Roast: A Hearty and Flavorful Recipe'
+                        link: https://myauntyrecipes.com/2024/10/23/italian-pot-roast/?tp_image_id=7421
+                        domain: myauntyrecipes.com
+                        dominantColor: null
+                        createdAt: Tue, 07 Jan 2025 18:23:09 +0000
+                        image:
+                          url: https://i.pinimg.com/originals/c0/ad/f4/c0adf44a87470e7287219893efa5df75.webp
+                          width: 1024
+                          height: 1024
+                        pinner:
+                          id: '3729749599852575'
+                          username: csadak
+                          fullName: Courtney Elizabeth
+                          avatarUrl: https://i.pinimg.com/75x75_RS/71/b7/c7/71b7c71b452076af02217324c26b3f08.jpg
+                        board:
+                          id: '3729680880427868'
+                          name: Food
+                          url: https://www.pinterest.com/csadak/food/
+                        metrics:
+                          saves: null
+                          repins: null
+                      page:
+                        nextCursor: eyJjIjoiWTJKVlNHODFWMi4uLiJ9
+                        hasMore: true
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                empty:
+                  value:
+                    data:
+                      query: Italian Pot Roast
+                      pins: []
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example_empty
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1PinterestSearch
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

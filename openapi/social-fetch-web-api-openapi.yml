@@ -1,0 +1,3203 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Web API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: Web
+paths:
+  /v1/web/search:
+    get:
+      tags:
+      - Web
+      summary: Search the web
+      description: Search the public web and return ranked organic results with snippets.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Search query text to run against the public web.
+        required: false
+        description: Search query text to run against the public web.
+        name: query
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Silent alias for query when query is omitted.
+        required: false
+        description: Silent alias for query when query is omitted.
+        name: q
+        in: query
+      - schema:
+          type: string
+          description: ISO 3166-1 country code for localized results (e.g. US, GB, CA).
+        required: false
+        description: ISO 3166-1 country code for localized results (e.g. US, GB, CA).
+        name: region
+        in: query
+      - schema:
+          type: string
+          enum:
+          - last-hour
+          - last-day
+          - last-week
+          - last-month
+          - last-year
+          description: Optional filter by when results were posted.
+        required: false
+        description: Optional filter by when results were posted.
+        name: datePosted
+        in: query
+      - schema:
+          type: integer
+          minimum: 1
+          description: 'Page number (1-based). Default: 1.'
+        required: false
+        description: 'Page number (1-based). Default: 1.'
+        name: page
+        in: query
+      responses:
+        '200':
+          description: Ranked web search results for the requested query.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      query:
+                        type: string
+                        description: Search query that was executed.
+                      results:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            title:
+                              type: string
+                              description: Result page title.
+                            url:
+                              type: string
+                              format: uri
+                              description: Result page URL.
+                            content:
+                              type: string
+                              description: Relevant text snippet extracted from the result.
+                          required:
+                          - title
+                          - url
+                          - content
+                          description: One ranked web search result.
+                        description: Ranked search results.
+                      page:
+                        type: object
+                        properties:
+                          page:
+                            type: integer
+                            description: Current page number (1-based).
+                            exclusiveMinimum: 0
+                          hasMore:
+                            type: boolean
+                            description: Whether another page is available.
+                          nextPage:
+                            type:
+                            - integer
+                            - 'null'
+                            description: Next page number when more pages exist; null on the last page.
+                            exclusiveMinimum: 0
+                        required:
+                        - page
+                        - hasMore
+                        - nextPage
+                        description: Best-effort pagination state. The upstream search provider reports no result total and no explicit end-of-results signal, so `hasMore` is true when this page came back full.
+                    required:
+                    - query
+                    - results
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                results:
+                  value:
+                    data:
+                      query: Social media scraping API
+                      results:
+                      - title: Social Fetch — Social Media Scraper API for TikTok, Instagram, YouTube & X
+                        url: https://www.socialfetch.dev
+                        content: Pull real-time data from any social platform. One API. Profiles, posts, comments, videos, transcripts, and metrics — from TikTok, Instagram, YouTube, and 20+ platforms.
+                      - title: Social Media Data Scraper APIs
+                        url: https://ensembledata.com
+                        content: With our social media scraping APIs, you can fetch user profiles, posts, comments, replies, engagement metrics (likes, views, shares), hashtags, keywords, and brand mentions.
+                      page:
+                        page: 1
+                        hasMore: true
+                        nextPage: 2
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                empty:
+                  value:
+                    data:
+                      query: obscure query with no hits xyz123
+                      results: []
+                      page:
+                        page: 1
+                        hasMore: false
+                        nextPage: null
+                    meta:
+                      requestId: req_01websearch_empty
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Search results could not be produced.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1WebSearch
+      x-operation-id-source: derived
+  /v1/web/markdown:
+    get:
+      tags:
+      - Web
+      summary: Generate web page markdown
+      description: Convert a web page URL into clean markdown.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      x-socialfetch-agent-hints:
+        emptyResults: '`lookupStatus: restricted` means bot/access protection blocked the fetch; content fields are null.'
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 2083
+          description: Web page URL to fetch.
+        required: true
+        description: Web page URL to fetch.
+        name: url
+        in: query
+      - schema:
+          type: string
+          enum:
+          - fit
+          - raw
+          - bm25
+          default: fit
+          description: 'Markdown extraction filter. `fit`: strip boilerplate and extract the main readable content. `raw`: full unfiltered page markdown, no content pruning. `bm25`: rank and return only the content most relevant to `query`, using the BM25 keyword-relevance algorithm — requires `query` to be set.'
+        required: false
+        description: 'Markdown extraction filter. `fit`: strip boilerplate and extract the main readable content. `raw`: full unfiltered page markdown, no content pruning. `bm25`: rank and return only the content most relevant to `query`, using the BM25 keyword-relevance algorithm — requires `query` to be set.'
+        name: filter
+        in: query
+      - schema:
+          type: string
+          maxLength: 500
+          description: Optional query string used by the bm25 filter to rank relevant content.
+        required: false
+        description: Optional query string used by the bm25 filter to rank relevant content.
+        name: query
+        in: query
+      - schema:
+          type: string
+          enum:
+          - enabled
+          - bypass
+          - write_only
+          default: enabled
+          description: 'Cache behavior. `enabled`: read from cache if present, else fetch and write to cache. `bypass`: always fetch fresh, ignoring and not updating the cache. `write_only`: always fetch fresh, but write the result to cache without reading from it first. Default: `enabled`.'
+        required: false
+        description: 'Cache behavior. `enabled`: read from cache if present, else fetch and write to cache. `bypass`: always fetch fresh, ignoring and not updating the cache. `write_only`: always fetch fresh, but write the result to cache without reading from it first. Default: `enabled`.'
+        name: cacheMode
+        in: query
+      - schema:
+          type: boolean
+          description: When true, scroll the page to load dynamically appended content (infinite scroll). Default false.
+        required: false
+        description: When true, scroll the page to load dynamically appended content (infinite scroll). Default false.
+        name: scanFullPage
+        in: query
+      - schema:
+          type: string
+          maxLength: 200
+          description: Wait for a CSS selector before extraction. Must be prefixed with "css:" (e.g. css:main). JavaScript wait conditions are not supported.
+        required: false
+        description: Wait for a CSS selector before extraction. Must be prefixed with "css:" (e.g. css:main). JavaScript wait conditions are not supported.
+        name: waitFor
+        in: query
+      responses:
+        '200':
+          description: Markdown extraction result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - restricted
+                        description: Whether page content could be extracted. Restricted means bot protection or similar access controls blocked automated fetching.
+                      url:
+                        type: string
+                        description: URL that was fetched.
+                      status:
+                        type:
+                        - integer
+                        - 'null'
+                        description: HTTP status code reported for the page fetch when available; null when restricted.
+                      markdown:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          raw:
+                            type: string
+                            description: Primary markdown text extracted from the page.
+                          fit:
+                            type: string
+                            description: Filtered markdown optimized for LLM consumption.
+                          withCitations:
+                            type: string
+                            description: Markdown with numbered citations for outbound links.
+                          references:
+                            type: string
+                            description: Reference list for cited links in the markdown output.
+                        required:
+                        - raw
+                        description: Markdown content when lookupStatus is found; null when restricted.
+                      metadata:
+                        type: object
+                        additionalProperties: {}
+                        description: Page metadata such as title when available.
+                      links:
+                        type: object
+                        properties:
+                          internal:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                                  description: Absolute or page-relative link href.
+                                text:
+                                  type: string
+                                  description: Anchor text when available.
+                                title:
+                                  type: string
+                                  description: Title attribute when available.
+                              required:
+                              - href
+                              description: A hyperlink discovered on the page.
+                            description: Same-host links discovered on the page.
+                          external:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                                  description: Absolute or page-relative link href.
+                                text:
+                                  type: string
+                                  description: Anchor text when available.
+                                title:
+                                  type: string
+                                  description: Title attribute when available.
+                              required:
+                              - href
+                              description: A hyperlink discovered on the page.
+                            description: Cross-host links discovered on the page.
+                        required:
+                        - internal
+                        - external
+                        description: Links discovered on the page when available.
+                      media:
+                        type: object
+                        properties:
+                          images:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                src:
+                                  type: string
+                                  description: Image source URL.
+                                alt:
+                                  type: string
+                                  description: Alt text when available.
+                                score:
+                                  type: number
+                                  description: Optional relevance score from the crawler.
+                              required:
+                              - src
+                              description: An image discovered on the page.
+                            description: Images on the page.
+                          videos:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                src:
+                                  type: string
+                                alt:
+                                  type: string
+                                score:
+                                  type: number
+                              required:
+                              - src
+                            description: Videos on the page.
+                          audios:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                src:
+                                  type: string
+                                alt:
+                                  type: string
+                                score:
+                                  type: number
+                              required:
+                              - src
+                            description: Audio elements on the page.
+                        description: Media assets discovered on the page when available.
+                    required:
+                    - lookupStatus
+                    - url
+                    - status
+                    - markdown
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              example:
+                data:
+                  lookupStatus: found
+                  url: https://www.socialfetch.dev/
+                  status: 200
+                  markdown:
+                    raw: '# Social media scraper API for every major platform.
+
+                      Scrape profiles, posts, comments, videos, transcripts, and metrics from TikTok, Instagram, YouTube, X, LinkedIn, and more.'
+                    fit: Social media scraper API for every major platform. Scrape profiles, posts, comments, videos, transcripts, and metrics from TikTok, Instagram, YouTube, X, LinkedIn, and more.
+                meta:
+                  requestId: req_01example
+                  creditsCharged: 1
+                  version: v1
+        '400':
+          description: Invalid query parameters or disallowed URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Extraction could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1WebMarkdown
+      x-operation-id-source: derived
+  /v1/web/ask:
+    get:
+      tags:
+      - Web
+      summary: Ask a question about a web page
+      description: Ask a natural-language question about a specific web page and get an LLM-generated answer.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      x-socialfetch-agent-hints:
+        emptyResults: '`lookupStatus: restricted` means bot/access protection blocked the fetch; `answer` is null.'
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 2083
+          description: Web page URL to fetch.
+        required: true
+        description: Web page URL to fetch.
+        name: url
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Natural-language question to answer about the page content.
+        required: true
+        description: Natural-language question to answer about the page content.
+        name: q
+        in: query
+      responses:
+        '200':
+          description: LLM answer for the question about the page.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - restricted
+                        description: Whether page content could be extracted. Restricted means bot protection or similar access controls blocked automated fetching.
+                      url:
+                        type: string
+                        description: URL that was analyzed.
+                      answer:
+                        type:
+                        - string
+                        - 'null'
+                        description: LLM-generated answer when lookupStatus is found; null when restricted.
+                    required:
+                    - lookupStatus
+                    - url
+                    - answer
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              example:
+                data:
+                  lookupStatus: found
+                  url: https://www.socialfetch.dev/
+                  answer: This page is about Social Fetch, a social media scraper API that lets developers scrape profiles, posts, comments, videos, transcripts, and metrics from major platforms through a unified API with pay-as-you-go credits.
+                meta:
+                  requestId: req_01example
+                  creditsCharged: 1
+                  version: v1
+        '400':
+          description: Invalid query parameters or disallowed URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Answer could not be produced.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1WebAsk
+      x-operation-id-source: derived
+  /v1/web/html:
+    get:
+      tags:
+      - Web
+      summary: Generate web page HTML
+      description: Fetch cleaned HTML for a web page URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      x-socialfetch-agent-hints:
+        emptyResults: '`lookupStatus: restricted` means bot/access protection blocked the fetch; `html` is null.'
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 2083
+          description: Web page URL to fetch.
+        required: true
+        description: Web page URL to fetch.
+        name: url
+        in: query
+      - schema:
+          type: boolean
+          description: When true, scroll the page to load dynamically appended content (infinite scroll). Default false.
+        required: false
+        description: When true, scroll the page to load dynamically appended content (infinite scroll). Default false.
+        name: scanFullPage
+        in: query
+      - schema:
+          type: string
+          maxLength: 200
+          description: Wait for a CSS selector before extraction. Must be prefixed with "css:" (e.g. css:main). JavaScript wait conditions are not supported.
+        required: false
+        description: Wait for a CSS selector before extraction. Must be prefixed with "css:" (e.g. css:main). JavaScript wait conditions are not supported.
+        name: waitFor
+        in: query
+      responses:
+        '200':
+          description: HTML extraction result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - restricted
+                        description: Whether page content could be extracted. Restricted means bot protection or similar access controls blocked automated fetching.
+                      url:
+                        type: string
+                        description: URL that was fetched.
+                      status:
+                        type:
+                        - integer
+                        - 'null'
+                        description: HTTP status code reported for the page fetch when available; null when restricted.
+                      html:
+                        type:
+                        - string
+                        - 'null'
+                        description: Cleaned or processed HTML when lookupStatus is found; null when restricted.
+                      metadata:
+                        type: object
+                        additionalProperties: {}
+                        description: Page metadata such as title when available.
+                      links:
+                        type: object
+                        properties:
+                          internal:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                                  description: Absolute or page-relative link href.
+                                text:
+                                  type: string
+                                  description: Anchor text when available.
+                                title:
+                                  type: string
+                                  description: Title attribute when available.
+                              required:
+                              - href
+                              description: A hyperlink discovered on the page.
+                            description: Same-host links discovered on the page.
+                          external:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                href:
+                                  type: string
+                                  description: Absolute or page-relative link href.
+                                text:
+                                  type: string
+                                  description: Anchor text when available.
+                                title:
+                                  type: string
+                                  description: Title attribute when available.
+                              required:
+                              - href
+                              description: A hyperlink discovered on the page.
+                            description: Cross-host links discovered on the page.
+                        required:
+                        - internal
+                        - external
+                        description: Links discovered on the page when available.
+                      media:
+                        type: object
+                        properties:
+                          images:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                src:
+                                  type: string
+                                  description: Image source URL.
+                                alt:
+                                  type: string
+                                  description: Alt text when available.
+                                score:
+                                  type: number
+                                  description: Optional relevance score from the crawler.
+                              required:
+                              - src
+                              description: An image discovered on the page.
+                            description: Images on the page.
+                          videos:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                src:
+                                  type: string
+                                alt:
+                                  type: string
+                                score:
+                                  type: number
+                              required:
+                              - src
+                            description: Videos on the page.
+                          audios:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                src:
+                                  type: string
+                                alt:
+                                  type: string
+                                score:
+                                  type: number
+                              required:
+                              - src
+                            description: Audio elements on the page.
+                        description: Media assets discovered on the page when available.
+                    required:
+                    - lookupStatus
+                    - url
+                    - status
+                    - html
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              example:
+                data:
+                  lookupStatus: found
+                  url: https://www.socialfetch.dev/
+                  status: 200
+                  html: <html lang="en"><head><title>Social Fetch — Social Media Scraper API</title></head><body><h1>Social media scraper API for every major platform.</h1></body></html>
+                meta:
+                  requestId: req_01example
+                  creditsCharged: 1
+                  version: v1
+        '400':
+          description: Invalid query parameters or disallowed URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Extraction could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1WebHtml
+      x-operation-id-source: derived
+  /v1/web/screenshot:
+    get:
+      tags:
+      - Web
+      summary: Capture a website screenshot
+      description: Capture a screenshot of a public web page URL as a hosted image artifact.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 2
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit (2 with region)
+      x-socialfetch-agent-hints:
+        emptyResults: '`lookupStatus: restricted` means bot/access protection blocked the capture; an artifact may still be present.'
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 2083
+          description: Web page URL to fetch.
+        required: true
+        description: Web page URL to fetch.
+        name: url
+        in: query
+      - schema:
+          type: boolean
+          description: 'When true, capture the full scrollable page. Default: false (viewport).'
+          default: false
+        required: false
+        description: 'When true, capture the full scrollable page. Default: false (viewport).'
+        name: fullPage
+        in: query
+      - schema:
+          type: integer
+          minimum: 320
+          maximum: 3840
+          default: 1280
+          description: 'Viewport width in CSS pixels. Default: 1280.'
+        required: false
+        description: 'Viewport width in CSS pixels. Default: 1280.'
+        name: viewportWidth
+        in: query
+      - schema:
+          type: integer
+          minimum: 320
+          maximum: 3840
+          default: 800
+          description: 'Viewport height in CSS pixels. Default: 800.'
+        required: false
+        description: 'Viewport height in CSS pixels. Default: 800.'
+        name: viewportHeight
+        in: query
+      - schema:
+          type: integer
+          minimum: 1
+          maximum: 3
+          default: 1
+          description: 'Device scale factor (1–3). Default: 1.'
+        required: false
+        description: 'Device scale factor (1–3). Default: 1.'
+        name: deviceScaleFactor
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: CSS selector to clip the screenshot to a single element. Cannot be combined with fullPage.
+        required: false
+        description: CSS selector to clip the screenshot to a single element. Cannot be combined with fullPage.
+        name: selector
+        in: query
+      - schema:
+          type: string
+          enum:
+          - png
+          - jpeg
+          - webp
+          default: png
+          description: 'Output image format. Default: png.'
+        required: false
+        description: 'Output image format. Default: png.'
+        name: format
+        in: query
+      - schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: JPEG/WebP quality 1–100. Invalid when format is png.
+        required: false
+        description: JPEG/WebP quality 1–100. Invalid when format is png.
+        name: quality
+        in: query
+      - schema:
+          type: integer
+          minimum: 0
+          maximum: 10000
+          default: 0
+          description: Extra settle delay in milliseconds after load (0–10000).
+        required: false
+        description: Extra settle delay in milliseconds after load (0–10000).
+        name: delay
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: CSS selector to wait for before capturing.
+        required: false
+        description: CSS selector to wait for before capturing.
+        name: waitFor
+        in: query
+      - schema:
+          type: string
+          enum:
+          - load
+          - domcontentloaded
+          - networkidle
+          default: load
+          description: 'Navigation wait condition. `networkidle` is bounded and resolves on idle or a short cap, whichever comes first. Default: load.'
+        required: false
+        description: 'Navigation wait condition. `networkidle` is bounded and resolves on idle or a short cap, whichever comes first. Default: load.'
+        name: waitUntil
+        in: query
+      - schema:
+          type: boolean
+          description: 'Dismiss/block cookie consent banners. Default: true.'
+          default: true
+        required: false
+        description: 'Dismiss/block cookie consent banners. Default: true.'
+        name: blockCookieBanners
+        in: query
+      - schema:
+          type: boolean
+          description: 'Block ads and trackers during render. Default: true.'
+          default: true
+        required: false
+        description: 'Block ads and trackers during render. Default: true.'
+        name: blockAds
+        in: query
+      - schema:
+          type: boolean
+          description: 'Request prefers-color-scheme: dark. Default: false.'
+          default: false
+        required: false
+        description: 'Request prefers-color-scheme: dark. Default: false.'
+        name: darkMode
+        in: query
+      - schema:
+          type: string
+          description: Optional ISO 3166-1 alpha-2 country for geo-located rendering (+1 credit).
+        required: false
+        description: Optional ISO 3166-1 alpha-2 country for geo-located rendering (+1 credit).
+        name: region
+        in: query
+      - schema:
+          type: string
+          enum:
+          - enabled
+          - bypass
+          - write_only
+          default: enabled
+          description: 'Cache behavior. `enabled`: read from cache if present, else fetch and write to cache. `bypass`: always fetch fresh, ignoring and not updating the cache. `write_only`: always fetch fresh, but write the result to cache without reading from it first. Default: `enabled`.'
+        required: false
+        description: 'Cache behavior. `enabled`: read from cache if present, else fetch and write to cache. `bypass`: always fetch fresh, ignoring and not updating the cache. `write_only`: always fetch fresh, but write the result to cache without reading from it first. Default: `enabled`.'
+        name: cacheMode
+        in: query
+      - schema:
+          type: integer
+          minimum: 60
+          maximum: 604800
+          description: Optional Redis artifact-cache TTL in seconds (60–604800). Must stay strictly below the 7-day object lifetime.
+        required: false
+        description: Optional Redis artifact-cache TTL in seconds (60–604800). Must stay strictly below the 7-day object lifetime.
+        name: cacheTtl
+        in: query
+      - schema:
+          type: string
+          enum:
+          - url
+          - base64
+          default: url
+          description: Delivery mode. `url` (default) returns a hosted CDN URL valid for 7 days. `base64` returns the image bytes inline when small enough.
+        required: false
+        description: Delivery mode. `url` (default) returns a hosted CDN URL valid for 7 days. `base64` returns the image bytes inline when small enough.
+        name: response
+        in: query
+      responses:
+        '200':
+          description: Screenshot capture result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - restricted
+                        description: Whether page content could be extracted. Restricted means bot protection or similar access controls blocked automated fetching.
+                      url:
+                        type: string
+                        description: URL that was rendered.
+                      finalUrl:
+                        type: string
+                        description: Final URL after redirects, when available.
+                      status:
+                        type:
+                        - integer
+                        - 'null'
+                        description: HTTP status of the main document when available; null when restricted.
+                      title:
+                        type:
+                        - string
+                        - 'null'
+                        description: Document title when available.
+                      artifact:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          url:
+                            type: string
+                            format: uri
+                            description: Public HTTPS URL of the artifact on the media CDN. Valid until expiresAt.
+                          format:
+                            type: string
+                            enum:
+                            - png
+                            - jpeg
+                            - webp
+                            description: Encoded image format of the artifact.
+                          mime:
+                            type: string
+                            minLength: 1
+                            description: MIME type of the artifact, e.g. image/png.
+                          bytes:
+                            type: integer
+                            minimum: 0
+                            description: Artifact size in bytes.
+                          width:
+                            type:
+                            - integer
+                            - 'null'
+                            description: Pixel width when known; null for non-raster artifacts.
+                            exclusiveMinimum: 0
+                          height:
+                            type:
+                            - integer
+                            - 'null'
+                            description: Pixel height when known; null for non-raster artifacts.
+                            exclusiveMinimum: 0
+                          expiresAt:
+                            type: string
+                            format: date-time
+                            description: ISO 8601 timestamp when the hosted URL expires and the object is deleted.
+                        required:
+                        - url
+                        - format
+                        - mime
+                        - bytes
+                        - width
+                        - height
+                        - expiresAt
+                        description: Hosted screenshot artifact when capture succeeded (found or restricted). Null only when no image was produced.
+                      base64:
+                        type: string
+                        description: Base64-encoded image bytes when response=base64 and the payload is within size limits.
+                    required:
+                    - lookupStatus
+                    - url
+                    - status
+                    - artifact
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      url: https://www.socialfetch.dev/
+                      finalUrl: https://www.socialfetch.dev/
+                      status: 200
+                      title: Social Fetch — Social media scraper API
+                      artifact:
+                        url: https://cdn-socialfetch.dev/prod/screenshots/7d/2026/08/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png
+                        format: png
+                        mime: image/png
+                        bytes: 84210
+                        width: 1280
+                        height: 800
+                        expiresAt: '2026-08-10T12:00:00.000Z'
+                    meta:
+                      requestId: req_01example_screenshot
+                      creditsCharged: 1
+                      version: v1
+                restricted:
+                  value:
+                    data:
+                      lookupStatus: restricted
+                      url: https://www.example-blocked.test/
+                      finalUrl: https://www.example-blocked.test/
+                      status: 403
+                      title: Just a moment...
+                      artifact:
+                        url: https://cdn-socialfetch.dev/prod/screenshots/7d/2026/08/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.png
+                        format: png
+                        mime: image/png
+                        bytes: 41200
+                        width: 1280
+                        height: 800
+                        expiresAt: '2026-08-10T12:00:00.000Z'
+                    meta:
+                      requestId: req_01example_screenshot_restricted
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters or disallowed URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Screenshot could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying. Present on capacity, deadline, circuit-open, and safe transport outages (bounded 1–120).
+              schema:
+                type: integer
+                minimum: 1
+                maximum: 120
+                example: 1
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1WebScreenshot
+      x-operation-id-source: derived
+  /v1/web/crawl:
+    get:
+      tags:
+      - Web
+      summary: Crawl web pages
+      description: Crawl a small set of web pages synchronously.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 5
+        normalizationFailureCredits: 0
+        batch:
+          maxUnits: 5
+          unit: url
+      x-socialfetch-credits-pricing: 1 credit per URL requested. Up to 5 URLs per request (5 credits max).
+      parameters:
+      - schema:
+          type: array
+          items:
+            type: string
+            minLength: 1
+            maxLength: 2083
+            description: Web page URL to fetch.
+          minItems: 1
+          maxItems: 5
+          description: URLs to crawl. Repeat the `url` query parameter for multiple pages (max 5).
+        required: true
+        description: URLs to crawl. Repeat the `url` query parameter for multiple pages (max 5).
+        name: url
+        in: query
+      - schema:
+          type: boolean
+          description: When true, scroll the page to load dynamically appended content (infinite scroll). Default false.
+        required: false
+        description: When true, scroll the page to load dynamically appended content (infinite scroll). Default false.
+        name: scanFullPage
+        in: query
+      - schema:
+          type: string
+          maxLength: 200
+          description: Wait for a CSS selector before extraction. Must be prefixed with "css:" (e.g. css:main). JavaScript wait conditions are not supported.
+        required: false
+        description: Wait for a CSS selector before extraction. Must be prefixed with "css:" (e.g. css:main). JavaScript wait conditions are not supported.
+        name: waitFor
+        in: query
+      responses:
+        '200':
+          description: Crawl results.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      results:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                              description: Final URL associated with this crawl result.
+                            status:
+                              type: integer
+                              description: HTTP status code reported for the page fetch.
+                            success:
+                              type: boolean
+                              description: Whether the page was crawled successfully.
+                            markdown:
+                              type: object
+                              properties:
+                                raw:
+                                  type: string
+                                  description: Raw markdown for the crawled page.
+                                fit:
+                                  type: string
+                                  description: Filtered markdown for the crawled page.
+                              description: Markdown extracted from the page when available.
+                            html:
+                              type: string
+                              description: HTML content for the page when returned by the crawler.
+                            metadata:
+                              type: object
+                              additionalProperties: {}
+                              description: Page metadata such as title or description when available.
+                            errorMessage:
+                              type: string
+                              description: Provider error message when the page crawl failed.
+                            links:
+                              type: object
+                              properties:
+                                internal:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      href:
+                                        type: string
+                                        description: Absolute or page-relative link href.
+                                      text:
+                                        type: string
+                                        description: Anchor text when available.
+                                      title:
+                                        type: string
+                                        description: Title attribute when available.
+                                    required:
+                                    - href
+                                    description: A hyperlink discovered on the page.
+                                  description: Same-host links discovered on the page.
+                                external:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      href:
+                                        type: string
+                                        description: Absolute or page-relative link href.
+                                      text:
+                                        type: string
+                                        description: Anchor text when available.
+                                      title:
+                                        type: string
+                                        description: Title attribute when available.
+                                    required:
+                                    - href
+                                    description: A hyperlink discovered on the page.
+                                  description: Cross-host links discovered on the page.
+                              required:
+                              - internal
+                              - external
+                              description: Links discovered on the page when available.
+                            media:
+                              type: object
+                              properties:
+                                images:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      src:
+                                        type: string
+                                        description: Image source URL.
+                                      alt:
+                                        type: string
+                                        description: Alt text when available.
+                                      score:
+                                        type: number
+                                        description: Optional relevance score from the crawler.
+                                    required:
+                                    - src
+                                    description: An image discovered on the page.
+                                  description: Images on the page.
+                                videos:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      src:
+                                        type: string
+                                      alt:
+                                        type: string
+                                      score:
+                                        type: number
+                                    required:
+                                    - src
+                                  description: Videos on the page.
+                                audios:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      src:
+                                        type: string
+                                      alt:
+                                        type: string
+                                      score:
+                                        type: number
+                                    required:
+                                    - src
+                                  description: Audio elements on the page.
+                              description: Media assets discovered on the page when available.
+                          required:
+                          - url
+                          - status
+                          - success
+                          description: Result for one URL in a crawl batch.
+                        description: Per-URL crawl results.
+                      summary:
+                        type: object
+                        properties:
+                          requestedUrls:
+                            type: integer
+                            minimum: 0
+                            description: Number of URLs requested in the crawl batch.
+                          succeeded:
+                            type: integer
+                            minimum: 0
+                            description: Number of URLs that crawled successfully.
+                          failed:
+                            type: integer
+                            minimum: 0
+                            description: Number of URLs that failed to crawl.
+                        required:
+                        - requestedUrls
+                        - succeeded
+                        - failed
+                        description: Summary counts for the crawl batch.
+                    required:
+                    - results
+                    - summary
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              example:
+                data:
+                  results:
+                  - url: https://www.socialfetch.dev/
+                    status: 200
+                    success: true
+                    markdown:
+                      raw: '# Social media scraper API for every major platform.'
+                      fit: Social media scraper API for every major platform.
+                  summary:
+                    requestedUrls: 1
+                    succeeded: 1
+                    failed: 0
+                meta:
+                  requestId: req_01example
+                  creditsCharged: 1
+                  version: v1
+        '400':
+          description: Invalid query parameters or disallowed URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Crawl could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1WebCrawl
+      x-operation-id-source: derived
+  /v1/web/extract:
+    post:
+      tags:
+      - Web
+      summary: Extract structured data from a web page
+      description: Extract structured fields from a web page using a CSS selector schema.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 2
+        surcharges: []
+        maxCredits: 2
+        normalizationFailureCredits: 2
+      x-socialfetch-credits-pricing: 2 credits per successful request.
+      x-socialfetch-agent-hints:
+        emptyResults: '`lookupStatus: restricted` means bot/access protection blocked the fetch; `extracted` is null.'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  minLength: 1
+                  maxLength: 2083
+                  description: Web page URL to fetch.
+                schema:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      minLength: 1
+                      maxLength: 200
+                    baseSelector:
+                      type: string
+                      minLength: 1
+                      maxLength: 500
+                    fields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            minLength: 1
+                            maxLength: 100
+                          selector:
+                            type: string
+                            minLength: 1
+                            maxLength: 500
+                          type:
+                            type: string
+                            enum:
+                            - text
+                            - attribute
+                            - html
+                            - regex
+                            default: text
+                          attribute:
+                            type: string
+                            minLength: 1
+                            maxLength: 100
+                        required:
+                        - name
+                        - selector
+                        description: One CSS extraction field.
+                      minItems: 1
+                      maxItems: 50
+                  required:
+                  - name
+                  - baseSelector
+                  - fields
+                  description: 'Crawl4AI JsonCssExtractionStrategy schema: baseSelector plus fields.'
+                scanFullPage:
+                  type: boolean
+                  description: When true, scroll the page to load dynamically appended content.
+                waitFor:
+                  type: string
+                  maxLength: 200
+                  description: Wait for a CSS selector before extraction. Must be prefixed with "css:" (e.g. css:main). JavaScript wait conditions are not supported.
+              required:
+              - url
+              - schema
+              description: JSON body for structured CSS extraction.
+            example:
+              url: https://example.com/products
+              schema:
+                name: products
+                baseSelector: div.product
+                fields:
+                - name: name
+                  selector: h2
+                  type: text
+                - name: price
+                  selector: .price
+                  type: text
+      responses:
+        '200':
+          description: Structured CSS extraction result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - restricted
+                        description: Whether page content could be extracted. Restricted means bot protection or similar access controls blocked automated fetching.
+                      url:
+                        type: string
+                        description: URL that was fetched.
+                      status:
+                        type:
+                        - integer
+                        - 'null'
+                        description: HTTP status code reported for the page fetch when available; null when restricted.
+                      extracted:
+                        type:
+                        - array
+                        - 'null'
+                        items:
+                          type: object
+                          additionalProperties: {}
+                        description: Structured rows extracted via CSS schema when lookupStatus is found; null when restricted.
+                      metadata:
+                        type: object
+                        additionalProperties: {}
+                        description: Page metadata such as title when available.
+                    required:
+                    - lookupStatus
+                    - url
+                    - status
+                    - extracted
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              example:
+                data:
+                  lookupStatus: found
+                  url: https://example.com/products
+                  status: 200
+                  extracted:
+                  - name: Widget
+                    price: $9.99
+                  - name: Gadget
+                    price: $14.50
+                  metadata:
+                    title: Products
+                meta:
+                  requestId: req_web_extract_example
+                  creditsCharged: 2
+                  version: v1
+        '400':
+          description: Invalid body or disallowed URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Extraction could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: postV1WebExtract
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

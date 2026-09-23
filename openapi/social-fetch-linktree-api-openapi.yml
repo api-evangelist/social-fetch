@@ -1,0 +1,508 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Linktree API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: Linktree
+paths:
+  /v1/linktree/profiles/{handle}:
+    get:
+      tags:
+      - Linktree
+      summary: Get Linktree profile
+      description: Get a public Linktree profile by handle, including links and socials.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Linktree handle to look up, with or without a leading @.
+        required: true
+        description: Linktree handle to look up, with or without a leading @.
+        name: handle
+        in: path
+      responses:
+        '200':
+          description: Linktree profile lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the page was found.
+                      profile:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - linktree
+                            description: Social platform for this profile.
+                          handle:
+                            type: string
+                            minLength: 1
+                            description: Canonical public username/handle without a leading @.
+                          displayName:
+                            type:
+                            - string
+                            - 'null'
+                            description: Public display title shown on the page.
+                          bio:
+                            type:
+                            - string
+                            - 'null'
+                            description: Public bio/description text when the page provides one.
+                          avatarUrl:
+                            type:
+                            - string
+                            - 'null'
+                            minLength: 1
+                            description: Best available avatar image URL; null when only a blank placeholder is shown.
+                          profileUrl:
+                            type: string
+                            minLength: 1
+                            description: Canonical public profile URL on the owning platform.
+                          verified:
+                            type: boolean
+                            description: Whether the platform marks the profile as verified.
+                        required:
+                        - platform
+                        - handle
+                        - displayName
+                        - bio
+                        - avatarUrl
+                        - profileUrl
+                        - verified
+                        description: Profile when lookupStatus is `found`; null when `not_found`.
+                      links:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type:
+                              - string
+                              - 'null'
+                              description: Stable link id from the platform when available.
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                              description: Link title shown on the page.
+                            url:
+                              type: string
+                              minLength: 1
+                              description: Destination URL.
+                            type:
+                              type:
+                              - string
+                              - 'null'
+                              description: Platform link type when available (e.g. CLASSIC, SPOTIFY_ALBUM).
+                            thumbnailUrl:
+                              type:
+                              - string
+                              - 'null'
+                              minLength: 1
+                              description: Optional thumbnail image URL for the link.
+                            position:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Zero-based display order when the platform provides it.
+                          required:
+                          - id
+                          - title
+                          - url
+                          - type
+                          - thumbnailUrl
+                          - position
+                          description: A link listed on a public link-in-bio page.
+                        description: Primary page links; empty when not found.
+                      socials:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            platform:
+                              type: string
+                              minLength: 1
+                              description: Normalized social platform slug (e.g. instagram, tiktok, email).
+                            url:
+                              type: string
+                              minLength: 1
+                              description: Social profile or contact destination.
+                          required:
+                          - platform
+                          - url
+                          description: A social or contact entry from a public link-in-bio page.
+                        description: Social/contact entries; empty when not found.
+                    required:
+                    - lookupStatus
+                    - profile
+                    - links
+                    - socials
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      profile:
+                        platform: linktree
+                        handle: miguelangeles
+                        displayName: MIGUEL ANGELES
+                        bio: ☆☆☆☆ IRL ANGEL ☆☆☆☆
+                        avatarUrl: https://ugc.production.linktr.ee/example-avatar.jpeg
+                        profileUrl: https://linktr.ee/miguelangeles
+                        verified: true
+                      links:
+                      - id: '463416775'
+                        title: new project "BEFORE THE SUN RISES"
+                        url: https://open.spotify.com/album/0pgrg7phBbnwGJ2HBEl9EG
+                        type: SPOTIFY_ALBUM
+                        thumbnailUrl: https://ugc.production.linktr.ee/example-thumb.jpeg
+                        position: 0
+                      socials:
+                      - platform: instagram
+                        url: https://instagram.com/miguelangeles
+                      - platform: tiktok
+                        url: https://tiktok.com/@irlangel
+                      - platform: email
+                        url: mailto:creator@example.com
+                    meta:
+                      requestId: req_01example_linktree_found
+                      creditsCharged: 1
+                      version: v1
+                sparse:
+                  value:
+                    data:
+                      lookupStatus: found
+                      profile:
+                        platform: linktree
+                        handle: linktree
+                        displayName: '@linktree'
+                        bio: null
+                        avatarUrl: null
+                        profileUrl: https://linktr.ee/linktree
+                        verified: true
+                      links:
+                      - id: '1'
+                        title: About Linktree
+                        url: https://linktr.ee/s/about
+                        type: CLASSIC
+                        thumbnailUrl: null
+                        position: 0
+                      socials: []
+                    meta:
+                      requestId: req_01example_linktree_sparse
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      profile: null
+                      links: []
+                      socials: []
+                    meta:
+                      requestId: req_01example_linktree_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid handle
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying. Present on capacity, deadline, circuit-open, and safe transport outages (bounded 1–120).
+              schema:
+                type: integer
+                minimum: 1
+                maximum: 120
+                example: 1
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1LinktreeProfilesByHandle
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

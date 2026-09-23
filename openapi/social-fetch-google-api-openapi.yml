@@ -1,0 +1,1514 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Google API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: Google
+paths:
+  /v1/google/ad-library/companies/ads:
+    get:
+      tags:
+      - Google
+      summary: List Google company ads
+      description: List ads a company or advertiser is running in Google Ad Transparency.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-agent-hints:
+        disambiguation: Google Ad Transparency only includes public ads.
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 25
+        surcharges: []
+        maxCredits: 25
+        normalizationFailureCredits: 25
+      x-socialfetch-credits-pricing: 25 credits per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Company domain when you do not have an advertiser id.
+        required: false
+        description: Company domain when you do not have an advertiser id.
+        name: domain
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Google Ad Transparency advertiser id when you have it instead of a domain.
+        required: false
+        description: Google Ad Transparency advertiser id when you have it instead of a domain.
+        name: advertiserId
+        in: query
+      - schema:
+          type: string
+          enum:
+          - all
+          - political
+          description: Optional topic filter. When `political`, `region` is required.
+        required: false
+        description: Optional topic filter. When `political`, `region` is required.
+        name: topic
+        in: query
+      - schema:
+          type: string
+          description: Optional region filter as a two-letter country code.
+        required: false
+        description: Optional region filter as a two-letter country code.
+        name: region
+        in: query
+      - schema:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          description: Optional start date filter in YYYY-MM-DD format.
+        required: false
+        description: Optional start date filter in YYYY-MM-DD format.
+        name: startDate
+        in: query
+      - schema:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+          description: Optional end date filter in YYYY-MM-DD format.
+        required: false
+        description: Optional end date filter in YYYY-MM-DD format.
+        name: endDate
+        in: query
+      - schema:
+          type: string
+          enum:
+          - google_maps
+          - google_play
+          - google_search
+          - google_shopping
+          - youtube
+          description: Optional Google surface filter.
+        required: false
+        description: Optional Google surface filter.
+        name: platform
+        in: query
+      - schema:
+          type: string
+          enum:
+          - text
+          - image
+          - video
+          description: Optional creative format filter.
+        required: false
+        description: Optional creative format filter.
+        name: format
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          description: Opaque pagination cursor from a previous response.
+        required: false
+        description: Opaque pagination cursor from a previous response.
+        name: cursor
+        in: query
+      responses:
+        '200':
+          description: Ads for the requested company or advertiser.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the company or advertiser resolved for this request.
+                      ads:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            advertiserId:
+                              type: string
+                              minLength: 1
+                              description: Google Ad Transparency advertiser id.
+                            creativeId:
+                              type: string
+                              minLength: 1
+                              description: Google Ad Transparency creative id.
+                            format:
+                              type:
+                              - string
+                              - 'null'
+                              description: Creative format when available (text, image, or video).
+                            adUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Public Google Ad Transparency URL for this creative when available.
+                            advertiserName:
+                              type:
+                              - string
+                              - 'null'
+                              description: Advertiser display name when available.
+                            domain:
+                              type:
+                              - string
+                              - 'null'
+                              description: Advertiser domain when available.
+                            imageUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Preview image URL when available.
+                            firstShown:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 timestamp for when the ad was first shown, when available.
+                            lastShown:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 timestamp for when the ad was last shown, when available.
+                          required:
+                          - advertiserId
+                          - creativeId
+                          - format
+                          - adUrl
+                          - advertiserName
+                          - domain
+                          - imageUrl
+                          - firstShown
+                          - lastShown
+                          description: A single Google Ad Transparency company ad.
+                        description: Ads returned for the requested company or advertiser. This array may be empty when the lookup resolves but no ads match the filters.
+                      adsEstimate:
+                        type:
+                        - integer
+                        - 'null'
+                        minimum: 0
+                        description: Estimated total number of matching ads when reported; otherwise null.
+                      page:
+                        type: object
+                        properties:
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Cursor to pass as `cursor` in the next request when `hasMore` is true; otherwise null.
+                          hasMore:
+                            type: boolean
+                            description: Whether another page of ads can be requested.
+                        required:
+                        - nextCursor
+                        - hasMore
+                        description: Pagination information for the current response.
+                    required:
+                    - lookupStatus
+                    - ads
+                    - adsEstimate
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      ads:
+                      - advertiserId: AR01614014350098432001
+                        creativeId: CR08567627846124568577
+                        format: image
+                        adUrl: https://adstransparency.google.com/advertiser/AR01614014350098432001/creative/CR08567627846124568577
+                        advertiserName: lululemon athletica canada inc.
+                        domain: lululemon.com
+                        imageUrl: null
+                        firstShown: '2026-03-11T17:08:22.000Z'
+                        lastShown: '2026-05-04T17:59:12.000Z'
+                      adsEstimate: 20000
+                      page:
+                        nextCursor: opaque_next_page_cursor
+                        hasMore: true
+                    meta:
+                      requestId: req_01example_found
+                      creditsCharged: 25
+                      version: v1
+                paginated:
+                  value:
+                    data:
+                      lookupStatus: found
+                      ads:
+                      - advertiserId: AR01614014350098432001
+                        creativeId: CR02637147045441306625
+                        format: text
+                        adUrl: https://adstransparency.google.com/advertiser/AR01614014350098432001/creative/CR02637147045441306625
+                        advertiserName: lululemon athletica canada inc.
+                        domain: lululemon.com
+                        imageUrl: https://tpc.googlesyndication.com/archive/simgad/7468813441689462696
+                        firstShown: '2024-11-01T01:34:54.000Z'
+                        lastShown: '2026-05-04T17:58:57.000Z'
+                      adsEstimate: 20000
+                      page:
+                        nextCursor: opaque_second_page_cursor
+                        hasMore: true
+                    meta:
+                      requestId: req_01example_page_2
+                      creditsCharged: 25
+                      version: v1
+                empty:
+                  value:
+                    data:
+                      lookupStatus: found
+                      ads: []
+                      adsEstimate: null
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example_empty
+                      creditsCharged: 25
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      ads: []
+                      adsEstimate: null
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 25
+                      version: v1
+        '400':
+          description: Invalid identifiers, filters, date range, cursor, or bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1GoogleAdLibraryCompaniesAds
+      x-operation-id-source: derived
+  /v1/google/ad-library/ads:
+    get:
+      tags:
+      - Google
+      summary: Get Google Ad Library ad
+      description: Get a single Google Ad Transparency creative by public Ad Transparency URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Public Google Ad Transparency URL for the creative.
+        required: true
+        description: Public Google Ad Transparency URL for the creative.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Ad Library ad detail.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the ad was found in the Ad Transparency Library.
+                      ad:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          advertiserId:
+                            type: string
+                            minLength: 1
+                            description: Google Ad Transparency advertiser id.
+                          creativeId:
+                            type: string
+                            minLength: 1
+                            description: Google Ad Transparency creative id.
+                          format:
+                            type:
+                            - string
+                            - 'null'
+                            description: Creative format when available (text, image, or video).
+                          firstShown:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 timestamp for when the ad was first shown, when available.
+                          lastShown:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 timestamp for when the ad was last shown, when available.
+                          overallImpressions:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              min:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Lower bound for impressions when available.
+                              max:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Upper bound for impressions when available.
+                            required:
+                            - min
+                            - max
+                            description: Overall impression range when available.
+                          creativeRegions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                regionCode:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Two-letter region code when available.
+                                regionName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Human-readable region name when available.
+                              required:
+                              - regionCode
+                              - regionName
+                              description: Region where a Google Ad Library creative ran.
+                            description: Regions where the creative ran.
+                          regionStats:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                regionCode:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Two-letter region code when available.
+                                regionName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Human-readable region name when available.
+                                firstShown:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: ISO-8601 timestamp for when the ad was first shown in this region, when available.
+                                lastShown:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: ISO-8601 timestamp for when the ad was last shown in this region, when available.
+                                impressions:
+                                  type:
+                                  - object
+                                  - 'null'
+                                  properties:
+                                    min:
+                                      type:
+                                      - integer
+                                      - 'null'
+                                      minimum: 0
+                                      description: Lower bound for impressions when available.
+                                    max:
+                                      type:
+                                      - integer
+                                      - 'null'
+                                      minimum: 0
+                                      description: Upper bound for impressions when available.
+                                  required:
+                                  - min
+                                  - max
+                                  description: Impression range for this region when available.
+                                platformImpressions:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      platform:
+                                        type:
+                                        - string
+                                        - 'null'
+                                        description: Platform label when available.
+                                      impressions:
+                                        type:
+                                        - object
+                                        - 'null'
+                                        properties:
+                                          min:
+                                            type:
+                                            - integer
+                                            - 'null'
+                                            minimum: 0
+                                            description: Lower bound for impressions when available.
+                                          max:
+                                            type:
+                                            - integer
+                                            - 'null'
+                                            minimum: 0
+                                            description: Upper bound for impressions when available.
+                                        required:
+                                        - min
+                                        - max
+                                        description: Impression range for this platform when available.
+                                    required:
+                                    - platform
+                                    - impressions
+                                  description: Per-platform impression breakdowns when available.
+                              required:
+                              - regionCode
+                              - regionName
+                              - firstShown
+                              - lastShown
+                              - impressions
+                              - platformImpressions
+                              description: Per-region stats for a Google Ad Library ad.
+                            description: Per-region impression and date stats.
+                          variations:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                destinationUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Landing page or destination URL when available.
+                                headline:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Ad headline when available. Text may be OCR-extracted and imperfect.
+                                description:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Ad description when available. Text may be OCR-extracted and imperfect.
+                                allText:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Combined visible text when available. Text may be OCR-extracted and imperfect.
+                                imageUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Creative image URL when available.
+                              required:
+                              - destinationUrl
+                              - headline
+                              - description
+                              - allText
+                              - imageUrl
+                              description: A creative variation for a Google Ad Library ad.
+                            description: Creative variations for this ad.
+                        required:
+                        - advertiserId
+                        - creativeId
+                        - format
+                        - firstShown
+                        - lastShown
+                        - overallImpressions
+                        - creativeRegions
+                        - regionStats
+                        - variations
+                        description: Ad details when found; otherwise null.
+                    required:
+                    - lookupStatus
+                    - ad
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      ad:
+                        advertiserId: AR01614014350098432001
+                        creativeId: CR07443539616616939521
+                        format: text
+                        firstShown: null
+                        lastShown: '2025-06-18T18:09:00.000Z'
+                        overallImpressions:
+                          min: null
+                          max: null
+                        creativeRegions:
+                        - regionCode: US
+                          regionName: United States
+                        regionStats:
+                        - regionCode: US
+                          regionName: United States
+                          firstShown: null
+                          lastShown: '2025-06-18T05:00:00.000Z'
+                          impressions:
+                            min: null
+                            max: null
+                          platformImpressions: []
+                        variations:
+                        - destinationUrl: shop.lululemon.com/gifts-for-all
+                          headline: lululemonⓇ Official Site - Best Birthday Gifts
+                          description: Find The Perfect Gifts At lululemon . We Have You Covered . Shop Online For Your Gifts . Birthday Gifts For Everyone ...
+                          allText: Sponsored Ω lululemon shop.lululemon.com/gifts-for-all lululemonⓇ Official Site - Best Birthday Gifts Find The Perfect Gifts At lululemon . We Have You Covered . Shop Online For Your Gifts . Birthday Gifts For Everyone ...
+                          imageUrl: https://tpc.googlesyndication.com/archive/simgad/2201045439314643090
+                        - destinationUrl: shop.lululemon.com
+                          headline: Work Pants, But Stretchy
+                          description: Move In Lightweight, Comfortable Work Pants That Take Your Day In New Directions.
+                          allText: null
+                          imageUrl: null
+                    meta:
+                      requestId: req_01example_found
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      ad: null
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1GoogleAdLibraryAds
+      x-operation-id-source: derived
+  /v1/google/ad-library/advertisers/search:
+    get:
+      tags:
+      - Google
+      summary: Search Google Ad Library advertisers
+      description: Search Google Ad Transparency advertisers by name.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Search query text for Google Ad Transparency advertisers.
+        required: true
+        description: Search query text for Google Ad Transparency advertisers.
+        name: query
+        in: query
+      - schema:
+          type: string
+          description: 'Two-letter country code to search in. Default: `US`.'
+        required: false
+        description: 'Two-letter country code to search in. Default: `US`.'
+        name: region
+        in: query
+      responses:
+        '200':
+          description: Advertisers matching the search query.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      query:
+                        type: string
+                        description: Search query that was evaluated for this response.
+                      advertisers:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              minLength: 1
+                              description: Advertiser display name.
+                            advertiserId:
+                              type: string
+                              minLength: 1
+                              description: Google Ad Transparency advertiser id for use with other Ad Library endpoints.
+                            region:
+                              type:
+                              - string
+                              - 'null'
+                              description: Region associated with the advertiser when available.
+                            adsEstimate:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Estimated number of ads for this advertiser when reported; otherwise null.
+                          required:
+                          - name
+                          - advertiserId
+                          - region
+                          - adsEstimate
+                          description: A Google Ad Library advertiser search result.
+                        description: Advertisers returned for the search query.
+                      websites:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            domain:
+                              type: string
+                              minLength: 1
+                              description: Website domain associated with the search.
+                          required:
+                          - domain
+                          description: A website domain associated with advertiser search results.
+                        description: Website domains associated with the search results.
+                      totalAdvertisers:
+                        type: integer
+                        minimum: 0
+                        description: Number of advertisers returned in this response.
+                    required:
+                    - query
+                    - advertisers
+                    - websites
+                    - totalAdvertisers
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      query: lululemon
+                      advertisers:
+                      - name: lululemon HK Limited
+                        advertiserId: AR01382517811867287553
+                        region: HK
+                        adsEstimate: 5
+                      - name: lululemon athletica canada inc.
+                        advertiserId: AR01614014350098432001
+                        region: CA
+                        adsEstimate: 7000
+                      - name: Lululemon Athletica Australia Pty Ltd
+                        advertiserId: AR12317441102226391041
+                        region: AU
+                        adsEstimate: 4
+                      websites:
+                      - domain: lululemon.de
+                      - domain: lululemon.com
+                      - domain: lululemon.co.uk
+                      - domain: lululemon.com.au
+                      totalAdvertisers: 3
+                    meta:
+                      requestId: req_01example_found
+                      creditsCharged: 1
+                      version: v1
+                empty:
+                  value:
+                    data:
+                      query: zzzxxyyqqnomatchfixture999
+                      advertisers: []
+                      websites: []
+                      totalAdvertisers: 0
+                    meta:
+                      requestId: req_01example_empty
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1GoogleAdLibraryAdvertisersSearch
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

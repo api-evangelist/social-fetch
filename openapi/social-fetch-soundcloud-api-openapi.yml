@@ -1,0 +1,1716 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Sound Cloud API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: SoundCloud
+paths:
+  /v1/soundcloud/profiles/{handle}:
+    get:
+      tags:
+      - SoundCloud
+      summary: Get SoundCloud profile
+      description: Get a SoundCloud profile by handle.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: SoundCloud handle to look up, with or without a leading @.
+        required: true
+        description: SoundCloud handle to look up, with or without a leading @.
+        name: handle
+        in: path
+      responses:
+        '200':
+          description: SoundCloud profile lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the profile was found.
+                      profile:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - soundcloud
+                            description: Social platform for this profile.
+                          handle:
+                            type: string
+                            minLength: 1
+                            description: SoundCloud handle without the leading @.
+                          platformUserId:
+                            type: string
+                            minLength: 1
+                            description: Stable SoundCloud user id as a string.
+                          displayName:
+                            type:
+                            - string
+                            - 'null'
+                            description: Public display name shown on the profile.
+                          bio:
+                            type:
+                            - string
+                            - 'null'
+                            description: Profile biography text.
+                          avatarUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Best available avatar image URL for the profile.
+                          bannerUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Profile banner image URL when available.
+                          profileUrl:
+                            type: string
+                            minLength: 1
+                            description: Canonical public SoundCloud profile URL.
+                          verified:
+                            type: boolean
+                            description: Whether the profile is marked as verified.
+                          city:
+                            type:
+                            - string
+                            - 'null'
+                            description: City listed on the profile.
+                          countryCode:
+                            type:
+                            - string
+                            - 'null'
+                            description: Country code listed on the profile.
+                          createdAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 timestamp when the profile was created.
+                        required:
+                        - platform
+                        - handle
+                        - platformUserId
+                        - displayName
+                        - bio
+                        - avatarUrl
+                        - bannerUrl
+                        - profileUrl
+                        - verified
+                        - city
+                        - countryCode
+                        - createdAt
+                        description: Profile details when available.
+                      metrics:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          followers:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Follower count for the profile when available.
+                          following:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Following count for the profile when available.
+                          tracks:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Number of public tracks on the profile when available.
+                          playlists:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Number of public playlists on the profile when available.
+                          likes:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Number of tracks the profile has liked when available.
+                          comments:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Number of comments the profile has left when available.
+                          reposts:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Number of reposts on the profile when available.
+                        required:
+                        - followers
+                        - following
+                        - tracks
+                        - playlists
+                        - likes
+                        - comments
+                        - reposts
+                        description: Profile metrics when available.
+                    required:
+                    - lookupStatus
+                    - profile
+                    - metrics
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      profile:
+                        platform: soundcloud
+                        handle: kehlanimusic
+                        platformUserId: '51562330'
+                        displayName: Kehlani
+                        bio: "\"Folded\" out now!\n\nSinger/Songwriter \nOakland to Los Angeles\n\nMGMT:\ndavid@abvgrnd.com\ninfo@thetsunamimob.com\n\nBOOKING:\nCaroline Yim\ncaroline.yim@caa.com"
+                        avatarUrl: https://i1.sndcdn.com/avatars-4pU1zic9ZyyDdF4G-dF6LHA-large.jpg
+                        bannerUrl: https://i1.sndcdn.com/visuals-000051562330-BFF9AP-original.jpg
+                        profileUrl: https://soundcloud.com/kehlanimusic
+                        verified: true
+                        city: Oakland, CA
+                        countryCode: US
+                        createdAt: null
+                      metrics:
+                        followers: 846352
+                        following: 0
+                        tracks: 341
+                        playlists: 27
+                        likes: 11
+                        comments: 0
+                        reposts: null
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      profile: null
+                      metrics: null
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1SoundcloudProfilesByHandle
+      x-operation-id-source: derived
+  /v1/soundcloud/profiles/{handle}/tracks:
+    get:
+      tags:
+      - SoundCloud
+      summary: List SoundCloud profile tracks
+      description: List a SoundCloud profile's tracks, newest first.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: SoundCloud handle whose tracks should be listed.
+        required: true
+        description: SoundCloud handle whose tracks should be listed.
+        name: handle
+        in: path
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Opaque pagination cursor from a previous response.
+        required: false
+        description: Opaque pagination cursor from a previous response.
+        name: cursor
+        in: query
+      responses:
+        '200':
+          description: SoundCloud profile tracks page.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the handle resolved for this listing.
+                      tracks:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Stable SoundCloud track id as a string.
+                            title:
+                              type: string
+                              minLength: 1
+                              description: Track title.
+                            url:
+                              type: string
+                              minLength: 1
+                              description: Canonical public SoundCloud URL for the track.
+                            permalink:
+                              type:
+                              - string
+                              - 'null'
+                              description: Track slug within the creator's profile when available.
+                            description:
+                              type:
+                              - string
+                              - 'null'
+                              description: Track description text when available.
+                            genre:
+                              type:
+                              - string
+                              - 'null'
+                              description: Genre label when available.
+                            tags:
+                              type: array
+                              items:
+                                type: string
+                                minLength: 1
+                              description: Creator-supplied tags for the track (may be empty).
+                            artworkUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Track artwork image URL when available.
+                            durationMs:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Full track duration in milliseconds when available.
+                            createdAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 timestamp when the track was uploaded.
+                            releaseDate:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 release date when available.
+                            labelName:
+                              type:
+                              - string
+                              - 'null'
+                              description: Record label credited on the track when available.
+                            license:
+                              type:
+                              - string
+                              - 'null'
+                              description: License the track is published under when available.
+                            isrc:
+                              type:
+                              - string
+                              - 'null'
+                              description: International Standard Recording Code when available.
+                            albumTitle:
+                              type:
+                              - string
+                              - 'null'
+                              description: Album or release the track belongs to when available.
+                            artistName:
+                              type:
+                              - string
+                              - 'null'
+                              description: Credited artist name from the release metadata.
+                            explicit:
+                              type:
+                              - boolean
+                              - 'null'
+                              description: Whether the release metadata marks the track as explicit.
+                            downloadable:
+                              type: boolean
+                              description: Whether the creator allows downloads for this track.
+                            artist:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                platform:
+                                  type: string
+                                  enum:
+                                  - soundcloud
+                                  description: Social platform for this creator.
+                                platformUserId:
+                                  type: string
+                                  minLength: 1
+                                  description: Stable SoundCloud user id as a string.
+                                handle:
+                                  type: string
+                                  minLength: 1
+                                  description: SoundCloud handle without a leading @.
+                                displayName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Public display name when available.
+                                avatarUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Avatar image URL when available.
+                                profileUrl:
+                                  type: string
+                                  minLength: 1
+                                  description: Canonical public SoundCloud profile URL.
+                                verified:
+                                  type: boolean
+                                  description: Whether the creator is marked as verified.
+                                followers:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Follower count for the creator when available.
+                              required:
+                              - platform
+                              - platformUserId
+                              - handle
+                              - displayName
+                              - avatarUrl
+                              - profileUrl
+                              - verified
+                              - followers
+                              description: Creator who uploaded the track when available.
+                            metrics:
+                              type: object
+                              properties:
+                                plays:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Play count when available.
+                                likes:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Like count when available.
+                                reposts:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Repost count when available.
+                                comments:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Comment count when available.
+                                downloads:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Download count when available.
+                              required:
+                              - plays
+                              - likes
+                              - reposts
+                              - comments
+                              - downloads
+                              description: Engagement metrics for the track.
+                          required:
+                          - id
+                          - title
+                          - url
+                          - permalink
+                          - description
+                          - genre
+                          - tags
+                          - artworkUrl
+                          - durationMs
+                          - createdAt
+                          - releaseDate
+                          - labelName
+                          - license
+                          - isrc
+                          - albumTitle
+                          - artistName
+                          - explicit
+                          - downloadable
+                          - artist
+                          - metrics
+                          description: A SoundCloud track.
+                        description: Tracks returned for this page.
+                      page:
+                        type: object
+                        properties:
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Opaque cursor for the next page, or null when there is no next page.
+                          hasMore:
+                            type: boolean
+                            description: Whether another page of results is available.
+                        required:
+                        - nextCursor
+                        - hasMore
+                        description: Pagination state for the current response.
+                    required:
+                    - lookupStatus
+                    - tracks
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      tracks:
+                      - id: '2306956232'
+                        title: Lights On (feat. Big Sean)
+                        url: https://soundcloud.com/kehlanimusic/lights-on-feat-big-sean
+                        permalink: lights-on-feat-big-sean
+                        description: null
+                        genre: R&B
+                        tags: []
+                        artworkUrl: https://i1.sndcdn.com/artworks-yDBHqvCqcSNn-0-large.jpg
+                        durationMs: 179305
+                        createdAt: '2026-04-22T00:39:25Z'
+                        releaseDate: '2026-04-23T00:00:00Z'
+                        labelName: TSNMI / Atlantic
+                        license: all-rights-reserved
+                        isrc: USAT22601414
+                        albumTitle: Kehlani
+                        artistName: Kehlani
+                        explicit: true
+                        downloadable: false
+                        artist:
+                          platform: soundcloud
+                          platformUserId: '51562330'
+                          handle: kehlanimusic
+                          displayName: Kehlani
+                          avatarUrl: https://i1.sndcdn.com/avatars-4pU1zic9ZyyDdF4G-dF6LHA-large.jpg
+                          profileUrl: https://soundcloud.com/kehlanimusic
+                          verified: true
+                          followers: 846352
+                        metrics:
+                          plays: 64952
+                          likes: 2545
+                          reposts: 32
+                          comments: 25
+                          downloads: 0
+                      - id: '2306955953'
+                        title: Call Me Back (feat. T-Pain & Lil Jon)
+                        url: https://soundcloud.com/kehlanimusic/call-me-back-feat-t-pain-lil
+                        permalink: call-me-back-feat-t-pain-lil
+                        description: null
+                        genre: R&B
+                        tags: []
+                        artworkUrl: https://i1.sndcdn.com/artworks-qOFE1IINKBQI-0-large.jpg
+                        durationMs: 199786
+                        createdAt: '2026-04-22T00:38:16Z'
+                        releaseDate: '2026-04-23T00:00:00Z'
+                        labelName: TSNMI / Atlantic
+                        license: all-rights-reserved
+                        isrc: USAT22601412
+                        albumTitle: Kehlani
+                        artistName: Kehlani
+                        explicit: true
+                        downloadable: false
+                        artist:
+                          platform: soundcloud
+                          platformUserId: '51562330'
+                          handle: kehlanimusic
+                          displayName: Kehlani
+                          avatarUrl: https://i1.sndcdn.com/avatars-4pU1zic9ZyyDdF4G-dF6LHA-large.jpg
+                          profileUrl: https://soundcloud.com/kehlanimusic
+                          verified: true
+                          followers: 846352
+                        metrics:
+                          plays: 68779
+                          likes: 2427
+                          reposts: 24
+                          comments: 24
+                          downloads: 0
+                      - id: '2306954489'
+                        title: Unlearn
+                        url: https://soundcloud.com/kehlanimusic/unlearn
+                        permalink: unlearn
+                        description: null
+                        genre: R&B
+                        tags: []
+                        artworkUrl: https://i1.sndcdn.com/artworks-qjS3koaFlh0H-0-large.jpg
+                        durationMs: 257055
+                        createdAt: '2026-04-22T00:35:10Z'
+                        releaseDate: '2026-04-23T00:00:00Z'
+                        labelName: TSNMI / Atlantic
+                        license: all-rights-reserved
+                        isrc: USAT22601417
+                        albumTitle: Kehlani
+                        artistName: Kehlani
+                        explicit: false
+                        downloadable: false
+                        artist:
+                          platform: soundcloud
+                          platformUserId: '51562330'
+                          handle: kehlanimusic
+                          displayName: Kehlani
+                          avatarUrl: https://i1.sndcdn.com/avatars-4pU1zic9ZyyDdF4G-dF6LHA-large.jpg
+                          profileUrl: https://soundcloud.com/kehlanimusic
+                          verified: true
+                          followers: 846352
+                        metrics:
+                          plays: 78310
+                          likes: 2772
+                          reposts: 32
+                          comments: 38
+                          downloads: 0
+                      page:
+                        nextCursor: 2026-04-23T00:00:00.000Z,tracks,00000000002319251642
+                        hasMore: true
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      tracks: []
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1SoundcloudProfilesByHandleTracks
+      x-operation-id-source: derived
+  /v1/soundcloud/tracks:
+    get:
+      tags:
+      - SoundCloud
+      summary: Get SoundCloud track
+      description: Get a SoundCloud track by URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Link to the SoundCloud track.
+        required: true
+        description: Link to the SoundCloud track.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: SoundCloud track lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the track was found.
+                      track:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            minLength: 1
+                            description: Stable SoundCloud track id as a string.
+                          title:
+                            type: string
+                            minLength: 1
+                            description: Track title.
+                          url:
+                            type: string
+                            minLength: 1
+                            description: Canonical public SoundCloud URL for the track.
+                          permalink:
+                            type:
+                            - string
+                            - 'null'
+                            description: Track slug within the creator's profile when available.
+                          description:
+                            type:
+                            - string
+                            - 'null'
+                            description: Track description text when available.
+                          genre:
+                            type:
+                            - string
+                            - 'null'
+                            description: Genre label when available.
+                          tags:
+                            type: array
+                            items:
+                              type: string
+                              minLength: 1
+                            description: Creator-supplied tags for the track (may be empty).
+                          artworkUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Track artwork image URL when available.
+                          durationMs:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Full track duration in milliseconds when available.
+                          createdAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 timestamp when the track was uploaded.
+                          releaseDate:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 release date when available.
+                          labelName:
+                            type:
+                            - string
+                            - 'null'
+                            description: Record label credited on the track when available.
+                          license:
+                            type:
+                            - string
+                            - 'null'
+                            description: License the track is published under when available.
+                          isrc:
+                            type:
+                            - string
+                            - 'null'
+                            description: International Standard Recording Code when available.
+                          albumTitle:
+                            type:
+                            - string
+                            - 'null'
+                            description: Album or release the track belongs to when available.
+                          artistName:
+                            type:
+                            - string
+                            - 'null'
+                            description: Credited artist name from the release metadata.
+                          explicit:
+                            type:
+                            - boolean
+                            - 'null'
+                            description: Whether the release metadata marks the track as explicit.
+                          downloadable:
+                            type: boolean
+                            description: Whether the creator allows downloads for this track.
+                          artist:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              platform:
+                                type: string
+                                enum:
+                                - soundcloud
+                                description: Social platform for this creator.
+                              platformUserId:
+                                type: string
+                                minLength: 1
+                                description: Stable SoundCloud user id as a string.
+                              handle:
+                                type: string
+                                minLength: 1
+                                description: SoundCloud handle without a leading @.
+                              displayName:
+                                type:
+                                - string
+                                - 'null'
+                                description: Public display name when available.
+                              avatarUrl:
+                                type:
+                                - string
+                                - 'null'
+                                description: Avatar image URL when available.
+                              profileUrl:
+                                type: string
+                                minLength: 1
+                                description: Canonical public SoundCloud profile URL.
+                              verified:
+                                type: boolean
+                                description: Whether the creator is marked as verified.
+                              followers:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Follower count for the creator when available.
+                            required:
+                            - platform
+                            - platformUserId
+                            - handle
+                            - displayName
+                            - avatarUrl
+                            - profileUrl
+                            - verified
+                            - followers
+                            description: Creator who uploaded the track when available.
+                          metrics:
+                            type: object
+                            properties:
+                              plays:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Play count when available.
+                              likes:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Like count when available.
+                              reposts:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Repost count when available.
+                              comments:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Comment count when available.
+                              downloads:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Download count when available.
+                            required:
+                            - plays
+                            - likes
+                            - reposts
+                            - comments
+                            - downloads
+                            description: Engagement metrics for the track.
+                        required:
+                        - id
+                        - title
+                        - url
+                        - permalink
+                        - description
+                        - genre
+                        - tags
+                        - artworkUrl
+                        - durationMs
+                        - createdAt
+                        - releaseDate
+                        - labelName
+                        - license
+                        - isrc
+                        - albumTitle
+                        - artistName
+                        - explicit
+                        - downloadable
+                        - artist
+                        - metrics
+                        description: Track details when available.
+                    required:
+                    - lookupStatus
+                    - track
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      track:
+                        id: '2306956232'
+                        title: Lights On (feat. Big Sean)
+                        url: https://soundcloud.com/kehlanimusic/lights-on-feat-big-sean
+                        permalink: lights-on-feat-big-sean
+                        description: null
+                        genre: R&B
+                        tags: []
+                        artworkUrl: https://i1.sndcdn.com/artworks-yDBHqvCqcSNn-0-large.jpg
+                        durationMs: 179305
+                        createdAt: '2026-04-22T00:39:25Z'
+                        releaseDate: '2026-04-23T00:00:00Z'
+                        labelName: TSNMI / Atlantic
+                        license: all-rights-reserved
+                        isrc: USAT22601414
+                        albumTitle: Kehlani
+                        artistName: Kehlani
+                        explicit: true
+                        downloadable: false
+                        artist:
+                          platform: soundcloud
+                          platformUserId: '51562330'
+                          handle: kehlanimusic
+                          displayName: Kehlani
+                          avatarUrl: https://i1.sndcdn.com/avatars-4pU1zic9ZyyDdF4G-dF6LHA-large.jpg
+                          profileUrl: https://soundcloud.com/kehlanimusic
+                          verified: true
+                          followers: 846352
+                        metrics:
+                          plays: 64952
+                          likes: 2545
+                          reposts: 32
+                          comments: 25
+                          downloads: 0
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      track: null
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query or bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1SoundcloudTracks
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

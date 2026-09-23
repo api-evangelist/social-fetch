@@ -1,0 +1,2914 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Rumble API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: Rumble
+paths:
+  /v1/rumble/channels/videos:
+    get:
+      tags:
+      - Rumble
+      summary: List Rumble channel videos
+      description: List videos and Shorts from a Rumble channel.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Link to the Rumble channel.
+        required: true
+        description: Link to the Rumble channel.
+        name: url
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          description: Page number from a previous response.
+        required: false
+        description: Page number from a previous response.
+        name: cursor
+        in: query
+      responses:
+        '200':
+          description: Videos and Shorts for the requested channel.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the channel was resolved for this request.
+                      channel:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          name:
+                            type:
+                            - string
+                            - 'null'
+                            description: Channel display name when available.
+                          handle:
+                            type:
+                            - string
+                            - 'null'
+                            description: Channel handle when available.
+                          url:
+                            type:
+                            - string
+                            - 'null'
+                            description: Canonical public channel URL when available.
+                        required:
+                        - name
+                        - handle
+                        - url
+                        description: Resolved channel metadata when available.
+                      videos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Rumble content identifier.
+                            kind:
+                              type: string
+                              enum:
+                              - video
+                              - short
+                              - live
+                              description: Normalized media kind for this row.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public URL for this item when available.
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                              description: Title shown for this item.
+                            thumbnailUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Thumbnail image URL when available.
+                            channel:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                name:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Channel display name when available.
+                                handle:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Channel handle when available.
+                                url:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Canonical public channel URL when available.
+                              required:
+                              - name
+                              - handle
+                              - url
+                              description: Channel metadata when available.
+                            viewCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: View count when available.
+                            viewCountText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable view count label when available.
+                            publishedAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 publish timestamp when available.
+                            publishedTimeText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable relative publish time when available.
+                            durationSeconds:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Duration in seconds when available.
+                            durationText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable duration label when available.
+                            badges:
+                              type: array
+                              items:
+                                type: string
+                              description: Display badges when present.
+                          required:
+                          - id
+                          - kind
+                          - url
+                          - title
+                          - thumbnailUrl
+                          - channel
+                          - viewCount
+                          - viewCountText
+                          - publishedAt
+                          - publishedTimeText
+                          - durationSeconds
+                          - durationText
+                          - badges
+                          description: A video, short, or live stream row in Rumble list results.
+                        description: Videos returned for the resolved channel. This array may be empty when the channel resolves but there are no videos in the returned page.
+                      shorts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Rumble content identifier.
+                            kind:
+                              type: string
+                              enum:
+                              - video
+                              - short
+                              - live
+                              description: Normalized media kind for this row.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public URL for this item when available.
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                              description: Title shown for this item.
+                            thumbnailUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Thumbnail image URL when available.
+                            channel:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                name:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Channel display name when available.
+                                handle:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Channel handle when available.
+                                url:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Canonical public channel URL when available.
+                              required:
+                              - name
+                              - handle
+                              - url
+                              description: Channel metadata when available.
+                            viewCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: View count when available.
+                            viewCountText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable view count label when available.
+                            publishedAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 publish timestamp when available.
+                            publishedTimeText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable relative publish time when available.
+                            durationSeconds:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Duration in seconds when available.
+                            durationText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable duration label when available.
+                            badges:
+                              type: array
+                              items:
+                                type: string
+                              description: Display badges when present.
+                          required:
+                          - id
+                          - kind
+                          - url
+                          - title
+                          - thumbnailUrl
+                          - channel
+                          - viewCount
+                          - viewCountText
+                          - publishedAt
+                          - publishedTimeText
+                          - durationSeconds
+                          - durationText
+                          - badges
+                          description: A video, short, or live stream row in Rumble list results.
+                        description: Shorts returned for the resolved channel. This array may be empty when the channel resolves but there are no Shorts in the returned page.
+                      page:
+                        type: object
+                        properties:
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Next page number when more results are available.
+                          hasMore:
+                            type: boolean
+                            description: Whether another page of results is available.
+                        required:
+                        - nextCursor
+                        - hasMore
+                        description: Pagination information for the current response.
+                    required:
+                    - lookupStatus
+                    - channel
+                    - videos
+                    - shorts
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      channel:
+                        name: Steven Crowder
+                        handle: StevenCrowder
+                        url: https://rumble.com/c/StevenCrowder
+                      videos:
+                      - id: v2oadka
+                        kind: video
+                        url: https://rumble.com/v2oadka--live-daily-show-louder-with-crowder.html
+                        title: 'F*CK YOUTUBE: CROWDER HIT 5x! IT''S TIME TO UNITE! | Louder with Crowder'
+                        thumbnailUrl: https://hugh.cdn.rumble.cloud/s/s8/1/A/T/E/H/ATEHj.0kob-small--LIVE-COVERAGE-TRUMP-CNN-TO.jpg
+                        channel: null
+                        viewCount: 1220000
+                        viewCountText: 1.22M views
+                        publishedAt: '2023-05-17T14:10:00-04:00'
+                        publishedTimeText: 2 years ago
+                        durationSeconds: 7032
+                        durationText: '1:57:12'
+                        badges: []
+                      shorts: []
+                      page:
+                        nextCursor: '2'
+                        hasMore: true
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                no_videos:
+                  value:
+                    data:
+                      lookupStatus: found
+                      channel:
+                        name: Steven Crowder
+                        handle: StevenCrowder
+                        url: https://rumble.com/c/StevenCrowder
+                      videos: []
+                      shorts: []
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example_empty
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      channel: null
+                      videos: []
+                      shorts: []
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1RumbleChannelsVideos
+      x-operation-id-source: derived
+  /v1/rumble/search:
+    get:
+      tags:
+      - Rumble
+      summary: Search Rumble
+      description: Search Rumble for videos and Shorts by keyword.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-agent-hints:
+        disambiguation: Use `data.page.hasMore` and `data.page.nextCursor` for pagination rather than inferring completion from `data.totalResults` alone.
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Search query text for Rumble content.
+        required: true
+        description: Search query text for Rumble content.
+        name: query
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          description: Page number from a previous response.
+        required: false
+        description: Page number from a previous response.
+        name: cursor
+        in: query
+      responses:
+        '200':
+          description: Search results for the requested query.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      query:
+                        type: string
+                        description: Search query string evaluated for this response.
+                      videos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Rumble content identifier.
+                            kind:
+                              type: string
+                              enum:
+                              - video
+                              - short
+                              - live
+                              description: Normalized media kind for this row.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public URL for this item when available.
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                              description: Title shown for this item.
+                            thumbnailUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Thumbnail image URL when available.
+                            channel:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                name:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Channel display name when available.
+                                handle:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Channel handle when available.
+                                url:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Canonical public channel URL when available.
+                              required:
+                              - name
+                              - handle
+                              - url
+                              description: Channel metadata when available.
+                            viewCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: View count when available.
+                            viewCountText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable view count label when available.
+                            publishedAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 publish timestamp when available.
+                            publishedTimeText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable relative publish time when available.
+                            durationSeconds:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Duration in seconds when available.
+                            durationText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable duration label when available.
+                            badges:
+                              type: array
+                              items:
+                                type: string
+                              description: Display badges when present.
+                          required:
+                          - id
+                          - kind
+                          - url
+                          - title
+                          - thumbnailUrl
+                          - channel
+                          - viewCount
+                          - viewCountText
+                          - publishedAt
+                          - publishedTimeText
+                          - durationSeconds
+                          - durationText
+                          - badges
+                          description: A video, short, or live stream row in Rumble list results.
+                        description: Matching Rumble videos.
+                      shorts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Rumble content identifier.
+                            kind:
+                              type: string
+                              enum:
+                              - video
+                              - short
+                              - live
+                              description: Normalized media kind for this row.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public URL for this item when available.
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                              description: Title shown for this item.
+                            thumbnailUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Thumbnail image URL when available.
+                            channel:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                name:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Channel display name when available.
+                                handle:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Channel handle when available.
+                                url:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Canonical public channel URL when available.
+                              required:
+                              - name
+                              - handle
+                              - url
+                              description: Channel metadata when available.
+                            viewCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: View count when available.
+                            viewCountText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable view count label when available.
+                            publishedAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 publish timestamp when available.
+                            publishedTimeText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable relative publish time when available.
+                            durationSeconds:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Duration in seconds when available.
+                            durationText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable duration label when available.
+                            badges:
+                              type: array
+                              items:
+                                type: string
+                              description: Display badges when present.
+                          required:
+                          - id
+                          - kind
+                          - url
+                          - title
+                          - thumbnailUrl
+                          - channel
+                          - viewCount
+                          - viewCountText
+                          - publishedAt
+                          - publishedTimeText
+                          - durationSeconds
+                          - durationText
+                          - badges
+                          description: A video, short, or live stream row in Rumble list results.
+                        description: Matching Rumble Shorts.
+                      channels:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Rumble channel identifier.
+                            name:
+                              type:
+                              - string
+                              - 'null'
+                              description: Channel display name.
+                            handle:
+                              type:
+                              - string
+                              - 'null'
+                              description: Channel handle when available.
+                            description:
+                              type:
+                              - string
+                              - 'null'
+                              description: Channel description snippet when available.
+                            thumbnailUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Channel avatar or banner thumbnail when available.
+                            subscriberCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Subscriber count when available.
+                            subscriberCountText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable subscriber count when available.
+                            badges:
+                              type: array
+                              items:
+                                type: string
+                              description: Display badges when present.
+                          required:
+                          - id
+                          - name
+                          - handle
+                          - description
+                          - thumbnailUrl
+                          - subscriberCount
+                          - subscriberCountText
+                          - badges
+                          description: A Rumble channel in search results.
+                        description: Matching Rumble channels.
+                      playlists:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Rumble playlist identifier.
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                              description: Playlist title.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical playlist URL when available.
+                            thumbnailUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Playlist thumbnail URL when available.
+                            videoCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Number of videos in the playlist when available.
+                            videoId:
+                              type:
+                              - string
+                              - 'null'
+                              description: Representative video id shown for the playlist when available.
+                            videoUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Representative video URL when available.
+                            channel:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                id:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Playlist owner channel id when available.
+                                name:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Playlist owner channel name.
+                                handle:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Playlist owner handle when available.
+                                url:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Playlist owner channel URL when available.
+                              required:
+                              - id
+                              - name
+                              - handle
+                              - url
+                              description: Playlist owner channel when available.
+                          required:
+                          - id
+                          - title
+                          - url
+                          - thumbnailUrl
+                          - videoCount
+                          - videoId
+                          - videoUrl
+                          - channel
+                          description: A Rumble playlist in search results.
+                        description: Matching Rumble playlists.
+                      liveStreams:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Rumble content identifier.
+                            kind:
+                              type: string
+                              enum:
+                              - video
+                              - short
+                              - live
+                              description: Normalized media kind for this row.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public URL for this item when available.
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                              description: Title shown for this item.
+                            thumbnailUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Thumbnail image URL when available.
+                            channel:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                name:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Channel display name when available.
+                                handle:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Channel handle when available.
+                                url:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Canonical public channel URL when available.
+                              required:
+                              - name
+                              - handle
+                              - url
+                              description: Channel metadata when available.
+                            viewCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: View count when available.
+                            viewCountText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable view count label when available.
+                            publishedAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 publish timestamp when available.
+                            publishedTimeText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable relative publish time when available.
+                            durationSeconds:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Duration in seconds when available.
+                            durationText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable duration label when available.
+                            badges:
+                              type: array
+                              items:
+                                type: string
+                              description: Display badges when present.
+                          required:
+                          - id
+                          - kind
+                          - url
+                          - title
+                          - thumbnailUrl
+                          - channel
+                          - viewCount
+                          - viewCountText
+                          - publishedAt
+                          - publishedTimeText
+                          - durationSeconds
+                          - durationText
+                          - badges
+                          description: A video, short, or live stream row in Rumble list results.
+                        description: Matching Rumble live streams.
+                      totalResults:
+                        type: integer
+                        minimum: 0
+                        description: Count of top-level result rows returned in this response across all buckets.
+                      page:
+                        type: object
+                        properties:
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Next page number when more results are available.
+                          hasMore:
+                            type: boolean
+                            description: Whether another page of results is available.
+                        required:
+                        - nextCursor
+                        - hasMore
+                        description: Pagination information for the current response.
+                    required:
+                    - query
+                    - videos
+                    - shorts
+                    - channels
+                    - playlists
+                    - liveStreams
+                    - totalResults
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                results:
+                  value:
+                    data:
+                      query: breaking news
+                      videos:
+                      - id: v6w80h0
+                        kind: video
+                        url: https://rumble.com/v6w80h0-democrats-pretend-to-care-about-epstein-nightly-scroll-w-hayley-caronia-ep..html
+                        title: Democrats Pretend To Care About Epstein - Nightly Scroll w/ Hayley Caronia (Ep.90) - 07/15/2025
+                        thumbnailUrl: https://hugh.cdn.rumble.cloud/video/fww1/e9/s8/1/K/X/A/2/KXA2y.oq1b.2-small-Democrats-Pretend-To-Care-A.jpg
+                        channel:
+                          name: BonginoReport Verified
+                          handle: BonginoReport
+                          url: https://rumble.com/user/BonginoReport
+                        viewCount: 185000
+                        viewCountText: 185,000 views
+                        publishedAt: '2025-07-15T16:29:49-04:00'
+                        publishedTimeText: 10 months ago
+                        durationSeconds: null
+                        durationText: null
+                        badges: []
+                      shorts: []
+                      channels: []
+                      playlists: []
+                      liveStreams: []
+                      totalResults: 1
+                      page:
+                        nextCursor: '2'
+                        hasMore: true
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                empty:
+                  value:
+                    data:
+                      query: socialfetch_fixture_no_results_000000
+                      videos: []
+                      shorts: []
+                      channels: []
+                      playlists: []
+                      liveStreams: []
+                      totalResults: 0
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example_empty
+                      creditsCharged: 1
+                      version: v1
+                paginated:
+                  value:
+                    data:
+                      query: breaking news
+                      videos:
+                      - id: v6w80h0
+                        kind: video
+                        url: https://rumble.com/v6w80h0-democrats-pretend-to-care-about-epstein-nightly-scroll-w-hayley-caronia-ep..html
+                        title: Democrats Pretend To Care About Epstein - Nightly Scroll w/ Hayley Caronia (Ep.90) - 07/15/2025
+                        thumbnailUrl: https://hugh.cdn.rumble.cloud/video/fww1/e9/s8/1/K/X/A/2/KXA2y.oq1b.2-small-Democrats-Pretend-To-Care-A.jpg
+                        channel:
+                          name: BonginoReport Verified
+                          handle: BonginoReport
+                          url: https://rumble.com/user/BonginoReport
+                        viewCount: 185000
+                        viewCountText: 185,000 views
+                        publishedAt: '2025-07-15T16:29:49-04:00'
+                        publishedTimeText: 10 months ago
+                        durationSeconds: 1255
+                        durationText: '20:55'
+                        badges: []
+                      shorts: []
+                      channels: []
+                      playlists: []
+                      liveStreams: []
+                      totalResults: 1
+                      page:
+                        nextCursor: '2'
+                        hasMore: true
+                    meta:
+                      requestId: req_01example_page2
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1RumbleSearch
+      x-operation-id-source: derived
+  /v1/rumble/videos:
+    get:
+      tags:
+      - Rumble
+      summary: Get Rumble video
+      description: Get metadata for a Rumble video by URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Link to the Rumble video.
+        required: true
+        description: Link to the Rumble video.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Rumble video metadata.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the video was resolved for this request.
+                      video:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            minLength: 1
+                            description: Rumble video identifier.
+                          url:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Rumble video URL.
+                          title:
+                            type: string
+                            description: Video title.
+                          description:
+                            type:
+                            - string
+                            - 'null'
+                            description: Video description text when available.
+                          thumbnailUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Thumbnail image URL when available.
+                          durationSeconds:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Video duration in seconds when available.
+                          durationFormatted:
+                            type:
+                            - string
+                            - 'null'
+                            description: Human-readable duration label when available.
+                          publishedAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 publish timestamp when available.
+                          publishDateText:
+                            type:
+                            - string
+                            - 'null'
+                            description: Human-readable publish date label when available.
+                          metrics:
+                            type: object
+                            properties:
+                              views:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: View count when available.
+                              likes:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Like count when available.
+                              dislikes:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Dislike count when available.
+                            required:
+                            - views
+                            - likes
+                            - dislikes
+                            description: Engagement metrics for the video.
+                          width:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Video width in pixels when available.
+                          height:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Video height in pixels when available.
+                          channel:
+                            type: object
+                            properties:
+                              name:
+                                type:
+                                - string
+                                - 'null'
+                                description: Channel display name when available.
+                              handle:
+                                type:
+                                - string
+                                - 'null'
+                                description: Channel handle when available.
+                              url:
+                                type:
+                                - string
+                                - 'null'
+                                description: Canonical public channel URL when available.
+                            required:
+                            - name
+                            - handle
+                            - url
+                            description: Uploader channel metadata when available.
+                          captionTracks:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                language:
+                                  type: string
+                                  minLength: 1
+                                  description: Caption track language code or key when available.
+                                label:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Human-readable caption track label when available.
+                                url:
+                                  type: string
+                                  minLength: 1
+                                  description: Caption track file URL when available.
+                              required:
+                              - language
+                              - label
+                              - url
+                              description: A caption or subtitle track available for the video.
+                            description: Caption and subtitle tracks when available.
+                          embedUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Embeddable player URL when available.
+                          shareUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Share URL when available.
+                          isLive:
+                            type: boolean
+                            description: Whether the video is a live stream.
+                        required:
+                        - id
+                        - url
+                        - title
+                        - description
+                        - thumbnailUrl
+                        - durationSeconds
+                        - durationFormatted
+                        - publishedAt
+                        - publishDateText
+                        - metrics
+                        - width
+                        - height
+                        - channel
+                        - captionTracks
+                        - embedUrl
+                        - shareUrl
+                        - isLive
+                        description: Video details when found.
+                    required:
+                    - lookupStatus
+                    - video
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      video:
+                        id: v79xhhm
+                        url: https://rumble.com/v79xhhm-discovery-why-glenn-wants-israel-to-sue-the-new-york-times.html
+                        title: 'DISCOVERY: Why Glenn WANTS Israel to Sue The New York Times'
+                        description: 'Follow Glenn Greenwald''s writing and other journalism at Substack, where you can become a member: https://greenwald.substack.com/ All videos now available as a podcast! Find full episodes here: https:'
+                        thumbnailUrl: https://hugh.cdn.rumble.cloud/video/fwe2/2f/s8/1/k/V/p/o/kVpoA.qR4e-small-DISCOVERY-Why-Glenn-WANTS-I..jpg
+                        durationSeconds: 1678
+                        durationFormatted: 00:27:58
+                        publishedAt: '2026-05-16T11:31:27+00:00'
+                        publishDateText: null
+                        metrics:
+                          views: 17279
+                          likes: 145
+                          dislikes: 3
+                        width: 1920
+                        height: 1080
+                        channel:
+                          name: Glenn Greenwald
+                          handle: GGreenwald
+                          url: https://rumble.com/c/GGreenwald
+                        captionTracks:
+                        - language: en-auto
+                          label: English (auto)
+                          url: https://hugh.cdn.rumble.cloud/video/fwe2/2f/s8/11/k/V/p/o/kVpoA.fn8Si.vtt
+                        embedUrl: https://rumble.com/embed/v77qthe/
+                        shareUrl: https://rumble.com/share/v79xhhm?src=VoG0dqZG5JZ6uoPQ0mmpV91Vkao2i8JCNcVBpMIgYffXfccYYhMCQA
+                        isLive: false
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      video: null
+                    meta:
+                      requestId: req_01example_not_found
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1RumbleVideos
+      x-operation-id-source: derived
+  /v1/rumble/videos/transcript:
+    get:
+      tags:
+      - Rumble
+      summary: Get Rumble video transcript
+      description: Get captions for a Rumble video when available.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit when a transcript is found; no charge when captions are unavailable.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Link to the Rumble video.
+        required: true
+        description: Link to the Rumble video.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Transcript lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        - lookup_failed
+                        description: Outcome of the transcript lookup.
+                      video:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            minLength: 1
+                            description: Rumble video identifier.
+                          url:
+                            type: string
+                            minLength: 1
+                            description: Canonical public URL for the video.
+                        required:
+                        - id
+                        - url
+                        description: Video identity when the lookup resolved.
+                      transcript:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          language:
+                            type: string
+                            description: Human-readable transcript language label when reported by the lookup.
+                          plainText:
+                            type: string
+                            description: Full transcript text parsed from captions.
+                          segments:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                text:
+                                  type: string
+                                  description: Transcript segment text.
+                                startMs:
+                                  type: integer
+                                  minimum: 0
+                                  description: Segment start offset in milliseconds.
+                                endMs:
+                                  type: integer
+                                  minimum: 0
+                                  description: Segment end offset in milliseconds.
+                              required:
+                              - text
+                              - startMs
+                              - endMs
+                              description: One timed transcript segment.
+                            description: Timed transcript segments when parsed from captions.
+                        required:
+                        - language
+                        - plainText
+                        description: Transcript content when available for the resolved video.
+                    required:
+                    - lookupStatus
+                    - video
+                    - transcript
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      video:
+                        id: v79xhhm
+                        url: https://rumble.com/v79xhhm-discovery-why-glenn-wants-israel-to-sue-the-new-york-times.html
+                      transcript:
+                        language: English (auto)
+                        plainText: 'Let''s get into these questions, and we''ll try and get through as many as we can.
+
+                          The first one is from Christi Marbet, who says there were a few questions about this.
+
+                          They want you to comment on the following'
+                        segments:
+                        - text: Let's get into these questions, and we'll try and get through as many as we can.
+                          startMs: 6890
+                          endMs: 11050
+                        - text: The first one is from Christi Marbet, who says there were a few questions about this.
+                          startMs: 11190
+                          endMs: 15650
+                        - text: They want you to comment on the following
+                          startMs: 15930
+                          endMs: 17730
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      video:
+                        id: v79xhhm
+                        url: https://rumble.com/v79xhhm-discovery-why-glenn-wants-israel-to-sue-the-new-york-times.html
+                      transcript: null
+                    meta:
+                      requestId: req_01example_not_found
+                      creditsCharged: 0
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1RumbleVideosTranscript
+      x-operation-id-source: derived
+  /v1/rumble/videos/comments:
+    get:
+      tags:
+      - Rumble
+      summary: List Rumble video comments
+      description: List top-level comments on a Rumble video.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Link to the Rumble video.
+        required: true
+        description: Link to the Rumble video.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Comment listing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the video was resolved for this request.
+                      video:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            minLength: 1
+                            description: Rumble video identifier.
+                          url:
+                            type: string
+                            minLength: 1
+                            description: Canonical public URL for the video.
+                        required:
+                        - id
+                        - url
+                        description: Video identity when the lookup resolved.
+                      comments:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Stable identifier for the comment.
+                            text:
+                              type: string
+                              description: Comment text.
+                            createdAt:
+                              type: string
+                              description: ISO-8601 timestamp when the comment was published.
+                            publishedTimeText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Human-readable relative publish time when available.
+                            likeCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Like count on the comment when available.
+                            dislikeCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Dislike count on the comment when available.
+                            replyCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Direct reply count for the comment thread when available.
+                            author:
+                              type: object
+                              properties:
+                                displayName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Display name shown on the commenter profile.
+                                handle:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Public Rumble handle when available.
+                                profileUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Profile page URL when available.
+                                avatarUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Profile image URL for the commenter when available.
+                              required:
+                              - displayName
+                              - handle
+                              - profileUrl
+                              - avatarUrl
+                              description: Comment author.
+                          required:
+                          - id
+                          - text
+                          - createdAt
+                          - publishedTimeText
+                          - likeCount
+                          - dislikeCount
+                          - replyCount
+                          - author
+                          description: A single top-level comment on a Rumble video.
+                        description: Top-level comments for the resolved video.
+                      page:
+                        type: object
+                        properties:
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Next page number when more results are available.
+                          hasMore:
+                            type: boolean
+                            description: Whether another page of results is available.
+                        required:
+                        - nextCursor
+                        - hasMore
+                        description: Pagination information for this response.
+                    required:
+                    - lookupStatus
+                    - video
+                    - comments
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      video:
+                        id: v792vns
+                        url: https://rumble.com/v792vns-the-splc-is-a-deceitful-and-poisonous-group.-but-was-their-behavior-crimina.html
+                      comments:
+                      - id: '609604348'
+                        text: This is just like Jussie Smollett but on a huger scale -- if we can't find "white supremacy," well, we'll just make that sh*t up. LOLLL
+                        createdAt: '2026-04-27T22:20:00.000Z'
+                        publishedTimeText: 3 weeks ago
+                        likeCount: 15
+                        dislikeCount: 0
+                        replyCount: 2
+                        author:
+                          displayName: robland
+                          handle: robland
+                          profileUrl: https://rumble.com/user/robland
+                          avatarUrl: null
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      video: null
+                      comments: []
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example_not_found
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1RumbleVideosComments
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

@@ -1,0 +1,2318 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Truth Social API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: truthsocial
+paths:
+  /v1/truthsocial/profiles/{handle}:
+    get:
+      tags:
+      - truthsocial
+      summary: Get Truth Social profile
+      description: Get a Truth Social profile by handle or account id.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 2
+        surcharges: []
+        maxCredits: 2
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 2 credits per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Truth Social handle or account id.
+        required: true
+        description: Truth Social handle or account id.
+        name: handle
+        in: path
+      responses:
+        '200':
+          description: Truth Social profile lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the profile was found.
+                      profile:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - truthsocial
+                            description: Social platform for this profile.
+                          id:
+                            type: string
+                            pattern: ^\d{1,30}$
+                            description: Stable Truth Social account id as a string.
+                          handle:
+                            type: string
+                            minLength: 1
+                            description: Truth Social handle without a leading @.
+                          displayName:
+                            type:
+                            - string
+                            - 'null'
+                            description: Public display name when available.
+                          bio:
+                            type:
+                            - string
+                            - 'null'
+                            description: Plain-text profile biography.
+                          profileUrl:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Truth Social profile URL.
+                          avatarUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Avatar image URL when publicly available.
+                          headerUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Header/banner image URL when publicly available.
+                          websiteUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Website URL from the profile when publicly safe.
+                          location:
+                            type:
+                            - string
+                            - 'null'
+                            description: Free-text location when present.
+                          createdAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 timestamp when the account was created.
+                          lastStatusAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 date of the latest public post when available.
+                          isVerified:
+                            type: boolean
+                            description: Whether the account is marked verified.
+                          isLocked:
+                            type: boolean
+                            description: Whether the account requires follow approval.
+                          isBot:
+                            type: boolean
+                            description: Whether the account is marked as a bot.
+                          metrics:
+                            type: object
+                            properties:
+                              followers:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Follower count when available.
+                              following:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Following count when available.
+                              posts:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Public post count when available.
+                            required:
+                            - followers
+                            - following
+                            - posts
+                            description: Follower, following, and post counts.
+                        required:
+                        - platform
+                        - id
+                        - handle
+                        - displayName
+                        - bio
+                        - profileUrl
+                        - avatarUrl
+                        - headerUrl
+                        - websiteUrl
+                        - location
+                        - createdAt
+                        - lastStatusAt
+                        - isVerified
+                        - isLocked
+                        - isBot
+                        - metrics
+                        description: Profile when lookupStatus is `found`; null when `not_found`.
+                    required:
+                    - lookupStatus
+                    - profile
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      profile:
+                        platform: truthsocial
+                        id: '107780257626128497'
+                        handle: realDonaldTrump
+                        displayName: Donald J. Trump
+                        bio: null
+                        profileUrl: https://truthsocial.com/@realDonaldTrump
+                        avatarUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg
+                        headerUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg
+                        websiteUrl: https://www.donaldjtrump.com/
+                        location: null
+                        createdAt: '2022-02-11T16:16:57.705Z'
+                        lastStatusAt: '2026-07-24'
+                        isVerified: true
+                        isLocked: false
+                        isBot: false
+                        metrics:
+                          followers: 12928913
+                          following: 69
+                          posts: 35171
+                    meta:
+                      requestId: req_truthsocial_profile_example
+                      creditsCharged: 2
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      profile: null
+                    meta:
+                      requestId: req_truthsocial_profile_not_found
+                      creditsCharged: 2
+                      version: v1
+        '400':
+          description: Invalid handle
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying. Present on capacity, deadline, circuit-open, and safe transport outages (bounded 1–120).
+              schema:
+                type: integer
+                minimum: 1
+                maximum: 120
+                example: 1
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1TruthsocialProfilesByHandle
+      x-operation-id-source: derived
+  /v1/truthsocial/profiles/{handle}/posts:
+    get:
+      tags:
+      - truthsocial
+      summary: List Truth Social profile posts
+      description: List posts from a Truth Social profile by handle or account id.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 2
+        surcharges:
+        - queryParam: includeReplies
+          credits: 2
+          when: boolean_true
+          label: Include replies
+        maxCredits: 4
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 2 credits base. With `includeReplies`, Include replies. Up to 4 credits max.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 64
+          description: Truth Social handle or account id.
+        required: true
+        description: Truth Social handle or account id.
+        name: handle
+        in: path
+      - schema:
+          type: string
+          minLength: 1
+          description: Opaque pagination cursor from a previous response. Omit for the first page.
+        required: false
+        description: Opaque pagination cursor from a previous response. Omit for the first page.
+        name: cursor
+        in: query
+      - schema:
+          type: boolean
+          description: 'When true, includes reply posts in the timeline. Adds 2 credits (4 total including the base lookup). Default: false (top-level posts only).'
+        required: false
+        description: 'When true, includes reply posts in the timeline. Adds 2 credits (4 total including the base lookup). Default: false (top-level posts only).'
+        name: includeReplies
+        in: query
+      - schema:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 20
+          description: 'Maximum posts to return (1–20). Default: 20.'
+        required: false
+        description: 'Maximum posts to return (1–20). Default: 20.'
+        name: limit
+        in: query
+      responses:
+        '200':
+          description: Truth Social profile posts listing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the profile was found.
+                      profile:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - truthsocial
+                            description: Social platform for this profile.
+                          id:
+                            type: string
+                            pattern: ^\d{1,30}$
+                            description: Stable Truth Social account id as a string.
+                          handle:
+                            type: string
+                            minLength: 1
+                            description: Truth Social handle without a leading @.
+                          displayName:
+                            type:
+                            - string
+                            - 'null'
+                            description: Public display name when available.
+                          bio:
+                            type:
+                            - string
+                            - 'null'
+                            description: Plain-text profile biography.
+                          profileUrl:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Truth Social profile URL.
+                          avatarUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Avatar image URL when publicly available.
+                          headerUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Header/banner image URL when publicly available.
+                          websiteUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Website URL from the profile when publicly safe.
+                          location:
+                            type:
+                            - string
+                            - 'null'
+                            description: Free-text location when present.
+                          createdAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 timestamp when the account was created.
+                          lastStatusAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 date of the latest public post when available.
+                          isVerified:
+                            type: boolean
+                            description: Whether the account is marked verified.
+                          isLocked:
+                            type: boolean
+                            description: Whether the account requires follow approval.
+                          isBot:
+                            type: boolean
+                            description: Whether the account is marked as a bot.
+                          metrics:
+                            type: object
+                            properties:
+                              followers:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Follower count when available.
+                              following:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Following count when available.
+                              posts:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Public post count when available.
+                            required:
+                            - followers
+                            - following
+                            - posts
+                            description: Follower, following, and post counts.
+                        required:
+                        - platform
+                        - id
+                        - handle
+                        - displayName
+                        - bio
+                        - profileUrl
+                        - avatarUrl
+                        - headerUrl
+                        - websiteUrl
+                        - location
+                        - createdAt
+                        - lastStatusAt
+                        - isVerified
+                        - isLocked
+                        - isBot
+                        - metrics
+                        description: Profile when found; null when not found.
+                      posts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              pattern: ^\d{1,30}$
+                              description: Truth Social status id.
+                            url:
+                              type: string
+                              minLength: 1
+                              description: Canonical public Truth Social post URL.
+                            createdAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 creation timestamp.
+                            editedAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 edit timestamp when available.
+                            text:
+                              type:
+                              - string
+                              - 'null'
+                              description: Plain-text post body.
+                            spoilerText:
+                              type:
+                              - string
+                              - 'null'
+                              description: Content warning / spoiler text when present.
+                            language:
+                              type:
+                              - string
+                              - 'null'
+                              description: Language code when available.
+                            visibility:
+                              type:
+                              - string
+                              - 'null'
+                              description: Visibility string when available.
+                            isSensitive:
+                              type: boolean
+                              description: Whether the post is marked sensitive.
+                            author:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                platform:
+                                  type: string
+                                  enum:
+                                  - truthsocial
+                                  description: Social platform for this author.
+                                id:
+                                  type: string
+                                  pattern: ^\d{1,30}$
+                                  description: Stable Truth Social account id as a string.
+                                handle:
+                                  type: string
+                                  minLength: 1
+                                  description: Truth Social handle without a leading @.
+                                displayName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Public display name when available.
+                                avatarUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Avatar image URL when available.
+                                isVerified:
+                                  type: boolean
+                                  description: Whether the account is marked verified.
+                                profileUrl:
+                                  type: string
+                                  minLength: 1
+                                  description: Canonical public Truth Social profile URL.
+                              required:
+                              - platform
+                              - id
+                              - handle
+                              - displayName
+                              - avatarUrl
+                              - isVerified
+                              - profileUrl
+                              description: Author snapshot when available.
+                            inReplyToStatusId:
+                              type:
+                              - string
+                              - 'null'
+                              pattern: ^\d{1,30}$
+                              description: Parent status id when this is a reply.
+                            inReplyToAccountId:
+                              type:
+                              - string
+                              - 'null'
+                              pattern: ^\d{1,30}$
+                              description: Parent account id when this is a reply.
+                            quoteId:
+                              type:
+                              - string
+                              - 'null'
+                              pattern: ^\d{1,30}$
+                              description: Quoted status id when present.
+                            repostOfId:
+                              type:
+                              - string
+                              - 'null'
+                              pattern: ^\d{1,30}$
+                              description: Original status id when this is a repost.
+                            metrics:
+                              type: object
+                              properties:
+                                replies:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Reply count when available.
+                                reposts:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Repost/reblog count when available.
+                                favorites:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Favorite count when available.
+                                upvotes:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Upvote count when available.
+                                downvotes:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Downvote count when available.
+                              required:
+                              - replies
+                              - reposts
+                              - favorites
+                              - upvotes
+                              - downvotes
+                              description: Engagement metrics.
+                            media:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  type:
+                                    type: string
+                                    enum:
+                                    - image
+                                    - video
+                                    - audio
+                                    - gifv
+                                    - unknown
+                                    description: Normalized media type.
+                                  url:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Primary media URL when available.
+                                  previewUrl:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Preview/thumbnail URL when available.
+                                  description:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Alt text / description when available.
+                                  width:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Width in pixels when available.
+                                  height:
+                                    type:
+                                    - integer
+                                    - 'null'
+                                    minimum: 0
+                                    description: Height in pixels when available.
+                                  durationSeconds:
+                                    type:
+                                    - number
+                                    - 'null'
+                                    minimum: 0
+                                    description: Duration in seconds for video/audio when available.
+                                required:
+                                - type
+                                - url
+                                - previewUrl
+                                - description
+                                - width
+                                - height
+                                - durationSeconds
+                                description: One media attachment on a Truth Social post.
+                              description: Media attachments in upstream order.
+                            linkPreview:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                url:
+                                  type: string
+                                  minLength: 1
+                                  description: Linked page URL.
+                                title:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Link card title when available.
+                                description:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Link card description when available.
+                                providerName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Link provider name when available.
+                                imageUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Link card image URL when available.
+                              required:
+                              - url
+                              - title
+                              - description
+                              - providerName
+                              - imageUrl
+                              description: Link preview card when present.
+                            poll:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                expiresAt:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: ISO-8601 poll expiration when available.
+                                expired:
+                                  type: boolean
+                                  description: Whether the poll has expired.
+                                multiple:
+                                  type: boolean
+                                  description: Whether multiple choices are allowed.
+                                votesCount:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Total votes when available.
+                                options:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      title:
+                                        type: string
+                                        description: Poll option title.
+                                      votesCount:
+                                        type:
+                                        - integer
+                                        - 'null'
+                                        minimum: 0
+                                        description: Votes for this option when available.
+                                    required:
+                                    - title
+                                    - votesCount
+                                    description: One option in a Truth Social poll.
+                                  description: Poll options in display order.
+                              required:
+                              - expiresAt
+                              - expired
+                              - multiple
+                              - votesCount
+                              - options
+                              description: Poll when present.
+                            quote:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                id:
+                                  type: string
+                                  pattern: ^\d{1,30}$
+                                  description: Quoted post id.
+                                url:
+                                  type: string
+                                  minLength: 1
+                                  description: Canonical quoted post URL.
+                                text:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Plain-text body of the quote.
+                                authorHandle:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Quoted author handle without @ when available.
+                              required:
+                              - id
+                              - url
+                              - text
+                              - authorHandle
+                              description: Quoted post summary when present.
+                          required:
+                          - id
+                          - url
+                          - createdAt
+                          - editedAt
+                          - text
+                          - spoilerText
+                          - language
+                          - visibility
+                          - isSensitive
+                          - author
+                          - inReplyToStatusId
+                          - inReplyToAccountId
+                          - quoteId
+                          - repostOfId
+                          - metrics
+                          - media
+                          - linkPreview
+                          - poll
+                          - quote
+                          description: Compact Truth Social post.
+                        description: Posts in reverse chronological order when found. Replies excluded unless `includeReplies=true`. Empty when not found or the account has no public posts.
+                      page:
+                        type: object
+                        properties:
+                          hasMore:
+                            type: boolean
+                            description: Whether another page is available.
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Cursor to pass in the next request when more pages exist; null on the last page.
+                        required:
+                        - hasMore
+                        - nextCursor
+                        description: Pagination state for the current page of posts.
+                    required:
+                    - lookupStatus
+                    - profile
+                    - posts
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      profile:
+                        platform: truthsocial
+                        id: '107780257626128497'
+                        handle: realDonaldTrump
+                        displayName: Donald J. Trump
+                        bio: null
+                        profileUrl: https://truthsocial.com/@realDonaldTrump
+                        avatarUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg
+                        headerUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/headers/107/780/257/626/128/497/original/ba3b910ba387bf4e.jpeg
+                        websiteUrl: https://www.donaldjtrump.com/
+                        location: null
+                        createdAt: '2022-02-11T16:16:57.705Z'
+                        lastStatusAt: '2026-07-24'
+                        isVerified: true
+                        isLocked: false
+                        isBot: false
+                        metrics:
+                          followers: 12928913
+                          following: 69
+                          posts: 35171
+                      posts:
+                      - id: '116972989857630623'
+                        url: https://truthsocial.com/@realDonaldTrump/116972989857630623
+                        createdAt: '2026-07-24T04:09:38.248Z'
+                        editedAt: null
+                        text: What a great guy, and baseball player!!! President DJT
+                        spoilerText: null
+                        language: en
+                        visibility: public
+                        isSensitive: false
+                        author:
+                          platform: truthsocial
+                          id: '107780257626128497'
+                          handle: realDonaldTrump
+                          displayName: Donald J. Trump
+                          avatarUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg
+                          isVerified: true
+                          profileUrl: https://truthsocial.com/@realDonaldTrump
+                        inReplyToStatusId: null
+                        inReplyToAccountId: null
+                        quoteId: null
+                        repostOfId: null
+                        metrics:
+                          replies: 627
+                          reposts: 1773
+                          favorites: 8769
+                          upvotes: 8769
+                          downvotes: 0
+                        media:
+                        - type: image
+                          url: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/973/000/267/351/979/original/9f77cc7143e78993.jpg
+                          previewUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/media_attachments/files/116/973/000/267/351/979/small/9f77cc7143e78993.jpg
+                          description: null
+                          width: 1241
+                          height: 827
+                          durationSeconds: null
+                        linkPreview: null
+                        poll: null
+                        quote: null
+                      - id: '116971865115694289'
+                        url: https://truthsocial.com/@realDonaldTrump/116971865115694289
+                        createdAt: '2026-07-23T23:23:36.047Z'
+                        editedAt: null
+                        text: Rick Jackson, from the Great State of Georgia, very successfully campaigned for Governor, on being strong with “TRUMP,” and won, against a field of very talented and popular opponents, including an incredible guy, Burt Jones, who has a truly bright future ahead of him! Rick has been a very successful Businessman and Entrepreneur, and will now be a tremendous Governor, who will work tirelessly to Grow the Economy, Cut Taxes and Regulations, Promote MADE IN THE U.S.A., Unleash American Energy DOMINANCE, Strengthen our Military/Veterans, Keep our Border SECURE, Ensure LAW AND ORDER, Safeguard our Elections, and Protect our always under siege Second Amendment. Now is the time for all Republicans to unite behind Rick to ensure he has a tremendous Victory in November! Rick will work closely with me to enact America First Policies. He is a FANTASTIC person who everyone is very proud of, as am I. Rick Jackson has my Complete and Total Endorsement to be the next Governor of Georgia – HE WILL NEVER LET YOU DOWN!
+                        spoilerText: null
+                        language: en
+                        visibility: public
+                        isSensitive: false
+                        author:
+                          platform: truthsocial
+                          id: '107780257626128497'
+                          handle: realDonaldTrump
+                          displayName: Donald J. Trump
+                          avatarUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg
+                          isVerified: true
+                          profileUrl: https://truthsocial.com/@realDonaldTrump
+                        inReplyToStatusId: null
+                        inReplyToAccountId: null
+                        quoteId: null
+                        repostOfId: null
+                        metrics:
+                          replies: 523
+                          reposts: 2522
+                          favorites: 10675
+                          upvotes: 10675
+                          downvotes: 0
+                        media: []
+                        linkPreview: null
+                        poll: null
+                        quote: null
+                      - id: '116971864522910409'
+                        url: https://truthsocial.com/@realDonaldTrump/116971864522910409
+                        createdAt: '2026-07-23T23:23:27.002Z'
+                        editedAt: null
+                        text: It is my Great Honor to endorse MAGA Patriot, Tim Fleming, who is running to be the next Secretary of State of the Incredible State of Georgia! A Highly Respected State Representative and Civic Leader, prior to running for Secretary of State, Tim has a strong record of being an America First Fighter for Election Integrity! A true MAGA Warrior, Tim understands that, ALL VOTERS MUST SHOW PHOTO VOTER I.D. (IDENTIFICATION!) AND, ALL VOTERS MUST SHOW PROOF OF CITIZENSHIP IN ORDER TO VOTE! The Dumocrats love to CHEAT, and Tim will work tirelessly to Safeguard Georgia’s Elections. Tim will also focus on helping us continue to Grow the Economy, Promote our Amazing Farmers and Ranchers, Stop Migrant Crime, Keep Men out of Women’s Sports, and Defend our always under siege Second Amendment. Tim Fleming has my Complete and Total Endorsement to be the next Secretary of State of Georgia – HE WILL DO A FANTASTIC JOB, AND NEVER LET YOU DOWN!
+                        spoilerText: null
+                        language: en
+                        visibility: public
+                        isSensitive: false
+                        author:
+                          platform: truthsocial
+                          id: '107780257626128497'
+                          handle: realDonaldTrump
+                          displayName: Donald J. Trump
+                          avatarUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg
+                          isVerified: true
+                          profileUrl: https://truthsocial.com/@realDonaldTrump
+                        inReplyToStatusId: null
+                        inReplyToAccountId: null
+                        quoteId: null
+                        repostOfId: null
+                        metrics:
+                          replies: 252
+                          reposts: 2087
+                          favorites: 9178
+                          upvotes: 9178
+                          downvotes: 0
+                        media: []
+                        linkPreview: null
+                        poll: null
+                        quote: null
+                      - id: '116971863913562523'
+                        url: https://truthsocial.com/@realDonaldTrump/116971863913562523
+                        createdAt: '2026-07-23T23:23:17.701Z'
+                        editedAt: null
+                        text: Greg Dolezal is a MAGA Warrior running for Lieutenant Governor to represent the Fantastic People of Georgia. He is strongly supported by my good friend, and the Peach State’s next Governor, Rick Jackson! A Highly Respected State Senator, Greg has dedicated his life to serving his Community. As your next Lieutenant Governor, Greg will work hard to Grow our Economy, Cut Taxes and Regulations, Support our Amazing Farmers and Ranchers, Promote MADE IN THE U.S.A., Unleash American Energy DOMINANCE, Keep our Border SECURE, Stop Migrant Crime, Advance Election Integrity, Ensure LAW AND ORDER, Strengthen our Military, Veterans, and Law Enforcement, and Defend our always under siege Second Amendment. He will work brilliantly with Rick Jackson, and do great things, never seen before in Georgia! Greg Dolezal has my Complete and Total Endorsement to be the next Lieutenant Governor of Georgia — HE WILL NEVER LET YOU DOWN!
+                        spoilerText: null
+                        language: en
+                        visibility: public
+                        isSensitive: false
+                        author:
+                          platform: truthsocial
+                          id: '107780257626128497'
+                          handle: realDonaldTrump
+                          displayName: Donald J. Trump
+                          avatarUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg
+                          isVerified: true
+                          profileUrl: https://truthsocial.com/@realDonaldTrump
+                        inReplyToStatusId: null
+                        inReplyToAccountId: null
+                        quoteId: null
+                        repostOfId: null
+                        metrics:
+                          replies: 126
+                          reposts: 1946
+                          favorites: 8418
+                          upvotes: 8418
+                          downvotes: 0
+                        media: []
+                        linkPreview: null
+                        poll: null
+                        quote: null
+                      - id: '116971862681784017'
+                        url: https://truthsocial.com/@realDonaldTrump/116971862681784017
+                        createdAt: '2026-07-23T23:22:58.907Z'
+                        editedAt: null
+                        text: It is my Great Honor to endorse America First Patriot, Brian Strickland, who is running to be the next Attorney General of the Wonderful State of Georgia! A Proven Leader, Brian previously served as a Highly Respected State Senator and State Representative, delivering strong results for his Community. As your next Attorney General, Brian will continue fighting tirelessly to Ensure LAW AND ORDER, Champion our Law Enforcement and First Responders, Support our Military/Veterans, Safeguard our Elections, Keep our Border SECURE, Stop Migrant Crime, Uphold our Constitution, and Protect our always under siege Second Amendment. Brian Strickland has my Complete and Total Endorsement to be the next Attorney General of Georgia — HE WILL NEVER LET YOU DOWN!
+                        spoilerText: null
+                        language: en
+                        visibility: public
+                        isSensitive: false
+                        author:
+                          platform: truthsocial
+                          id: '107780257626128497'
+                          handle: realDonaldTrump
+                          displayName: Donald J. Trump
+                          avatarUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg
+                          isVerified: true
+                          profileUrl: https://truthsocial.com/@realDonaldTrump
+                        inReplyToStatusId: null
+                        inReplyToAccountId: null
+                        quoteId: null
+                        repostOfId: null
+                        metrics:
+                          replies: 120
+                          reposts: 1846
+                          favorites: 8102
+                          upvotes: 8102
+                          downvotes: 0
+                        media: []
+                        linkPreview: null
+                        poll: null
+                        quote: null
+                      - id: '116971555718513784'
+                        url: https://truthsocial.com/@realDonaldTrump/116971555718513784
+                        createdAt: '2026-07-23T22:04:55.022Z'
+                        editedAt: null
+                        text: Please let this statement serve to represent, until further notice, that from this point forth, any and all damages done to Ships, Cargo, or anything related thereto, will be paid for by Iranian Money that the United States has in its possession, and controls. These damages may be very substantial but, nevertheless, this is the fair and equitable thing to do. Thank you for your attention to this matter! President DONALD J. TRUMP
+                        spoilerText: null
+                        language: en
+                        visibility: public
+                        isSensitive: false
+                        author:
+                          platform: truthsocial
+                          id: '107780257626128497'
+                          handle: realDonaldTrump
+                          displayName: Donald J. Trump
+                          avatarUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg
+                          isVerified: true
+                          profileUrl: https://truthsocial.com/@realDonaldTrump
+                        inReplyToStatusId: null
+                        inReplyToAccountId: null
+                        quoteId: null
+                        repostOfId: null
+                        metrics:
+                          replies: 1689
+                          reposts: 4768
+                          favorites: 17790
+                          upvotes: 17790
+                          downvotes: 0
+                        media: []
+                        linkPreview: null
+                        poll: null
+                        quote: null
+                      - id: '116969243226176328'
+                        url: https://truthsocial.com/@realDonaldTrump/116969243226176328
+                        createdAt: '2026-07-23T12:16:49.186Z'
+                        editedAt: null
+                        text: A year ago the United States of America attacked, very powerfully, the Houthis, for their interference with commerce and trade, by shooting at ships. Since that time, and during our conflict with Iran, they have acted very responsibly. Unfortunately, now they are starting up again, shooting at two Saudi Arabian ships last night. Please let this TRUTH serve to represent that if they do this again, the U.S. will hold Iran responsible, in that the Houthis are a Surrogate and/or Proxy of Iran, and major military punishment will be inflicted upon Iran and, of course, the Houthis, themselves, who I am very disappointed with in that they have, until now, acted very professionally and smart. Thank you for your attention to this matter! President DONALD J. TRUMP
+                        spoilerText: null
+                        language: en
+                        visibility: public
+                        isSensitive: false
+                        author:
+                          platform: truthsocial
+                          id: '107780257626128497'
+                          handle: realDonaldTrump
+                          displayName: Donald J. Trump
+                          avatarUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg
+                          isVerified: true
+                          profileUrl: https://truthsocial.com/@realDonaldTrump
+                        inReplyToStatusId: null
+                        inReplyToAccountId: null
+                        quoteId: null
+                        repostOfId: null
+                        metrics:
+                          replies: 4549
+                          reposts: 8304
+                          favorites: 35156
+                          upvotes: 35156
+                          downvotes: 0
+                        media: []
+                        linkPreview: null
+                        poll: null
+                        quote: null
+                      - id: '116969149016233329'
+                        url: https://truthsocial.com/@realDonaldTrump/116969149016233329
+                        createdAt: '2026-07-23T11:52:51.658Z'
+                        editedAt: null
+                        text: The Civil Nuclear Deal (There will be no enrichment of material!) being made between the United States Department of Energy and Saudi Arabia, which pertains only to non-military use such as the ones that Iran and UAE (and others) already have, will be approved, but is totally subject to Saudi Arabia joining the very respected and successful Abraham Accords. The United States is not opposed to Civil (Non-Enriched) Nuclear Facilities. Thank you for your attention to this matter! President DONALD J. TRUMP
+                        spoilerText: null
+                        language: en
+                        visibility: public
+                        isSensitive: false
+                        author:
+                          platform: truthsocial
+                          id: '107780257626128497'
+                          handle: realDonaldTrump
+                          displayName: Donald J. Trump
+                          avatarUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/780/257/626/128/497/original/454286ac07a6f6e6.jpeg
+                          isVerified: true
+                          profileUrl: https://truthsocial.com/@realDonaldTrump
+                        inReplyToStatusId: null
+                        inReplyToAccountId: null
+                        quoteId: null
+                        repostOfId: null
+                        metrics:
+                          replies: 1173
+                          reposts: 4530
+                          favorites: 18315
+                          upvotes: 18315
+                          downvotes: 0
+                        media: []
+                        linkPreview: null
+                        poll: null
+                        quote: null
+                      page:
+                        nextCursor: eyJ2IjoxLCJoYW5kbGUiOiJyZWFsRG9uYWxkVHJ1bXAiLCJtYXhJZCI6IjExNjk2OTE0OTAxNjIzMzMyOSIsImFjY291bnRJZCI6IjEwNzc4MDI1NzYyNjEyODQ5NyJ9
+                        hasMore: true
+                    meta:
+                      requestId: req_truthsocial_posts_example
+                      creditsCharged: 2
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      profile: null
+                      posts: []
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_truthsocial_posts_not_found
+                      creditsCharged: 2
+                      version: v1
+        '400':
+          description: Invalid handle or pagination cursor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying. Present on capacity, deadline, circuit-open, and safe transport outages (bounded 1–120).
+              schema:
+                type: integer
+                minimum: 1
+                maximum: 120
+                example: 1
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1TruthsocialProfilesByHandlePosts
+      x-operation-id-source: derived
+  /v1/truthsocial/posts:
+    get:
+      tags:
+      - truthsocial
+      summary: Get Truth Social post
+      description: Get a Truth Social post by URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 2
+        surcharges: []
+        maxCredits: 2
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 2 credits per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Link to the Truth Social post.
+        required: true
+        description: Link to the Truth Social post.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Truth Social post lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the post was found.
+                      post:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            pattern: ^\d{1,30}$
+                            description: Truth Social status id.
+                          url:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Truth Social post URL.
+                          createdAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 creation timestamp.
+                          editedAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 edit timestamp when available.
+                          text:
+                            type:
+                            - string
+                            - 'null'
+                            description: Plain-text post body.
+                          spoilerText:
+                            type:
+                            - string
+                            - 'null'
+                            description: Content warning / spoiler text when present.
+                          language:
+                            type:
+                            - string
+                            - 'null'
+                            description: Language code when available.
+                          visibility:
+                            type:
+                            - string
+                            - 'null'
+                            description: Visibility string when available.
+                          isSensitive:
+                            type: boolean
+                            description: Whether the post is marked sensitive.
+                          author:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              platform:
+                                type: string
+                                enum:
+                                - truthsocial
+                                description: Social platform for this author.
+                              id:
+                                type: string
+                                pattern: ^\d{1,30}$
+                                description: Stable Truth Social account id as a string.
+                              handle:
+                                type: string
+                                minLength: 1
+                                description: Truth Social handle without a leading @.
+                              displayName:
+                                type:
+                                - string
+                                - 'null'
+                                description: Public display name when available.
+                              avatarUrl:
+                                type:
+                                - string
+                                - 'null'
+                                description: Avatar image URL when available.
+                              isVerified:
+                                type: boolean
+                                description: Whether the account is marked verified.
+                              profileUrl:
+                                type: string
+                                minLength: 1
+                                description: Canonical public Truth Social profile URL.
+                            required:
+                            - platform
+                            - id
+                            - handle
+                            - displayName
+                            - avatarUrl
+                            - isVerified
+                            - profileUrl
+                            description: Author snapshot when available.
+                          inReplyToStatusId:
+                            type:
+                            - string
+                            - 'null'
+                            pattern: ^\d{1,30}$
+                            description: Parent status id when this is a reply.
+                          inReplyToAccountId:
+                            type:
+                            - string
+                            - 'null'
+                            pattern: ^\d{1,30}$
+                            description: Parent account id when this is a reply.
+                          quoteId:
+                            type:
+                            - string
+                            - 'null'
+                            pattern: ^\d{1,30}$
+                            description: Quoted status id when present.
+                          repostOfId:
+                            type:
+                            - string
+                            - 'null'
+                            pattern: ^\d{1,30}$
+                            description: Original status id when this is a repost.
+                          metrics:
+                            type: object
+                            properties:
+                              replies:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Reply count when available.
+                              reposts:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Repost/reblog count when available.
+                              favorites:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Favorite count when available.
+                              upvotes:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Upvote count when available.
+                              downvotes:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Downvote count when available.
+                            required:
+                            - replies
+                            - reposts
+                            - favorites
+                            - upvotes
+                            - downvotes
+                            description: Engagement metrics.
+                          media:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                type:
+                                  type: string
+                                  enum:
+                                  - image
+                                  - video
+                                  - audio
+                                  - gifv
+                                  - unknown
+                                  description: Normalized media type.
+                                url:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Primary media URL when available.
+                                previewUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Preview/thumbnail URL when available.
+                                description:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Alt text / description when available.
+                                width:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Width in pixels when available.
+                                height:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Height in pixels when available.
+                                durationSeconds:
+                                  type:
+                                  - number
+                                  - 'null'
+                                  minimum: 0
+                                  description: Duration in seconds for video/audio when available.
+                              required:
+                              - type
+                              - url
+                              - previewUrl
+                              - description
+                              - width
+                              - height
+                              - durationSeconds
+                              description: One media attachment on a Truth Social post.
+                            description: Media attachments in upstream order.
+                          linkPreview:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              url:
+                                type: string
+                                minLength: 1
+                                description: Linked page URL.
+                              title:
+                                type:
+                                - string
+                                - 'null'
+                                description: Link card title when available.
+                              description:
+                                type:
+                                - string
+                                - 'null'
+                                description: Link card description when available.
+                              providerName:
+                                type:
+                                - string
+                                - 'null'
+                                description: Link provider name when available.
+                              imageUrl:
+                                type:
+                                - string
+                                - 'null'
+                                description: Link card image URL when available.
+                            required:
+                            - url
+                            - title
+                            - description
+                            - providerName
+                            - imageUrl
+                            description: Link preview card when present.
+                          poll:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              expiresAt:
+                                type:
+                                - string
+                                - 'null'
+                                description: ISO-8601 poll expiration when available.
+                              expired:
+                                type: boolean
+                                description: Whether the poll has expired.
+                              multiple:
+                                type: boolean
+                                description: Whether multiple choices are allowed.
+                              votesCount:
+                                type:
+                                - integer
+                                - 'null'
+                                minimum: 0
+                                description: Total votes when available.
+                              options:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    title:
+                                      type: string
+                                      description: Poll option title.
+                                    votesCount:
+                                      type:
+                                      - integer
+                                      - 'null'
+                                      minimum: 0
+                                      description: Votes for this option when available.
+                                  required:
+                                  - title
+                                  - votesCount
+                                  description: One option in a Truth Social poll.
+                                description: Poll options in display order.
+                            required:
+                            - expiresAt
+                            - expired
+                            - multiple
+                            - votesCount
+                            - options
+                            description: Poll when present.
+                          quote:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              id:
+                                type: string
+                                pattern: ^\d{1,30}$
+                                description: Quoted post id.
+                              url:
+                                type: string
+                                minLength: 1
+                                description: Canonical quoted post URL.
+                              text:
+                                type:
+                                - string
+                                - 'null'
+                                description: Plain-text body of the quote.
+                              authorHandle:
+                                type:
+                                - string
+                                - 'null'
+                                description: Quoted author handle without @ when available.
+                            required:
+                            - id
+                            - url
+                            - text
+                            - authorHandle
+                            description: Quoted post summary when present.
+                        required:
+                        - id
+                        - url
+                        - createdAt
+                        - editedAt
+                        - text
+                        - spoilerText
+                        - language
+                        - visibility
+                        - isSensitive
+                        - author
+                        - inReplyToStatusId
+                        - inReplyToAccountId
+                        - quoteId
+                        - repostOfId
+                        - metrics
+                        - media
+                        - linkPreview
+                        - poll
+                        - quote
+                        description: Post when lookupStatus is `found`; null when `not_found`.
+                    required:
+                    - lookupStatus
+                    - post
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      post:
+                        id: '116972401572691045'
+                        url: https://truthsocial.com/@justthenews/116972401572691045
+                        createdAt: '2026-07-24T01:40:01.732Z'
+                        editedAt: null
+                        text: Patel returns looted artifacts to Indonesian president during overseas trip https://justthenews.com/government/federal-agencies/patel-returns-looted-artifacts-indonesian-president-during-overseas?utm_source=mux&utm_medium=social-media&utm_campaign=social-media-autopost
+                        spoilerText: null
+                        language: en
+                        visibility: public
+                        isSensitive: false
+                        author:
+                          platform: truthsocial
+                          id: '107815195611798453'
+                          handle: justthenews
+                          displayName: Just the News
+                          avatarUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/accounts/avatars/107/815/195/611/798/453/original/78803287358b5fe7.jpeg
+                          isVerified: true
+                          profileUrl: https://truthsocial.com/@justthenews
+                        inReplyToStatusId: null
+                        inReplyToAccountId: null
+                        quoteId: null
+                        repostOfId: null
+                        metrics:
+                          replies: 9
+                          reposts: 70
+                          favorites: 248
+                          upvotes: 248
+                          downvotes: 0
+                        media: []
+                        linkPreview:
+                          url: https://justthenews.com/government/federal-agencies/patel-returns-looted-artifacts-indonesian-president-during-overseas?utm_source=mux&utm_medium=social-media&utm_campaign=social-media-autopost
+                          title: Patel returns looted artifacts to Indonesian president during overseas trip
+                          description: Indonesian officials told reporters that the handover took place Wednesday at Subianto’s residence in the Indonesian capital, Jakarta. The return was part of an ongoing effort to recover and return cultural artifacts.
+                          providerName: justthenews.com
+                          imageUrl: https://static-assets-1.truthsocial.com/tmtg:prime-ts-assets/cache/preview_cards/images/074/561/271/original/3157141e1007c5dd.jpg
+                        poll: null
+                        quote: null
+                    meta:
+                      requestId: req_truthsocial_post_example
+                      creditsCharged: 2
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      post: null
+                    meta:
+                      requestId: req_truthsocial_post_not_found
+                      creditsCharged: 2
+                      version: v1
+        '400':
+          description: Invalid post URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying. Present on capacity, deadline, circuit-open, and safe transport outages (bounded 1–120).
+              schema:
+                type: integer
+                minimum: 1
+                maximum: 120
+                example: 1
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1TruthsocialPosts
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

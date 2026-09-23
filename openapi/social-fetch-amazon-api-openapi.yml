@@ -1,0 +1,983 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Amazon API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: Amazon
+paths:
+  /v1/amazon/shop:
+    get:
+      tags:
+      - Amazon
+      summary: Get Amazon Shop page
+      description: Get a creator Amazon Shop storefront by URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      x-socialfetch-agent-hints:
+        emptyResults: 'Empty `data.lists`, `data.trendingPicks`, or `data.curations` with `lookupStatus: found` means this storefront page has no collections (or this page of a paginated shop is empty). `data.lists` mixes idea lists (`kind: list`) and shoppable photos (`kind: photo`). The cursor pages `data.lists`; profile, trendingPicks, and curations are first-page fields. This is not a product PDP lookup.'
+        disambiguation: Pass an amazon.com/shop/... creator storefront URL. Extra path segments such as `/list/...` are resolved to the storefront. Product pages (`/dp/`) and brand stores (`/stores/`) are rejected with HTTP 400.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Public Amazon Shop storefront URL.
+        required: true
+        description: Public Amazon Shop storefront URL.
+        name: url
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 8192
+          description: Pagination cursor returned by a previous response.
+        required: false
+        description: Pagination cursor returned by a previous response.
+        name: cursor
+        in: query
+      responses:
+        '200':
+          description: Amazon Shop storefront page.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the storefront resolved for this request.
+                      profile:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          handle:
+                            type:
+                            - string
+                            - 'null'
+                            description: Shop handle from the storefront URL, when available.
+                          name:
+                            type:
+                            - string
+                            - 'null'
+                            description: Display name shown on the shop page.
+                          description:
+                            type:
+                            - string
+                            - 'null'
+                            description: Shop bio or description text, when available.
+                          avatarUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Creator avatar image URL, when available.
+                          profileUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Canonical public Amazon Shop storefront URL, when available.
+                          isTopCreator:
+                            type:
+                            - boolean
+                            - 'null'
+                            description: Whether Amazon marks this shop as a Top Creator. Null on continuation pages that omit profile details.
+                          socials:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                platform:
+                                  type: string
+                                  minLength: 1
+                                  description: Normalized social platform slug (e.g. tiktok, instagram).
+                                url:
+                                  type: string
+                                  minLength: 1
+                                  description: Public social profile or destination URL.
+                              required:
+                              - platform
+                              - url
+                              description: A social profile linked from the Amazon Shop page.
+                            description: Social destinations linked from the shop page.
+                        required:
+                        - handle
+                        - name
+                        - description
+                        - avatarUrl
+                        - profileUrl
+                        - isTopCreator
+                        - socials
+                        description: Shop profile when found; otherwise null.
+                      lists:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            kind:
+                              type:
+                              - string
+                              - 'null'
+                              enum:
+                              - list
+                              - photo
+                              - null
+                              description: Whether this row is an idea list or a shoppable photo. Null when the URL does not identify either.
+                            id:
+                              type:
+                              - string
+                              - 'null'
+                              description: List or shoppable-photo identifier from the public URL, when available.
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                              description: List title. Shoppable photos usually have no title.
+                            itemCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Number of items in the list, when available.
+                            imageUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: List cover image URL, when available.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Public URL for the list, when available.
+                          required:
+                          - kind
+                          - id
+                          - title
+                          - itemCount
+                          - imageUrl
+                          - url
+                          description: 'A row in the storefront lists feed: an idea list (`kind: list`) or a shoppable photo (`kind: photo`).'
+                        description: Idea lists and shoppable photos on this page of the storefront feed. Filter by `kind` to separate them.
+                      trendingPicks:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            asin:
+                              type:
+                              - string
+                              - 'null'
+                              description: Amazon ASIN for the product, when available.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public product URL (`/dp/{ASIN}`), when available.
+                            imageUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Product image URL, when available.
+                            price:
+                              type:
+                              - number
+                              - 'null'
+                              minimum: 0
+                              description: Current price in USD as a number, when available.
+                            discountPercent:
+                              type:
+                              - number
+                              - 'null'
+                              minimum: 0
+                              description: Discount percent as a number, when available.
+                          required:
+                          - asin
+                          - url
+                          - imageUrl
+                          - price
+                          - discountPercent
+                          description: A trending product pick on the Amazon Shop page.
+                        description: Trending product picks on this page.
+                      curations:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type:
+                              - string
+                              - 'null'
+                              description: Curation identifier from the public URL, when available.
+                            title:
+                              type:
+                              - string
+                              - 'null'
+                              description: Curation title.
+                            postCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Number of posts in the curation, when available.
+                            imageUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Curation cover image URL, when available.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Public URL for the curation, when available.
+                          required:
+                          - id
+                          - title
+                          - postCount
+                          - imageUrl
+                          - url
+                          description: A shoppable curation on the Amazon Shop page.
+                        description: Curations on this page.
+                      page:
+                        type: object
+                        properties:
+                          hasMore:
+                            type: boolean
+                            description: Whether another page is available.
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Cursor to pass in the next request when more pages exist; null on the last page.
+                        required:
+                        - hasMore
+                        - nextCursor
+                        description: Pagination state for the current response.
+                    required:
+                    - lookupStatus
+                    - profile
+                    - lists
+                    - trendingPicks
+                    - curations
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      profile:
+                        handle: sydneydelrey
+                        name: sydney del rey
+                        description: sharing all of my favorite Amazon finds ᥫ᭡ click the icons below to follow me on socials! all photo & video content is also shoppable x
+                        avatarUrl: https://m.media-amazon.com/images/I/A1rW00V-tHL._CR0%2C0%2C2560%2C2560_._US500_SCLZZZZZZZ_.jpg
+                        profileUrl: https://www.amazon.com/shop/sydneydelrey
+                        isTopCreator: true
+                        socials:
+                        - platform: tiktok
+                          url: https://vm.tiktok.com/ZTFrowSpg/
+                        - platform: youtube
+                          url: https://www.youtube.com/channel/UCWvW1JOQ-nsAinO1jLFgrVA
+                      lists:
+                      - kind: photo
+                        id: amzn1.shoppablemedia.v1.30c16cf6-7e24-42f5-a995-467affcbd606
+                        title: null
+                        itemCount: null
+                        imageUrl: null
+                        url: https://www.amazon.com/shop/sydneydelrey/photo/amzn1.shoppablemedia.v1.30c16cf6-7e24-42f5-a995-467affcbd606?tag=sydneybertonc-20
+                      - kind: list
+                        id: 16P4Z5SKOB7EG
+                        title: my amazon heel collection
+                        itemCount: 75
+                        imageUrl: null
+                        url: https://www.amazon.com/shop/sydneydelrey/list/16P4Z5SKOB7EG?tag=sydneybertonc-20
+                      - kind: list
+                        id: KUGNMP73CKST
+                        title: vacay fitspo (from videos)
+                        itemCount: 269
+                        imageUrl: null
+                        url: https://www.amazon.com/shop/sydneydelrey/list/KUGNMP73CKST?tag=sydneybertonc-20
+                      - kind: list
+                        id: 2AFQPW1LWR5N4
+                        title: MY JEWELRY 🫶🏼
+                        itemCount: 179
+                        imageUrl: null
+                        url: https://www.amazon.com/shop/sydneydelrey/list/2AFQPW1LWR5N4?tag=sydneybertonc-20
+                      - kind: list
+                        id: 3ATZV5FABO2FN
+                        title: spring/summer shoes
+                        itemCount: 222
+                        imageUrl: null
+                        url: https://www.amazon.com/shop/sydneydelrey/list/3ATZV5FABO2FN?tag=sydneybertonc-20
+                      - kind: list
+                        id: 3CYZIM94TRHGV
+                        title: crochet edit 🐚
+                        itemCount: 59
+                        imageUrl: null
+                        url: https://www.amazon.com/shop/sydneydelrey/list/3CYZIM94TRHGV?tag=sydneybertonc-20
+                      - kind: list
+                        id: 1R7PNVYVT17GJ
+                        title: fav activewear
+                        itemCount: 179
+                        imageUrl: null
+                        url: https://www.amazon.com/shop/sydneydelrey/list/1R7PNVYVT17GJ?tag=sydneybertonc-20
+                      - kind: list
+                        id: C1AG67YXZIK1
+                        title: skims inspired ✨
+                        itemCount: 178
+                        imageUrl: null
+                        url: https://www.amazon.com/shop/sydneydelrey/list/C1AG67YXZIK1?tag=sydneybertonc-20
+                      - kind: list
+                        id: DV4P9VTPUEH6
+                        title: two pc sets
+                        itemCount: 228
+                        imageUrl: https://m.media-amazon.com/images/I/5192rfGxt+L._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/DV4P9VTPUEH6?tag=sydneybertonc-20
+                      - kind: list
+                        id: 3P0YR7TIS1VUP
+                        title: elevated basics
+                        itemCount: 71
+                        imageUrl: https://m.media-amazon.com/images/I/61WDTXEiL2L._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/3P0YR7TIS1VUP?tag=sydneybertonc-20
+                      - kind: list
+                        id: 5SVIEYKA1LIE
+                        title: maxi, midi & mini skirts
+                        itemCount: 95
+                        imageUrl: https://m.media-amazon.com/images/I/51dLZAxvNYL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/5SVIEYKA1LIE?tag=sydneybertonc-20
+                      - kind: list
+                        id: 7M0T5CIXH7WP
+                        title: fall/winter tops
+                        itemCount: 204
+                        imageUrl: https://m.media-amazon.com/images/I/71kXLiKV4cL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/7M0T5CIXH7WP?tag=sydneybertonc-20
+                      - kind: list
+                        id: 2DZ8JX696PDJT
+                        title: spring/summer tops
+                        itemCount: 194
+                        imageUrl: https://m.media-amazon.com/images/I/61JnAp2RTZL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/2DZ8JX696PDJT?tag=sydneybertonc-20
+                      - kind: list
+                        id: 3AC7HV3IUB385
+                        title: corset tops with boning
+                        itemCount: 39
+                        imageUrl: https://m.media-amazon.com/images/I/71gk37X6ugL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/3AC7HV3IUB385?tag=sydneybertonc-20
+                      - kind: list
+                        id: 2GK5L3R8SDDP8
+                        title: mini dresses
+                        itemCount: 246
+                        imageUrl: https://m.media-amazon.com/images/I/61gQlqhUiCL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/2GK5L3R8SDDP8?tag=sydneybertonc-20
+                      - kind: list
+                        id: 3OL1EMSZ7FWNC
+                        title: embellished heels
+                        itemCount: 88
+                        imageUrl: https://m.media-amazon.com/images/I/61s1leUzgvL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/3OL1EMSZ7FWNC?tag=sydneybertonc-20
+                      - kind: list
+                        id: 1OX9UQ28GC2HG
+                        title: fall shoes
+                        itemCount: 137
+                        imageUrl: https://m.media-amazon.com/images/I/51cAF3fCvlL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/1OX9UQ28GC2HG?tag=sydneybertonc-20
+                      - kind: list
+                        id: 3QK78CNQ4RYOX
+                        title: heel sandals
+                        itemCount: 359
+                        imageUrl: https://m.media-amazon.com/images/I/61fTW+gHvqL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/3QK78CNQ4RYOX?tag=sydneybertonc-20
+                      - kind: list
+                        id: B20KHM3ED2DG
+                        title: wedges & platforms
+                        itemCount: 83
+                        imageUrl: https://m.media-amazon.com/images/I/71qlS2XzKXL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/B20KHM3ED2DG?tag=sydneybertonc-20
+                      - kind: list
+                        id: 2QE72MMAGTHHH
+                        title: closed toe heels
+                        itemCount: 166
+                        imageUrl: https://m.media-amazon.com/images/I/51DKgAHsT-L._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/2QE72MMAGTHHH?tag=sydneybertonc-20
+                      trendingPicks:
+                      - asin: B0FCRHPMWB
+                        url: https://www.amazon.com/dp/B0FCRHPMWB?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/31KfvtKR1oL._AC_.jpg
+                        price: 25.64
+                        discountPercent: null
+                      - asin: B0FW41KWFD
+                        url: https://www.amazon.com/dp/B0FW41KWFD?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/41NLqVsHcUL._AC_.jpg
+                        price: 19.97
+                        discountPercent: null
+                      - asin: B0FZB1ZHL5
+                        url: https://www.amazon.com/dp/B0FZB1ZHL5?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/31VhngG8iUL._AC_.jpg
+                        price: 14.97
+                        discountPercent: null
+                      - asin: B0GGXZKDT8
+                        url: https://www.amazon.com/dp/B0GGXZKDT8?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/41zhtHKtyuL._AC_.jpg
+                        price: 63.74
+                        discountPercent: null
+                      - asin: B0G6C52H25
+                        url: https://www.amazon.com/dp/B0G6C52H25?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/31noWBSbV2L._AC_.jpg
+                        price: 14.98
+                        discountPercent: null
+                      - asin: B0G5XH7FXF
+                        url: https://www.amazon.com/dp/B0G5XH7FXF?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/31EeK+PopNL._AC_.jpg
+                        price: 35.98
+                        discountPercent: null
+                      - asin: B0F88ZW3DG
+                        url: https://www.amazon.com/dp/B0F88ZW3DG?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/41w0hp0xF5L._AC_.jpg
+                        price: 54.99
+                        discountPercent: null
+                      - asin: B0H7JB3Z9D
+                        url: https://www.amazon.com/dp/B0H7JB3Z9D?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/31C2GaALkUL._AC_.jpg
+                        price: 37.99
+                        discountPercent: null
+                      - asin: B0H8RMWYVV
+                        url: https://www.amazon.com/dp/B0H8RMWYVV?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/41j7AGRu9rL._AC_.jpg
+                        price: 39.99
+                        discountPercent: null
+                      - asin: B0H2ZH81PV
+                        url: https://www.amazon.com/dp/B0H2ZH81PV?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/41JAw2oOWAL._AC_.jpg
+                        price: 37.59
+                        discountPercent: null
+                      - asin: B0F2Y3WQHZ
+                        url: https://www.amazon.com/dp/B0F2Y3WQHZ?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/31skVCdcqBL._AC_.jpg
+                        price: 28.99
+                        discountPercent: null
+                      - asin: B0G4MC8S2L
+                        url: https://www.amazon.com/dp/B0G4MC8S2L?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/41+oSyV44DL._AC_.jpg
+                        price: 34.99
+                        discountPercent: null
+                      - asin: B0FMRM4T7W
+                        url: https://www.amazon.com/dp/B0FMRM4T7W?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/31enDjeNdfL._AC_.jpg
+                        price: 59.99
+                        discountPercent: null
+                      - asin: B0FBR1LHVW
+                        url: https://www.amazon.com/dp/B0FBR1LHVW?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/31tCey+xieL._AC_.jpg
+                        price: 42.99
+                        discountPercent: null
+                      - asin: B0FT89DQ5X
+                        url: https://www.amazon.com/dp/B0FT89DQ5X?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/31p6CvD9WhL._AC_.jpg
+                        price: 179
+                        discountPercent: null
+                      - asin: B0GD1CBHSH
+                        url: https://www.amazon.com/dp/B0GD1CBHSH?tag=sydneybertonc-20
+                        imageUrl: https://m.media-amazon.com/images/I/31q0m9-ZPKL._AC_.jpg
+                        price: 26.99
+                        discountPercent: null
+                      curations:
+                      - id: bdca11e0-6920-4402-ac72-2f2016ed1e36
+                        title: SHOES ✨
+                        postCount: 13
+                        imageUrl: https://m.media-amazon.com/images/I/51fg2nMAyXL._US225_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/curation/bdca11e0-6920-4402-ac72-2f2016ed1e36
+                      - id: 45a32943-0bd5-495a-8630-2390fac635c4
+                        title: styled fits (non try on)
+                        postCount: 121
+                        imageUrl: https://m.media-amazon.com/images/S/shoppable-media-external-prod-iad-us-east-1/3520061e-8329-48e2-94aa-879edff35c67/a07df-6366-4871-9447-4eb791a01._SX225_SCLZZZZZZZ_.jpeg
+                        url: https://www.amazon.com/shop/sydneydelrey/curation/45a32943-0bd5-495a-8630-2390fac635c4
+                      - id: 5f8fb9ec-e682-4ed1-a9ac-654661e63d51
+                        title: S/S fit try ons
+                        postCount: 108
+                        imageUrl: https://m.media-amazon.com/images/S/shoppable-media-external-prod-iad-us-east-1/3d21bc19-066d-478e-8a9f-f01fb4fa8d4f/51bdc-bc29-416b-8940-8f7107072._SX225_SCLZZZZZZZ_.jpeg
+                        url: https://www.amazon.com/shop/sydneydelrey/curation/5f8fb9ec-e682-4ed1-a9ac-654661e63d51
+                      - id: 7d2a59d2-d2d5-459a-a664-90ae837c2fec
+                        title: Gym outfits
+                        postCount: 114
+                        imageUrl: https://m.media-amazon.com/images/S/shoppable-media-external-prod-iad-us-east-1/047e02b7-0e8d-4c73-9a42-6d8adfd9cdf8/e6d57-8dfe-4d36-9eed-d376838e7._SX225_SCLZZZZZZZ_.jpeg
+                        url: https://www.amazon.com/shop/sydneydelrey/curation/7d2a59d2-d2d5-459a-a664-90ae837c2fec
+                      - id: c288f6db-d87f-482a-b8e0-295e21cba45d
+                        title: PRIME DAY
+                        postCount: 13
+                        imageUrl: https://m.media-amazon.com/images/I/61WlaUxV0OL._US225_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/curation/c288f6db-d87f-482a-b8e0-295e21cba45d
+                      - id: d3b3bc61-e5cb-41b7-8ef3-a97835802528
+                        title: FESTIVAL 🪩
+                        postCount: 50
+                        imageUrl: https://m.media-amazon.com/images/S/shoppable-media-external-prod-iad-us-east-1/5f7beb8f-8082-4a1b-ad7e-b74225afaa41/02f27-de2b-4798-be69-2463e279f._SX225_SCLZZZZZZZ_.jpeg
+                        url: https://www.amazon.com/shop/sydneydelrey/curation/d3b3bc61-e5cb-41b7-8ef3-a97835802528
+                      - id: 94a14bea-11ab-49c9-b1eb-d14c8892ac4c
+                        title: S/S/vacay fits
+                        postCount: 304
+                        imageUrl: https://m.media-amazon.com/images/S/shoppable-media-external-prod-iad-us-east-1/b97c7bda-c7b5-413c-a56b-eafa8af6178f/f2c70-8360-4f82-b9ac-e4fc43b66._SX225_SCLZZZZZZZ_.jpeg
+                        url: https://www.amazon.com/shop/sydneydelrey/curation/94a14bea-11ab-49c9-b1eb-d14c8892ac4c
+                      - id: 1514dc33-6b7f-4639-971f-0d377539f85d
+                        title: fall/winter fits
+                        postCount: 212
+                        imageUrl: https://m.media-amazon.com/images/S/shoppable-media-external-prod-iad-us-east-1/a28b689b-400a-43ac-9137-3c4758f014b6/dc486-906c-45b6-b082-508ec7053._SX225_SCLZZZZZZZ_.jpeg
+                        url: https://www.amazon.com/shop/sydneydelrey/curation/1514dc33-6b7f-4639-971f-0d377539f85d
+                      - id: 1060e92a-7bbe-4581-8cf8-888a6a4ded70
+                        title: My jewelry 💎
+                        postCount: 34
+                        imageUrl: https://m.media-amazon.com/images/S/shoppable-media-external-prod-iad-us-east-1/48f67417-062f-456b-a254-dbfa2f0e2da7/f314f-8c6a-4eae-9501-e3c284b23._SX225_SCLZZZZZZZ_.jpeg
+                        url: https://www.amazon.com/shop/sydneydelrey/curation/1060e92a-7bbe-4581-8cf8-888a6a4ded70
+                      - id: b74328f3-11ce-4a55-a844-40f6aff6e467
+                        title: Holiday outfits (xmas, nye, vday, st pats)
+                        postCount: 175
+                        imageUrl: https://m.media-amazon.com/images/S/shoppable-media-external-prod-iad-us-east-1/a82d4490-2fca-4648-bea1-a39a9ac029b7/d1926-6b07-4cb6-96af-571b46644._SX225_SCLZZZZZZZ_.jpeg
+                        url: https://www.amazon.com/shop/sydneydelrey/curation/b74328f3-11ce-4a55-a844-40f6aff6e467
+                      - id: 83cfdc54-e837-44c2-89ab-5eb9299828e9
+                        title: home goods
+                        postCount: 38
+                        imageUrl: https://m.media-amazon.com/images/S/shoppable-media-external-prod-iad-us-east-1/baddd261-ab7e-4998-969e-5c7148eb2dfa/2356e-e857-45e7-a766-a97152a8d._SX225_SCLZZZZZZZ_.jpeg
+                        url: https://www.amazon.com/shop/sydneydelrey/curation/83cfdc54-e837-44c2-89ab-5eb9299828e9
+                      page:
+                        hasMore: true
+                        nextCursor: amzn1.ideas.2QE72MMAGTHHH_0_2026-08-22T20:41:16.807Z
+                    meta:
+                      requestId: req_055aba0b-33f9-44c7-a5cc-242576eb1f30
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      profile: null
+                      lists: []
+                      trendingPicks: []
+                      curations: []
+                      page:
+                        hasMore: false
+                        nextCursor: null
+                    meta:
+                      requestId: req_40488a0e-008e-49aa-aa58-1d8f098041d9
+                      creditsCharged: 1
+                      version: v1
+                paginated:
+                  value:
+                    data:
+                      lookupStatus: found
+                      profile:
+                        handle: sydneydelrey
+                        name: null
+                        description: null
+                        avatarUrl: null
+                        profileUrl: https://www.amazon.com/shop/sydneydelrey
+                        isTopCreator: null
+                        socials: []
+                      lists:
+                      - kind: photo
+                        id: amzn1.shoppablemedia.v1.aa61bbd3-096e-45b6-adc1-9758d561d531
+                        title: null
+                        itemCount: null
+                        imageUrl: https://m.media-amazon.com/images/S/shoppable-media-external-prod-iad-us-east-1/308a3856-b6b7-4006-a8b1-1d82f10bc487/41345-76cf-4c37-9e61-039f4ea53._AC_._SX900_SCLZZZZZZZ_.jpeg
+                        url: https://www.amazon.com/shop/sydneydelrey/photo/amzn1.shoppablemedia.v1.aa61bbd3-096e-45b6-adc1-9758d561d531?tag=sydneybertonc-20
+                      - kind: list
+                        id: 3KW0MIND4G3IY
+                        title: statement jewels
+                        itemCount: 44
+                        imageUrl: https://m.media-amazon.com/images/I/61CcI+ZfPML._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/3KW0MIND4G3IY?tag=sydneybertonc-20
+                      - kind: list
+                        id: 1EB0NFBTDO35J
+                        title: bags
+                        itemCount: 201
+                        imageUrl: https://m.media-amazon.com/images/I/514Zbt0QoYL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/1EB0NFBTDO35J?tag=sydneybertonc-20
+                      - kind: list
+                        id: QLL6Z67G403B
+                        title: mini shorts & skorts
+                        itemCount: 198
+                        imageUrl: https://m.media-amazon.com/images/I/710XtMHy8hL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/QLL6Z67G403B?tag=sydneybertonc-20
+                      - kind: list
+                        id: 46GPQU46U4NW
+                        title: baby yellow finds 🧈
+                        itemCount: 225
+                        imageUrl: https://m.media-amazon.com/images/I/718mvWgodLL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/46GPQU46U4NW?tag=sydneybertonc-20
+                      - kind: list
+                        id: B2C2XJK73BDT
+                        title: best basics 🫶🏼
+                        itemCount: 189
+                        imageUrl: https://m.media-amazon.com/images/I/51MGYS+sdeL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/B2C2XJK73BDT?tag=sydneybertonc-20
+                      - kind: list
+                        id: F8AS75OYLAA6
+                        title: PJS
+                        itemCount: 147
+                        imageUrl: https://m.media-amazon.com/images/I/71JlFmPvsJL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/F8AS75OYLAA6?tag=sydneybertonc-20
+                      - kind: list
+                        id: IX98IL7BZN34
+                        title: gym sets & onesies
+                        itemCount: 225
+                        imageUrl: https://m.media-amazon.com/images/I/81aIQFtoVTL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/IX98IL7BZN34?tag=sydneybertonc-20
+                      - kind: list
+                        id: 198HUSQTTFU1Q
+                        title: little black dresses 🖤
+                        itemCount: 133
+                        imageUrl: https://m.media-amazon.com/images/I/41DqWomHsHL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/198HUSQTTFU1Q?tag=sydneybertonc-20
+                      - kind: list
+                        id: 3PDR5YVGLMWCO
+                        title: fall fashion
+                        itemCount: 137
+                        imageUrl: https://m.media-amazon.com/images/I/71RpqtsSTzL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/3PDR5YVGLMWCO?tag=sydneybertonc-20
+                      - kind: list
+                        id: 2LXB3R5H1XV9O
+                        title: back to school 🍎
+                        itemCount: 111
+                        imageUrl: https://m.media-amazon.com/images/I/71EPuy+qGGL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/2LXB3R5H1XV9O?tag=sydneybertonc-20
+                      - kind: list
+                        id: 1JVJAN9VKIAPO
+                        title: capris
+                        itemCount: 57
+                        imageUrl: https://m.media-amazon.com/images/I/61LinCslBTL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/1JVJAN9VKIAPO?tag=sydneybertonc-20
+                      - kind: list
+                        id: 2G57BBMMN2KXD
+                        title: sweatpants, shorts & yoga pants
+                        itemCount: 37
+                        imageUrl: https://m.media-amazon.com/images/I/51Sybx+abBL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/2G57BBMMN2KXD?tag=sydneybertonc-20
+                      - kind: list
+                        id: 1MA6DJZCOYXRE
+                        title: flat sandals
+                        itemCount: 77
+                        imageUrl: https://m.media-amazon.com/images/I/51s3+GBI5LL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/1MA6DJZCOYXRE?tag=sydneybertonc-20
+                      - kind: list
+                        id: 2QFU6BQ08TOOA
+                        title: tops with built in pads
+                        itemCount: 59
+                        imageUrl: https://m.media-amazon.com/images/I/71W1T-+2CIL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/2QFU6BQ08TOOA?tag=sydneybertonc-20
+                      - kind: list
+                        id: 8GKS3G0EVT95
+                        title: tropical vacation cart 🌺
+                        itemCount: 266
+                        imageUrl: https://m.media-amazon.com/images/I/71HZdXGwfBL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/8GKS3G0EVT95?tag=sydneybertonc-20
+                      - kind: list
+                        id: 24GV4S1RFFOCY
+                        title: festi fashion 🪩✨
+                        itemCount: 335
+                        imageUrl: https://m.media-amazon.com/images/I/61j2N6aJ2oL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/24GV4S1RFFOCY?tag=sydneybertonc-20
+                      - kind: list
+                        id: T15MXS47HF1S
+                        title: free people inspired ✨
+                        itemCount: 98
+                        imageUrl: https://m.media-amazon.com/images/I/61njLFe+0WL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/T15MXS47HF1S?tag=sydneybertonc-20
+                      - kind: list
+                        id: 2SYXITEOATNRH
+                        title: Flats
+                        itemCount: 66
+                        imageUrl: https://m.media-amazon.com/images/I/61cAsWdgPtL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/2SYXITEOATNRH?tag=sydneybertonc-20
+                      - kind: list
+                        id: W3CUMCLIY2VH
+                        title: halloween
+                        itemCount: 157
+                        imageUrl: https://m.media-amazon.com/images/I/61VVrDkLfPL._AC_._US550_SCLZZZZZZZ_.jpg
+                        url: https://www.amazon.com/shop/sydneydelrey/list/W3CUMCLIY2VH?tag=sydneybertonc-20
+                      trendingPicks: []
+                      curations: []
+                      page:
+                        hasMore: true
+                        nextCursor: amzn1.ideas.W3CUMCLIY2VH_0_2026-08-13T23:47:36.134Z
+                    meta:
+                      requestId: req_e2eabf70-3c51-4e19-88c7-65eafbb1f4b3
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1AmazonShop
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

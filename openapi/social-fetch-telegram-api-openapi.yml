@@ -1,0 +1,1469 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Telegram API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: Telegram
+paths:
+  /v1/telegram/channels/{handle}:
+    get:
+      tags:
+      - Telegram
+      summary: Get Telegram public entity
+      description: Get metadata for a public Telegram channel or group by username.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Telegram public username (channel or group), with or without leading @.
+        required: true
+        description: Telegram public username (channel or group), with or without leading @.
+        name: handle
+        in: path
+      responses:
+        '200':
+          description: Channel or group lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        - restricted
+                        description: Whether the channel or group was found, restricted, or not found.
+                      entity:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          entityType:
+                            type: string
+                            enum:
+                            - channel
+                            - group
+                            - user_or_bot
+                            - unknown
+                            description: Resolved Telegram public entity type.
+                          title:
+                            type:
+                            - string
+                            - 'null'
+                            description: Display name.
+                          description:
+                            type:
+                            - string
+                            - 'null'
+                            description: Bio/description text. Line breaks are preserved when Telegram renders them on the public page.
+                          subscriberCount:
+                            type:
+                            - integer
+                            - 'null'
+                            description: Subscriber count for broadcast channels from Telegram's public page at t.me/{handle}. Null for groups and other entity types.
+                          memberCount:
+                            type:
+                            - integer
+                            - 'null'
+                            description: Member count for public groups/supergroups. Null for channels and other entity types.
+                          onlineCount:
+                            type:
+                            - integer
+                            - 'null'
+                            description: Currently online member count when Telegram shows it on the public group page. Null for channels and other entity types.
+                          avatarUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: URL of the avatar image when Telegram serves a CDN photo.
+                          isVerified:
+                            type: boolean
+                            description: Whether the entity has a Telegram verified badge.
+                          handle:
+                            type: string
+                            description: The canonical username/handle that was looked up.
+                        required:
+                        - entityType
+                        - title
+                        - description
+                        - subscriberCount
+                        - memberCount
+                        - onlineCount
+                        - avatarUrl
+                        - isVerified
+                        - handle
+                        description: Entity data when lookupStatus is `found`; null when `not_found` or `restricted`.
+                    required:
+                    - lookupStatus
+                    - entity
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      entity:
+                        entityType: channel
+                        title: Test Channel
+                        description: Channel description text.
+                        subscriberCount: 12500
+                        memberCount: null
+                        onlineCount: null
+                        avatarUrl: https://cdn4.telesco.pe/file/avatar.jpg
+                        isVerified: false
+                        handle: testchannel
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                group:
+                  value:
+                    data:
+                      lookupStatus: found
+                      entity:
+                        entityType: group
+                        title: Futboltv ⚽️
+                        description: 'Gol Videolari✅
+
+                          Futbol Yangiliklari✅
+
+                          Futbolga oid qiziqarli ma''lumotlar✅'
+                        subscriberCount: null
+                        memberCount: 1742860
+                        onlineCount: 27088
+                        avatarUrl: null
+                        isVerified: false
+                        handle: futbol_fudbol_sport_tv_gollar
+                    meta:
+                      requestId: req_01example_group
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      entity: null
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+                restricted:
+                  value:
+                    data:
+                      lookupStatus: restricted
+                      entity: null
+                    meta:
+                      requestId: req_01example_restricted
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid handle
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying. Present on capacity, deadline, circuit-open, and safe transport outages (bounded 1–120).
+              schema:
+                type: integer
+                minimum: 1
+                maximum: 120
+                example: 1
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1TelegramChannelsByHandle
+      x-operation-id-source: derived
+  /v1/telegram/channels/{handle}/posts:
+    get:
+      tags:
+      - Telegram
+      summary: Get Telegram channel posts
+      description: List recent posts from a public Telegram channel. Groups are not supported.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Telegram public username (channel or group), with or without leading @.
+        required: true
+        description: Telegram public username (channel or group), with or without leading @.
+        name: handle
+        in: path
+      - schema:
+          type: string
+          description: Opaque pagination cursor from a previous response. Omit for the first page.
+        required: false
+        description: Opaque pagination cursor from a previous response. Omit for the first page.
+        name: cursor
+        in: query
+      responses:
+        '200':
+          description: Channel posts listing.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        - restricted
+                        description: Whether the channel was found, restricted, or not found.
+                      posts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            postId:
+                              type: string
+                              description: Unique post ID within the channel.
+                            text:
+                              type:
+                              - string
+                              - 'null'
+                              description: Post text as simplified HTML (<br> line breaks, <a href> links, custom tg-emoji expanded to unicode, common HTML entities decoded so arrows and quotes read naturally in JSON). Null if the post contains only media.
+                            date:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO 8601 publication timestamp.
+                            views:
+                              type:
+                              - integer
+                              - 'null'
+                              description: View count from the public feed. Telegram may abbreviate large values (e.g. 1.13M → 1130000). Null for very recent posts.
+                            forwardedFrom:
+                              type:
+                              - string
+                              - 'null'
+                              description: Original channel name if this post was forwarded.
+                            replyTo:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                postId:
+                                  type: string
+                                  description: Numeric post ID of the message being replied to, from the public t.me link in the reply preview.
+                                authorName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Channel or author name shown in the reply preview bar.
+                                text:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Preview snippet of the replied-to message as shown in the embed (often truncated). May be a short media label such as Photo when Telegram does not show body text.
+                              default: null
+                              required:
+                              - postId
+                              - authorName
+                              - text
+                              description: Reply/quote preview when this post replies to another channel message; null otherwise.
+                            photoUrls:
+                              type: array
+                              items:
+                                type: string
+                              description: Photo URLs from Telegram CDN. May expire over time; download promptly if needed.
+                            videoUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Video URL if the post contains a video. May expire over time; download promptly if needed.
+                            reactions:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  emoji:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    description: Unicode reaction emoji when Telegram exposes it in the public HTML (including Stars as ⭐). Null for premium/custom animated reactions — use customEmojiId and emojiImageUrl.
+                                  customEmojiId:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    default: null
+                                    description: Telegram custom emoji document id when the reaction uses a premium/custom emoji.
+                                  emojiImageUrl:
+                                    type:
+                                    - string
+                                    - 'null'
+                                    default: null
+                                    description: Preview image URL for custom emoji reactions (from Telegram's public emoji metadata). Null for standard unicode reactions.
+                                  isPaid:
+                                    type: boolean
+                                    default: false
+                                    description: True when the reaction is a Telegram Stars paid reaction.
+                                  count:
+                                    type: integer
+                                    minimum: 0
+                                    description: Number of users who added this reaction.
+                                required:
+                                - emoji
+                                - count
+                                description: A reaction emoji and count from the public channel feed.
+                              default: []
+                              description: Reaction counts shown on the public preview page. Empty when Telegram omits them for a post.
+                          required:
+                          - postId
+                          - text
+                          - date
+                          - views
+                          - forwardedFrom
+                          - photoUrls
+                          - videoUrl
+                          description: A single Telegram channel post.
+                        description: Posts in reverse chronological order (newest first) when lookupStatus is `found`. Empty when `not_found` or `restricted`.
+                      page:
+                        type: object
+                        properties:
+                          hasMore:
+                            type: boolean
+                            description: Whether another page is available.
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Cursor to pass in the next request when more pages exist; null on the last page.
+                        required:
+                        - hasMore
+                        - nextCursor
+                        description: Pagination state for the current page of posts.
+                    required:
+                    - lookupStatus
+                    - posts
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      posts:
+                      - postId: '100'
+                        text: Hello world
+                        date: '2026-01-15T10:00:00+00:00'
+                        views: 1200
+                        forwardedFrom: null
+                        replyTo: null
+                        photoUrls: []
+                        videoUrl: null
+                        reactions: []
+                      page:
+                        hasMore: false
+                        nextCursor: null
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      posts: []
+                      page:
+                        hasMore: false
+                        nextCursor: null
+                    meta:
+                      requestId: req_01example_posts_nf
+                      creditsCharged: 1
+                      version: v1
+                restricted:
+                  value:
+                    data:
+                      lookupStatus: restricted
+                      posts: []
+                      page:
+                        hasMore: false
+                        nextCursor: null
+                    meta:
+                      requestId: req_01example_posts_restricted
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid handle or pagination cursor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying. Present on capacity, deadline, circuit-open, and safe transport outages (bounded 1–120).
+              schema:
+                type: integer
+                minimum: 1
+                maximum: 120
+                example: 1
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1TelegramChannelsByHandlePosts
+      x-operation-id-source: derived
+  /v1/telegram/channels/{handle}/posts/{postId}:
+    get:
+      tags:
+      - Telegram
+      summary: Get Telegram channel post
+      description: Get a single public post from a Telegram channel by handle and post ID. Groups are not supported.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          description: Telegram public username (channel or group), with or without leading @.
+        required: true
+        description: Telegram public username (channel or group), with or without leading @.
+        name: handle
+        in: path
+      - schema:
+          type: string
+          maxLength: 20
+          pattern: ^\d+$
+          description: Numeric Telegram channel post ID from the public URL.
+        required: true
+        description: Numeric Telegram channel post ID from the public URL.
+        name: postId
+        in: path
+      responses:
+        '200':
+          description: Channel post lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        - restricted
+                        description: Whether the channel post was found, restricted, or not found.
+                      post:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          postId:
+                            type: string
+                            description: Unique post ID within the channel.
+                          text:
+                            type:
+                            - string
+                            - 'null'
+                            description: Post text as simplified HTML (<br> line breaks, <a href> links, custom tg-emoji expanded to unicode, common HTML entities decoded so arrows and quotes read naturally in JSON). Null if the post contains only media.
+                          date:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO 8601 publication timestamp.
+                          views:
+                            type:
+                            - integer
+                            - 'null'
+                            description: View count from the public feed. Telegram may abbreviate large values (e.g. 1.13M → 1130000). Null for very recent posts.
+                          forwardedFrom:
+                            type:
+                            - string
+                            - 'null'
+                            description: Original channel name if this post was forwarded.
+                          replyTo:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              postId:
+                                type: string
+                                description: Numeric post ID of the message being replied to, from the public t.me link in the reply preview.
+                              authorName:
+                                type:
+                                - string
+                                - 'null'
+                                description: Channel or author name shown in the reply preview bar.
+                              text:
+                                type:
+                                - string
+                                - 'null'
+                                description: Preview snippet of the replied-to message as shown in the embed (often truncated). May be a short media label such as Photo when Telegram does not show body text.
+                            default: null
+                            required:
+                            - postId
+                            - authorName
+                            - text
+                            description: Reply/quote preview when this post replies to another channel message; null otherwise.
+                          photoUrls:
+                            type: array
+                            items:
+                              type: string
+                            description: Photo URLs from Telegram CDN. May expire over time; download promptly if needed.
+                          videoUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Video URL if the post contains a video. May expire over time; download promptly if needed.
+                          reactions:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                emoji:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Unicode reaction emoji when Telegram exposes it in the public HTML (including Stars as ⭐). Null for premium/custom animated reactions — use customEmojiId and emojiImageUrl.
+                                customEmojiId:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  default: null
+                                  description: Telegram custom emoji document id when the reaction uses a premium/custom emoji.
+                                emojiImageUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  default: null
+                                  description: Preview image URL for custom emoji reactions (from Telegram's public emoji metadata). Null for standard unicode reactions.
+                                isPaid:
+                                  type: boolean
+                                  default: false
+                                  description: True when the reaction is a Telegram Stars paid reaction.
+                                count:
+                                  type: integer
+                                  minimum: 0
+                                  description: Number of users who added this reaction.
+                              required:
+                              - emoji
+                              - count
+                              description: A reaction emoji and count from the public channel feed.
+                            default: []
+                            description: Reaction counts shown on the public preview page. Empty when Telegram omits them for a post.
+                        required:
+                        - postId
+                        - text
+                        - date
+                        - views
+                        - forwardedFrom
+                        - photoUrls
+                        - videoUrl
+                        description: The post when lookupStatus is `found`; null when `not_found` or `restricted`.
+                    required:
+                    - lookupStatus
+                    - post
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      post:
+                        postId: '93'
+                        text: In Telegram 10.12<br>⭐️ Premium Users can use Custom emojis in Polls by pressing on 🙂 icon
+                        date: '2024-05-04T14:11:43+00:00'
+                        views: 193000
+                        forwardedFrom: null
+                        replyTo: null
+                        photoUrls:
+                        - https://cdn4.telesco.pe/file/kmnXZjsr08SIjsurmBb8HZiJSr5Cs1XmCt4HAu9As-f3KYbWCCpGj6koOApEEgruutsEukhb2SV5EWmAudRoXozwbPTjKZ-hat00nEBWDbcfo7Uu4Dp-N2zQVyLGOklQVGeaHrnaAVQOrm6pCgSCWS7jzWsANZaIBD6inN4mna9_Q1125cWDI_bfvzmwQBeHGfMttbtvI499ffpT3OU2vU2pccJPMLbvh7YIdCQaC_N_jj0Ai0mx9nh46Tz-On1GDIApvrlY4JPqn2CpF3EXT2Lxk6hp83NlRCx2LN6ixZohSyS9ZmcroYBiuCNEpAL2Iy8_UYep_wkNXbczWWhmFg.jpg
+                        videoUrl: null
+                        reactions:
+                        - emoji: ⭐
+                          customEmojiId: null
+                          emojiImageUrl: null
+                          isPaid: true
+                          count: 3
+                        - emoji: null
+                          customEmojiId: '5400182803553853382'
+                          emojiImageUrl: null
+                          isPaid: false
+                          count: 266
+                        - emoji: null
+                          customEmojiId: '5427233156124131061'
+                          emojiImageUrl: null
+                          isPaid: false
+                          count: 195
+                        - emoji: null
+                          customEmojiId: '5296769225245861798'
+                          emojiImageUrl: null
+                          isPaid: false
+                          count: 97
+                        - emoji: null
+                          customEmojiId: '5424972470023104089'
+                          emojiImageUrl: null
+                          isPaid: false
+                          count: 84
+                        - emoji: ⭐️
+                          customEmojiId: '5427086749278943412'
+                          emojiImageUrl: null
+                          isPaid: false
+                          count: 46
+                        - emoji: ❤
+                          customEmojiId: null
+                          emojiImageUrl: null
+                          isPaid: false
+                          count: 26
+                        - emoji: 👍
+                          customEmojiId: null
+                          emojiImageUrl: null
+                          isPaid: false
+                          count: 23
+                        - emoji: 🆒
+                          customEmojiId: null
+                          emojiImageUrl: null
+                          isPaid: false
+                          count: 21
+                        - emoji: null
+                          customEmojiId: '5296615048804837674'
+                          emojiImageUrl: null
+                          isPaid: false
+                          count: 18
+                        - emoji: 🤣
+                          customEmojiId: null
+                          emojiImageUrl: null
+                          isPaid: false
+                          count: 12
+                        - emoji: 🔥
+                          customEmojiId: null
+                          emojiImageUrl: null
+                          isPaid: false
+                          count: 10
+                    meta:
+                      requestId: req_01example_post
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      post: null
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+                restricted:
+                  value:
+                    data:
+                      lookupStatus: restricted
+                      post: null
+                    meta:
+                      requestId: req_01example_post_restricted
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid handle or post ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying. Present on capacity, deadline, circuit-open, and safe transport outages (bounded 1–120).
+              schema:
+                type: integer
+                minimum: 1
+                maximum: 120
+                example: 1
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1TelegramChannelsByHandlePostsByPostId
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

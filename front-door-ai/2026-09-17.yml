@@ -1,0 +1,27 @@
+# Front Door AI Index — social-fetch — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: social-fetch
+  lexicon_version: '1.0'
+  probed_at: '2026-09-17'
+  host: www.socialfetch.dev
+  final_host: www.socialfetch.dev
+  ownership: own
+  owner: social-fetch
+  shares_host_with: null
+  inherited_from: null
+  verdict: scored
+  score: 2
+  host_score: 2
+  density: 0.98
+  words: 2050
+  tiers:
+    agentic: 0
+    core: 1
+    model: 1
+  ambiguous: 2
+  top_terms:
+    agent: 2
+    Claude: 1
+    LLMs: 1

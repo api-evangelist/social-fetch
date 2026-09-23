@@ -1,0 +1,476 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Auth API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: Auth
+paths:
+  /v1/whoami:
+    get:
+      tags:
+      - Auth
+      summary: Whoami
+      description: Get the authenticated API account for this session.
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: Internal Social Fetch user identifier.
+                          name:
+                            type:
+                            - string
+                            - 'null'
+                            description: Display name for the authenticated user, when available.
+                          email:
+                            type:
+                            - string
+                            - 'null'
+                            description: Email address for the authenticated user, when available.
+                        required:
+                        - id
+                        - name
+                        - email
+                        description: Authenticated user associated with the provided API key.
+                    required:
+                    - user
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              example:
+                data:
+                  user:
+                    id: nizsoaaBymR4pospV7cNLcNUw01O6C9P
+                    name: Lukem121
+                    email: lukeask@hotmail.co.uk
+                meta:
+                  requestId: req_42b54391-91b3-47f2-b435-9a82f39dd68f
+                  creditsCharged: 0
+                  version: v1
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '429':
+          description: Rate limit exceeded for this free endpoint
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1Whoami
+      x-operation-id-source: derived
+  /v1/balance:
+    get:
+      tags:
+      - Auth
+      summary: Get account balance
+      description: Get remaining credit balance before running large batches of metered tools.
+      security:
+      - ApiKeyAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      balance:
+                        type: integer
+                        minimum: 0
+                        description: Spendable credits. Grace buffer counts only after included and PAYG credits are exhausted.
+                      payg:
+                        type: integer
+                        minimum: 0
+                        description: Total PAYG bucket, including pre-granted grace not yet spendable.
+                      paygSpendable:
+                        type: integer
+                        minimum: 0
+                        description: PAYG credits spendable before grace. Equals `payg` when not in grace.
+                      graceDebtCredits:
+                        type: integer
+                        minimum: 0
+                        description: Grace buffer for the current unpaid refill episode (0 if none). Excluded from `balance` until spendable credits are spent.
+                      refillState:
+                        type:
+                        - string
+                        - 'null'
+                        enum:
+                        - healthy
+                        - grace
+                        - exhausted
+                        - null
+                        description: 'Auto-refill state: `healthy`, `grace`, or `exhausted`. Null when auto-refill is off.'
+                      billingAlert:
+                        type: string
+                        enum:
+                        - none
+                        - payment_action_required
+                        - suspended
+                        description: 'Billing health: `none`, `payment_action_required`, or `suspended`. Check alongside `balance` for alerts.'
+                      subscriptionIncludedRemaining:
+                        type: integer
+                        minimum: 0
+                        description: Included credits left this period (0 if not subscribed).
+                      subscriptionIncludedTotal:
+                        type: integer
+                        minimum: 0
+                        description: Included credits granted this period (0 if not subscribed).
+                      subscription:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          tier:
+                            type: string
+                            description: Subscription tier (e.g. `starter`).
+                          status:
+                            type: string
+                            description: Subscription status (e.g. `active`, `past_due`).
+                          periodEnd:
+                            type: string
+                            description: When the current included-credit period ends (ISO 8601).
+                        required:
+                        - tier
+                        - status
+                        - periodEnd
+                        description: Subscription summary, or `null` for PAYG-only callers.
+                      collectionStatus:
+                        type: string
+                        enum:
+                        - current
+                        - base_past_due
+                        - suspended
+                        description: Subscription collection status.
+                    required:
+                    - balance
+                    - payg
+                    - paygSpendable
+                    - graceDebtCredits
+                    - refillState
+                    - billingAlert
+                    - subscriptionIncludedRemaining
+                    - subscriptionIncludedTotal
+                    - subscription
+                    - collectionStatus
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              example:
+                data:
+                  balance: 59816
+                  billingAlert: none
+                  payg: 9816
+                  paygSpendable: 9816
+                  graceDebtCredits: 0
+                  refillState: healthy
+                  subscriptionIncludedRemaining: 50000
+                  subscriptionIncludedTotal: 50000
+                  subscription:
+                    tier: scale
+                    status: active
+                    periodEnd: '2026-08-01T00:00:00.000Z'
+                  collectionStatus: current
+                meta:
+                  requestId: req_41e1520a-a1aa-41ab-9c8b-a2e3ed14100f
+                  creditsCharged: 0
+                  version: v1
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '429':
+          description: Rate limit exceeded for this free endpoint
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1Balance
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

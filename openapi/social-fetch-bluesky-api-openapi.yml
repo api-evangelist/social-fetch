@@ -1,0 +1,1910 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Bluesky API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: Bluesky
+paths:
+  /v1/bluesky/profiles/{handle}:
+    get:
+      tags:
+      - Bluesky
+      summary: Get Bluesky profile
+      description: Get a Bluesky profile for a creator or account.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 253
+          description: Bluesky handle to look up, with or without a leading @.
+        required: true
+        description: Bluesky handle to look up, with or without a leading @.
+        name: handle
+        in: path
+      responses:
+        '200':
+          description: Bluesky profile lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the profile was found.
+                      profile:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - bluesky
+                            description: Social platform for this profile.
+                          handle:
+                            type: string
+                            description: Bluesky handle without the leading @.
+                          displayName:
+                            type:
+                            - string
+                            - 'null'
+                            description: Public display name shown on the Bluesky profile.
+                          bio:
+                            type:
+                            - string
+                            - 'null'
+                            description: Profile biography text.
+                          avatarUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Best available avatar image URL for the profile.
+                          verified:
+                            type: boolean
+                            description: Whether the profile is marked as verified.
+                          profileUrl:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Bluesky profile URL.
+                          platformUserId:
+                            type: string
+                            minLength: 1
+                            description: Stable Bluesky user id as a string.
+                          createdAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 timestamp when the profile was created.
+                        required:
+                        - platform
+                        - handle
+                        - displayName
+                        - bio
+                        - avatarUrl
+                        - verified
+                        - profileUrl
+                        - platformUserId
+                        - createdAt
+                        description: Profile details when available.
+                      metrics:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          followers:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Follower count for the profile when available.
+                          following:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Following count for the profile when available.
+                          posts:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Post count for the profile when available.
+                        required:
+                        - followers
+                        - following
+                        - posts
+                        description: Profile metrics when available.
+                    required:
+                    - lookupStatus
+                    - profile
+                    - metrics
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      profile:
+                        platform: bluesky
+                        handle: espn.com
+                        displayName: ESPN
+                        bio: Serving sports fans. Anytime. Anywhere.
+                        avatarUrl: https://cdn.bsky.app/img/avatar/plain/did:plc:x7d6j54pm22ufehkes6jo4jf/bafkreie4oxawqqsfzvk47ysr3unsnmviedzpylxmwxnpa534to2bzas4ie@jpeg
+                        verified: true
+                        profileUrl: https://bsky.app/profile/espn.com
+                        platformUserId: did:plc:x7d6j54pm22ufehkes6jo4jf
+                        createdAt: '2024-11-25T21:49:49.345Z'
+                      metrics:
+                        followers: 198477
+                        following: 32
+                        posts: 659
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      profile: null
+                      metrics: null
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid handle or bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1BlueskyProfilesByHandle
+      x-operation-id-source: derived
+  /v1/bluesky/profiles/{handle}/posts:
+    get:
+      tags:
+      - Bluesky
+      summary: List Bluesky profile posts
+      description: List posts from a Bluesky profile by handle.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 253
+          description: Bluesky handle whose posts should be listed.
+        required: true
+        description: Bluesky handle whose posts should be listed.
+        name: handle
+        in: path
+      - schema:
+          type: string
+          minLength: 1
+          description: Pagination cursor returned by a previous response.
+        required: false
+        description: Pagination cursor returned by a previous response.
+        name: cursor
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          description: Optional Bluesky user id to speed up the request.
+        required: false
+        description: Optional Bluesky user id to speed up the request.
+        name: userId
+        in: query
+      responses:
+        '200':
+          description: Bluesky profile posts page.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the handle resolved for this listing.
+                      posts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Stable Bluesky post URI (at://…).
+                            cid:
+                              type:
+                              - string
+                              - 'null'
+                              description: Content id when available.
+                            url:
+                              type: string
+                              minLength: 1
+                              description: Canonical public Bluesky web URL for the post.
+                            text:
+                              type:
+                              - string
+                              - 'null'
+                              description: Post text body when available.
+                            createdAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 timestamp when the post was created.
+                            indexedAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 timestamp when the post was indexed.
+                            author:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                platform:
+                                  type: string
+                                  enum:
+                                  - bluesky
+                                  description: Social platform for this author.
+                                platformUserId:
+                                  type: string
+                                  minLength: 1
+                                  description: Stable Bluesky user id as a string.
+                                handle:
+                                  type: string
+                                  minLength: 1
+                                  description: Bluesky handle without a leading @.
+                                displayName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Public display name when available.
+                                avatarUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Avatar image URL when available.
+                                verified:
+                                  type: boolean
+                                  description: Whether the profile is marked as verified.
+                              required:
+                              - platform
+                              - platformUserId
+                              - handle
+                              - displayName
+                              - avatarUrl
+                              - verified
+                              description: Author snapshot when available.
+                            metrics:
+                              type: object
+                              properties:
+                                likes:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Like count when available.
+                                reposts:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Repost count when available.
+                                replies:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Reply count when available.
+                                quotes:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Quote count when available.
+                              required:
+                              - likes
+                              - reposts
+                              - replies
+                              - quotes
+                              description: Engagement metrics when available.
+                            embed:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                kind:
+                                  type: string
+                                  enum:
+                                  - external
+                                  - images
+                                  - video
+                                  - record
+                                  - unknown
+                                  description: Normalized embed kind.
+                                external:
+                                  type:
+                                  - object
+                                  - 'null'
+                                  properties:
+                                    url:
+                                      type: string
+                                      minLength: 1
+                                      description: Linked page URL.
+                                    title:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Link card title when available.
+                                    description:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Link card description when available.
+                                    thumbUrl:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Link card thumbnail URL when available.
+                                  required:
+                                  - url
+                                  - title
+                                  - description
+                                  - thumbUrl
+                                  description: External link card when kind is external.
+                                images:
+                                  type:
+                                  - array
+                                  - 'null'
+                                  items:
+                                    type: object
+                                    properties:
+                                      url:
+                                        type: string
+                                        minLength: 1
+                                        description: Image URL.
+                                      alt:
+                                        type:
+                                        - string
+                                        - 'null'
+                                        description: Alt text when available.
+                                    required:
+                                    - url
+                                    - alt
+                                    description: One image in an images embed.
+                                  description: Images when kind is images.
+                                video:
+                                  type:
+                                  - object
+                                  - 'null'
+                                  properties:
+                                    url:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Playable video URL when available.
+                                    thumbnailUrl:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Video thumbnail URL when available.
+                                    alt:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Alt text when available.
+                                  required:
+                                  - url
+                                  - thumbnailUrl
+                                  - alt
+                                  description: Video details when kind is video.
+                                record:
+                                  type:
+                                  - object
+                                  - 'null'
+                                  properties:
+                                    uri:
+                                      type: string
+                                      minLength: 1
+                                      description: Quoted or referenced post URI.
+                                    cid:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Content id when available.
+                                  required:
+                                  - uri
+                                  - cid
+                                  description: Quoted record when kind is record.
+                              required:
+                              - kind
+                              - external
+                              - images
+                              - video
+                              - record
+                              description: Embed when present.
+                          required:
+                          - id
+                          - cid
+                          - url
+                          - text
+                          - createdAt
+                          - indexedAt
+                          - author
+                          - metrics
+                          - embed
+                          description: A Bluesky post in a listing or replies array.
+                        description: Bluesky posts returned for this page.
+                      page:
+                        type: object
+                        properties:
+                          nextCursor:
+                            type:
+                            - string
+                            - 'null'
+                            description: Opaque cursor for the next page, or null when there is no next page.
+                          hasMore:
+                            type: boolean
+                            description: Whether another page of results is available.
+                        required:
+                        - nextCursor
+                        - hasMore
+                        description: Pagination state for the current response.
+                    required:
+                    - lookupStatus
+                    - posts
+                    - page
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      posts:
+                      - id: at://did:plc:x7d6j54pm22ufehkes6jo4jf/app.bsky.feed.post/3lqdfq7fkvm2g
+                        cid: bafyreibams5wyqdpg2cmmks7lhf5ccxu7hbu24sfatgc53jmb2nun5k5dm
+                        url: https://bsky.app/profile/espn.com/post/3lqdfq7fkvm2g
+                        text: 'Oilers'' defenseman Mattias Ekholm is set to return to action Thursday for Game 5 of the Western Conference finals against the Stars.
+
+
+                          Ekholm has been out of the Oilers'' lineup since April 11 with an undisclosed injury.'
+                        createdAt: '2025-05-29T19:01:20.743Z'
+                        indexedAt: '2025-05-29T19:01:21.645Z'
+                        author:
+                          platform: bluesky
+                          platformUserId: did:plc:x7d6j54pm22ufehkes6jo4jf
+                          handle: espn.com
+                          displayName: ESPN
+                          avatarUrl: https://cdn.bsky.app/img/avatar/plain/did:plc:x7d6j54pm22ufehkes6jo4jf/bafkreie4oxawqqsfzvk47ysr3unsnmviedzpylxmwxnpa534to2bzas4ie@jpeg
+                          verified: true
+                        metrics:
+                          likes: 24
+                          reposts: 0
+                          replies: 1
+                          quotes: 1
+                        embed:
+                          kind: external
+                          external:
+                            url: http://spr.ly/63320N4OEy
+                            title: Oilers' Ekholm set for return in Game 5 vs. Stars
+                            description: The Oilers apparently will have defenseman Mattias Ekholm back in their lineup for Game 5 of the Western Conference finals against the Stars.
+                            thumbUrl: null
+                          images: null
+                          video: null
+                          record: null
+                      page:
+                        nextCursor: '2025-05-22T17:02:02.847Z'
+                        hasMore: true
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      posts: []
+                      page:
+                        nextCursor: null
+                        hasMore: false
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1BlueskyProfilesByHandlePosts
+      x-operation-id-source: derived
+  /v1/bluesky/posts:
+    get:
+      tags:
+      - Bluesky
+      summary: Get Bluesky post
+      description: Get a single Bluesky post by URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 0
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Link to the Bluesky post.
+        required: true
+        description: Link to the Bluesky post.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Bluesky post lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the post was found.
+                      post:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          id:
+                            type: string
+                            minLength: 1
+                            description: Stable Bluesky post URI (at://…).
+                          cid:
+                            type:
+                            - string
+                            - 'null'
+                            description: Content id when available.
+                          url:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Bluesky web URL for the post.
+                          text:
+                            type:
+                            - string
+                            - 'null'
+                            description: Post text body when available.
+                          createdAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 timestamp when the post was created.
+                          indexedAt:
+                            type:
+                            - string
+                            - 'null'
+                            description: ISO-8601 timestamp when the post was indexed.
+                        required:
+                        - id
+                        - cid
+                        - url
+                        - text
+                        - createdAt
+                        - indexedAt
+                        description: Primary post when found.
+                      author:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - bluesky
+                            description: Social platform for this author.
+                          platformUserId:
+                            type: string
+                            minLength: 1
+                            description: Stable Bluesky user id as a string.
+                          handle:
+                            type: string
+                            minLength: 1
+                            description: Bluesky handle without a leading @.
+                          displayName:
+                            type:
+                            - string
+                            - 'null'
+                            description: Public display name when available.
+                          avatarUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Avatar image URL when available.
+                          verified:
+                            type: boolean
+                            description: Whether the profile is marked as verified.
+                        required:
+                        - platform
+                        - platformUserId
+                        - handle
+                        - displayName
+                        - avatarUrl
+                        - verified
+                        description: Author when found.
+                      metrics:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          likes:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Like count when available.
+                          reposts:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Repost count when available.
+                          replies:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Reply count when available.
+                          quotes:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Quote count when available.
+                        required:
+                        - likes
+                        - reposts
+                        - replies
+                        - quotes
+                        description: Metrics when found.
+                      embed:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          kind:
+                            type: string
+                            enum:
+                            - external
+                            - images
+                            - video
+                            - record
+                            - unknown
+                            description: Normalized embed kind.
+                          external:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              url:
+                                type: string
+                                minLength: 1
+                                description: Linked page URL.
+                              title:
+                                type:
+                                - string
+                                - 'null'
+                                description: Link card title when available.
+                              description:
+                                type:
+                                - string
+                                - 'null'
+                                description: Link card description when available.
+                              thumbUrl:
+                                type:
+                                - string
+                                - 'null'
+                                description: Link card thumbnail URL when available.
+                            required:
+                            - url
+                            - title
+                            - description
+                            - thumbUrl
+                            description: External link card when kind is external.
+                          images:
+                            type:
+                            - array
+                            - 'null'
+                            items:
+                              type: object
+                              properties:
+                                url:
+                                  type: string
+                                  minLength: 1
+                                  description: Image URL.
+                                alt:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Alt text when available.
+                              required:
+                              - url
+                              - alt
+                              description: One image in an images embed.
+                            description: Images when kind is images.
+                          video:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              url:
+                                type:
+                                - string
+                                - 'null'
+                                description: Playable video URL when available.
+                              thumbnailUrl:
+                                type:
+                                - string
+                                - 'null'
+                                description: Video thumbnail URL when available.
+                              alt:
+                                type:
+                                - string
+                                - 'null'
+                                description: Alt text when available.
+                            required:
+                            - url
+                            - thumbnailUrl
+                            - alt
+                            description: Video details when kind is video.
+                          record:
+                            type:
+                            - object
+                            - 'null'
+                            properties:
+                              uri:
+                                type: string
+                                minLength: 1
+                                description: Quoted or referenced post URI.
+                              cid:
+                                type:
+                                - string
+                                - 'null'
+                                description: Content id when available.
+                            required:
+                            - uri
+                            - cid
+                            description: Quoted record when kind is record.
+                        required:
+                        - kind
+                        - external
+                        - images
+                        - video
+                        - record
+                        description: Embed when present.
+                      replies:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              minLength: 1
+                              description: Stable Bluesky post URI (at://…).
+                            cid:
+                              type:
+                              - string
+                              - 'null'
+                              description: Content id when available.
+                            url:
+                              type: string
+                              minLength: 1
+                              description: Canonical public Bluesky web URL for the post.
+                            text:
+                              type:
+                              - string
+                              - 'null'
+                              description: Post text body when available.
+                            createdAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 timestamp when the post was created.
+                            indexedAt:
+                              type:
+                              - string
+                              - 'null'
+                              description: ISO-8601 timestamp when the post was indexed.
+                            author:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                platform:
+                                  type: string
+                                  enum:
+                                  - bluesky
+                                  description: Social platform for this author.
+                                platformUserId:
+                                  type: string
+                                  minLength: 1
+                                  description: Stable Bluesky user id as a string.
+                                handle:
+                                  type: string
+                                  minLength: 1
+                                  description: Bluesky handle without a leading @.
+                                displayName:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Public display name when available.
+                                avatarUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Avatar image URL when available.
+                                verified:
+                                  type: boolean
+                                  description: Whether the profile is marked as verified.
+                              required:
+                              - platform
+                              - platformUserId
+                              - handle
+                              - displayName
+                              - avatarUrl
+                              - verified
+                              description: Author snapshot when available.
+                            metrics:
+                              type: object
+                              properties:
+                                likes:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Like count when available.
+                                reposts:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Repost count when available.
+                                replies:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Reply count when available.
+                                quotes:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Quote count when available.
+                              required:
+                              - likes
+                              - reposts
+                              - replies
+                              - quotes
+                              description: Engagement metrics when available.
+                            embed:
+                              type:
+                              - object
+                              - 'null'
+                              properties:
+                                kind:
+                                  type: string
+                                  enum:
+                                  - external
+                                  - images
+                                  - video
+                                  - record
+                                  - unknown
+                                  description: Normalized embed kind.
+                                external:
+                                  type:
+                                  - object
+                                  - 'null'
+                                  properties:
+                                    url:
+                                      type: string
+                                      minLength: 1
+                                      description: Linked page URL.
+                                    title:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Link card title when available.
+                                    description:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Link card description when available.
+                                    thumbUrl:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Link card thumbnail URL when available.
+                                  required:
+                                  - url
+                                  - title
+                                  - description
+                                  - thumbUrl
+                                  description: External link card when kind is external.
+                                images:
+                                  type:
+                                  - array
+                                  - 'null'
+                                  items:
+                                    type: object
+                                    properties:
+                                      url:
+                                        type: string
+                                        minLength: 1
+                                        description: Image URL.
+                                      alt:
+                                        type:
+                                        - string
+                                        - 'null'
+                                        description: Alt text when available.
+                                    required:
+                                    - url
+                                    - alt
+                                    description: One image in an images embed.
+                                  description: Images when kind is images.
+                                video:
+                                  type:
+                                  - object
+                                  - 'null'
+                                  properties:
+                                    url:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Playable video URL when available.
+                                    thumbnailUrl:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Video thumbnail URL when available.
+                                    alt:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Alt text when available.
+                                  required:
+                                  - url
+                                  - thumbnailUrl
+                                  - alt
+                                  description: Video details when kind is video.
+                                record:
+                                  type:
+                                  - object
+                                  - 'null'
+                                  properties:
+                                    uri:
+                                      type: string
+                                      minLength: 1
+                                      description: Quoted or referenced post URI.
+                                    cid:
+                                      type:
+                                      - string
+                                      - 'null'
+                                      description: Content id when available.
+                                  required:
+                                  - uri
+                                  - cid
+                                  description: Quoted record when kind is record.
+                              required:
+                              - kind
+                              - external
+                              - images
+                              - video
+                              - record
+                              description: Embed when present.
+                          required:
+                          - id
+                          - cid
+                          - url
+                          - text
+                          - createdAt
+                          - indexedAt
+                          - author
+                          - metrics
+                          - embed
+                          description: A Bluesky post in a listing or replies array.
+                        description: Top-level replies when available.
+                    required:
+                    - lookupStatus
+                    - post
+                    - author
+                    - metrics
+                    - embed
+                    - replies
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      post:
+                        id: at://did:plc:x7d6j54pm22ufehkes6jo4jf/app.bsky.feed.post/3lqdfq7fkvm2g
+                        cid: bafyreibams5wyqdpg2cmmks7lhf5ccxu7hbu24sfatgc53jmb2nun5k5dm
+                        url: https://bsky.app/profile/espn.com/post/3lqdfq7fkvm2g
+                        text: 'Oilers'' defenseman Mattias Ekholm is set to return to action Thursday for Game 5 of the Western Conference finals against the Stars.
+
+
+                          Ekholm has been out of the Oilers'' lineup since April 11 with an undisclosed injury.'
+                        createdAt: '2025-05-29T19:01:20.743Z'
+                        indexedAt: '2025-05-29T19:01:21.645Z'
+                      author:
+                        platform: bluesky
+                        platformUserId: did:plc:x7d6j54pm22ufehkes6jo4jf
+                        handle: espn.com
+                        displayName: ESPN
+                        avatarUrl: https://cdn.bsky.app/img/avatar/plain/did:plc:x7d6j54pm22ufehkes6jo4jf/bafkreie4oxawqqsfzvk47ysr3unsnmviedzpylxmwxnpa534to2bzas4ie@jpeg
+                        verified: true
+                      metrics:
+                        likes: 24
+                        reposts: 0
+                        replies: 1
+                        quotes: 1
+                      embed:
+                        kind: external
+                        external:
+                          url: http://spr.ly/63320N4OEy
+                          title: Oilers' Ekholm set for return in Game 5 vs. Stars
+                          description: The Oilers apparently will have defenseman Mattias Ekholm back in their lineup for Game 5 of the Western Conference finals against the Stars.
+                          thumbUrl: https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:x7d6j54pm22ufehkes6jo4jf/bafkreihhffgngv4thcnw7sh7o43qnwwyjvfemdlccwalu76r3vnhlbssle@jpeg
+                        images: null
+                        video: null
+                        record: null
+                      replies:
+                      - id: at://did:plc:dzsbhwnnvblrpyy2fpnmaih3/app.bsky.feed.post/3lqdii5jmmc2p
+                        cid: bafyreicrfgr5rge655xy6wsgmdiexanr2vhwib7fkjbgu4kku3gzjzwowu
+                        url: https://bsky.app/profile/thinkasaurus.bsky.social/post/3lqdii5jmmc2p
+                        text: Alright! Now I have a reason to root for Edmonton aside from my burning hatred of Dallas!
+                        createdAt: '2025-05-29T19:50:31.613Z'
+                        indexedAt: '2025-05-29T19:50:32.451Z'
+                        author:
+                          platform: bluesky
+                          platformUserId: did:plc:dzsbhwnnvblrpyy2fpnmaih3
+                          handle: thinkasaurus.bsky.social
+                          displayName: Doris the Thinkasaurus
+                          avatarUrl: https://cdn.bsky.app/img/avatar/plain/did:plc:dzsbhwnnvblrpyy2fpnmaih3/bafkreielkwohfe37wdka5336fl2sxijxur242dhovdb2edkk56yuzl4fyu@jpeg
+                          verified: false
+                        metrics:
+                          likes: 0
+                          reposts: 0
+                          replies: 0
+                          quotes: 0
+                        embed: null
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      post: null
+                      author: null
+                      metrics: null
+                      embed: null
+                      replies: []
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1BlueskyPosts
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

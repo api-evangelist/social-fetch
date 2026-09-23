@@ -1,0 +1,1690 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Spotify API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: Spotify
+paths:
+  /v1/spotify/artist:
+    get:
+      tags:
+      - Spotify
+      summary: Get Spotify artist
+      description: Get a Spotify artist by id or profile URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Optional Spotify artist id for the request.
+        required: false
+        description: Optional Spotify artist id for the request.
+        name: artistId
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Optional Spotify artist URL for the request.
+        required: false
+        description: Optional Spotify artist URL for the request.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Artist lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the artist was found.
+                      artist:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - spotify
+                            description: Platform for this artist.
+                          artistId:
+                            type: string
+                            minLength: 1
+                            description: Stable Spotify artist identifier.
+                          displayName:
+                            type: string
+                            minLength: 1
+                            description: Public display name for the artist.
+                          bio:
+                            type:
+                            - string
+                            - 'null'
+                            description: Artist biography text when available.
+                          avatarUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Best available square avatar image URL when available.
+                          profileUrl:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Spotify artist profile URL.
+                          verified:
+                            type: boolean
+                            description: Whether the artist is marked as verified on Spotify.
+                          externalLinks:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                name:
+                                  type: string
+                                  minLength: 1
+                                  description: Link label as shown on the artist profile.
+                                url:
+                                  type: string
+                                  minLength: 1
+                                  description: Outbound URL for this link.
+                              required:
+                              - name
+                              - url
+                              description: External link on a Spotify artist profile.
+                            description: Outbound profile links when available.
+                        required:
+                        - platform
+                        - artistId
+                        - displayName
+                        - bio
+                        - avatarUrl
+                        - profileUrl
+                        - verified
+                        description: Artist details when available.
+                      metrics:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          followers:
+                            type: integer
+                            minimum: 0
+                            description: Follower count for the artist.
+                          monthlyListeners:
+                            type: integer
+                            minimum: 0
+                            description: Monthly listener count when available.
+                          worldRank:
+                            type: integer
+                            description: Global popularity rank when available.
+                            exclusiveMinimum: 0
+                          topCities:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                city:
+                                  type: string
+                                  minLength: 1
+                                  description: City name.
+                                country:
+                                  type: string
+                                  minLength: 1
+                                  description: ISO country code when available.
+                                listeners:
+                                  type: integer
+                                  minimum: 0
+                                  description: Monthly listener count for this city when available.
+                                region:
+                                  type: string
+                                  description: Region code within the country when available.
+                              required:
+                              - city
+                              - country
+                              - listeners
+                              description: Top listener city for an artist.
+                            description: Top listener cities when available.
+                        required:
+                        - followers
+                        description: Artist metrics when available.
+                      relatedArtists:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            artistId:
+                              type: string
+                              minLength: 1
+                              description: Related artist Spotify id.
+                            displayName:
+                              type: string
+                              minLength: 1
+                              description: Related artist display name.
+                            avatarUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Best available avatar URL for the related artist.
+                            profileUrl:
+                              type: string
+                              minLength: 1
+                              description: Canonical public Spotify URL for the related artist.
+                          required:
+                          - artistId
+                          - displayName
+                          - avatarUrl
+                          - profileUrl
+                          description: Related Spotify artist summary.
+                        description: Related artists when available (may be empty).
+                      discographySummary:
+                        type: object
+                        properties:
+                          albumCount:
+                            type: integer
+                            minimum: 0
+                            description: Number of albums listed in the artist discography.
+                          singleCount:
+                            type: integer
+                            minimum: 0
+                            description: Number of singles listed in the artist discography.
+                          compilationCount:
+                            type: integer
+                            minimum: 0
+                            description: Number of compilations listed in the artist discography.
+                        required:
+                        - albumCount
+                        - singleCount
+                        - compilationCount
+                        description: Discography counts when available.
+                    required:
+                    - lookupStatus
+                    - artist
+                    - metrics
+                    - relatedArtists
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      artist:
+                        platform: spotify
+                        artistId: 1uNFoZAHBGtllmzznpCI3s
+                        displayName: Justin Bieber
+                        bio: "Since his emergence in 2008, Justin Bieber has quietly worked towards delivering a career-defining artistic statement with his 2025 seventh full-length album, SWAG via Def Jam Recordings. Beyond writing songs and performing, he co-produced the LP which is a 21-track opus evocative of his evolution, yet indicative of the signature spirit millions of fans first fell in love with. \n\nUp to this point, he has smashed countless records, captivated crowds globally and led 21st century pop music and culture as both the preeminent entertainer of his generation and a peerless boundary-pushing creative force. From humble beginnings in Ontario, Canada, the Los Angeles-based singer, songwriter, and producer has elevated to one of the best-selling artists in history, moving over 150 million albums worldwide, generating nearly 200 billion streams, and scoring an astonishing 5 RIAA Diamond certifications. Speaking to his versatility, he has also delivered cross-generational hits in genres as diverse as pop, electronic, hip-hop, R&amp;B, Latin, and more. With SWAG, he continues an unbelievable journey as an era-defining superstar whose influence is unstoppable and unparalleled."
+                        avatarUrl: null
+                        profileUrl: https://open.spotify.com/artist/1uNFoZAHBGtllmzznpCI3s?si=4W1DlCLSTR2plslOINBq_A
+                        verified: true
+                      metrics:
+                        followers: 90965890
+                        monthlyListeners: 143198848
+                        worldRank: 1
+                        topCities:
+                        - city: London
+                          country: GB
+                          listeners: 2216095
+                          region: ENG
+                        - city: São Paulo
+                          country: BR
+                          listeners: 1847775
+                          region: SP
+                        - city: Jakarta
+                          country: ID
+                          listeners: 1639263
+                          region: JK
+                        - city: Quezon City
+                          country: PH
+                          listeners: 1476119
+                          region: '00'
+                        - city: Mexico City
+                          country: MX
+                          listeners: 1424041
+                          region: CMX
+                      relatedArtists:
+                      - artistId: 0du5cEVh5yTK9QJze8zA0C
+                        displayName: Bruno Mars
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5ebc7688aad1bf03986934d7e26
+                        profileUrl: https://open.spotify.com/artist/0du5cEVh5yTK9QJze8zA0C
+                      - artistId: 66CXWjxzNUsdJxJ2JdwvnR
+                        displayName: Ariana Grande
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5eb766397ec42a573a53eb5fb87
+                        profileUrl: https://open.spotify.com/artist/66CXWjxzNUsdJxJ2JdwvnR
+                      - artistId: 5pKCCKE2ajJHZ9KAiaK11H
+                        displayName: Rihanna
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5ebcb565a8e684e3be458d329ac
+                        profileUrl: https://open.spotify.com/artist/5pKCCKE2ajJHZ9KAiaK11H
+                      - artistId: 6S0dmVVn4udvppDhZIWxCr
+                        displayName: Sean Kingston
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5ebee205e5029a04bd0460e16e4
+                        profileUrl: https://open.spotify.com/artist/6S0dmVVn4udvppDhZIWxCr
+                      - artistId: 04gDigrS5kc9YWfZHwBETP
+                        displayName: Maroon 5
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5ebf8349dfb619a7f842242de77
+                        profileUrl: https://open.spotify.com/artist/04gDigrS5kc9YWfZHwBETP
+                      - artistId: 2tIP7SsRs7vjIcLrU85W8J
+                        displayName: The Kid LAROI
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5eb8ae6a1046094624d95b115cb
+                        profileUrl: https://open.spotify.com/artist/2tIP7SsRs7vjIcLrU85W8J
+                      - artistId: 6jJ0s89eD6GaHleKKya26X
+                        displayName: Katy Perry
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5eb049c9a9ae6f93f81ab517798
+                        profileUrl: https://open.spotify.com/artist/6jJ0s89eD6GaHleKKya26X
+                      - artistId: 1Xyo4u8uXC1ZmMpatF05PJ
+                        displayName: The Weeknd
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5ebc1719ac9e6a75c1c25835018
+                        profileUrl: https://open.spotify.com/artist/1Xyo4u8uXC1ZmMpatF05PJ
+                      - artistId: 6VuMaDnrHyPL1p4EHjYLi7
+                        displayName: Charlie Puth
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5eb6721f541fb123145d4cb3ace
+                        profileUrl: https://open.spotify.com/artist/6VuMaDnrHyPL1p4EHjYLi7
+                      - artistId: 7n2wHs1TKAczGzO7Dd2rGr
+                        displayName: Shawn Mendes
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5eb58b4b9419486550f6fda0535
+                        profileUrl: https://open.spotify.com/artist/7n2wHs1TKAczGzO7Dd2rGr
+                      - artistId: 540vIaP2JwjQb9dm3aArA4
+                        displayName: DJ Snake
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5eb175df1a8848d8ff67c6d5600
+                        profileUrl: https://open.spotify.com/artist/540vIaP2JwjQb9dm3aArA4
+                      - artistId: 5CiGnKThu5ctn9pBxv7DGa
+                        displayName: benny blanco
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5eb9e339e423b680759b0006a63
+                        profileUrl: https://open.spotify.com/artist/5CiGnKThu5ctn9pBxv7DGa
+                      - artistId: 1Xylc3o4UrD53lo9CvFvVg
+                        displayName: Zara Larsson
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5ebd519a7e349541cba8f85e965
+                        profileUrl: https://open.spotify.com/artist/1Xylc3o4UrD53lo9CvFvVg
+                      - artistId: 5ZsFI1h6hIdQRw2ti0hz81
+                        displayName: ZAYN
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5eb830845d2fa6c5c7874176951
+                        profileUrl: https://open.spotify.com/artist/5ZsFI1h6hIdQRw2ti0hz81
+                      - artistId: 31TPClRtHm23RisEBtV3X7
+                        displayName: Justin Timberlake
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5eb7a5cfe2597665a3d160e805e
+                        profileUrl: https://open.spotify.com/artist/31TPClRtHm23RisEBtV3X7
+                      - artistId: 6eUKZXaKkcviH0Ku9w2n3V
+                        displayName: Ed Sheeran
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5ebd55c95ad400aed87da52daec
+                        profileUrl: https://open.spotify.com/artist/6eUKZXaKkcviH0Ku9w2n3V
+                      - artistId: 5ndkK3dpZLKtBklKjxNQwT
+                        displayName: B.o.B
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5eb834607348a8574d8f3b7a2ca
+                        profileUrl: https://open.spotify.com/artist/5ndkK3dpZLKtBklKjxNQwT
+                      - artistId: 0C8ZW7ezQVs4URX5aX7Kqx
+                        displayName: Selena Gomez
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5eb815e520e3ce7fe210046ba66
+                        profileUrl: https://open.spotify.com/artist/0C8ZW7ezQVs4URX5aX7Kqx
+                      - artistId: 4AK6F7OLvEQ5QYCBNiQWHq
+                        displayName: One Direction
+                        avatarUrl: https://i.scdn.co/image/5bb443424a1ad71603c43d67f5af1a04da6bb3c8
+                        profileUrl: https://open.spotify.com/artist/4AK6F7OLvEQ5QYCBNiQWHq
+                      - artistId: 21E3waRsmPlU7jZsS13rcj
+                        displayName: Ne-Yo
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5ebca118e3822061f7b7f6bc537
+                        profileUrl: https://open.spotify.com/artist/21E3waRsmPlU7jZsS13rcj
+                      discographySummary:
+                        albumCount: 10
+                        singleCount: 10
+                        compilationCount: 0
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      artist: null
+                      metrics: null
+                      relatedArtists: []
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query or bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1SpotifyArtist
+      x-operation-id-source: derived
+  /v1/spotify/album:
+    get:
+      tags:
+      - Spotify
+      summary: Get Spotify album
+      description: Get a Spotify album by id or album URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Optional Spotify album id for the request.
+        required: false
+        description: Optional Spotify album id for the request.
+        name: albumId
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Optional Spotify album URL for the request.
+        required: false
+        description: Optional Spotify album URL for the request.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Album lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the album was found.
+                      album:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - spotify
+                            description: Platform for this album.
+                          albumId:
+                            type: string
+                            minLength: 1
+                            description: Stable Spotify album identifier.
+                          title:
+                            type: string
+                            minLength: 1
+                            description: Album title.
+                          albumType:
+                            type: string
+                            enum:
+                            - album
+                            - single
+                            - compilation
+                            - ep
+                            - unknown
+                            description: Release type (album, single, compilation, etc.).
+                          label:
+                            type:
+                            - string
+                            - 'null'
+                            description: Record label when available.
+                          releaseDate:
+                            type: string
+                            minLength: 1
+                            description: Release date as an ISO 8601 string when available.
+                          releaseDatePrecision:
+                            type: string
+                            enum:
+                            - day
+                            - month
+                            - year
+                            description: Precision of the release date when available.
+                          coverArtUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Best available square cover image URL when available.
+                          albumUrl:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Spotify album URL.
+                          playable:
+                            type: boolean
+                            description: Whether the album is playable on Spotify.
+                          isPreRelease:
+                            type: boolean
+                            description: Whether the album is marked as a pre-release.
+                          copyright:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                text:
+                                  type: string
+                                  minLength: 1
+                                  description: Copyright notice text.
+                                type:
+                                  type: string
+                                  minLength: 1
+                                  description: Copyright type code.
+                              required:
+                              - text
+                              - type
+                              description: Copyright line on a Spotify album.
+                            description: Copyright lines when available.
+                          artists:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                artistId:
+                                  type: string
+                                  minLength: 1
+                                  description: Spotify artist id.
+                                displayName:
+                                  type: string
+                                  minLength: 1
+                                  description: Artist display name on this album.
+                                profileUrl:
+                                  type: string
+                                  minLength: 1
+                                  description: Canonical public Spotify artist profile URL.
+                                avatarUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Best available square avatar image URL when available.
+                              required:
+                              - artistId
+                              - displayName
+                              - profileUrl
+                              description: Artist credited on a Spotify album.
+                            minItems: 1
+                            description: Album artists when available.
+                          trackCount:
+                            type: integer
+                            minimum: 0
+                            description: Number of tracks on the album.
+                          tracks:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                trackId:
+                                  type: string
+                                  minLength: 1
+                                  description: Stable Spotify track identifier.
+                                title:
+                                  type: string
+                                  minLength: 1
+                                  description: Track title.
+                                trackNumber:
+                                  type: integer
+                                  description: Track number on the disc.
+                                  exclusiveMinimum: 0
+                                discNumber:
+                                  type: integer
+                                  description: Disc number for this track.
+                                  exclusiveMinimum: 0
+                                durationMs:
+                                  type: integer
+                                  minimum: 0
+                                  description: Track duration in milliseconds.
+                                explicit:
+                                  type: boolean
+                                  description: Whether the track is marked explicit.
+                                playCount:
+                                  type: integer
+                                  minimum: 0
+                                  description: Reported play count when available.
+                                artists:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      artistId:
+                                        type: string
+                                        minLength: 1
+                                        description: Spotify artist id for this track.
+                                      displayName:
+                                        type: string
+                                        minLength: 1
+                                        description: Artist display name on this track.
+                                    required:
+                                    - artistId
+                                    - displayName
+                                    description: Artist credited on a Spotify album track.
+                                  minItems: 1
+                                  description: Artists credited on this track.
+                              required:
+                              - trackId
+                              - title
+                              - trackNumber
+                              - discNumber
+                              - durationMs
+                              - explicit
+                              - artists
+                              description: Track on a Spotify album.
+                            description: Album tracks in track order.
+                        required:
+                        - platform
+                        - albumId
+                        - title
+                        - albumType
+                        - label
+                        - releaseDate
+                        - coverArtUrl
+                        - albumUrl
+                        - playable
+                        - copyright
+                        - artists
+                        - trackCount
+                        - tracks
+                        description: Album details when available.
+                    required:
+                    - lookupStatus
+                    - album
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      album:
+                        platform: spotify
+                        albumId: 0pgrg7phBbnwGJ2HBEl9EG
+                        title: BEFORE THE SUN RISES & WINTERR ENDS
+                        albumType: single
+                        label: IRL Angel
+                        releaseDate: '2025-03-16T00:00:00Z'
+                        releaseDatePrecision: day
+                        coverArtUrl: https://i.scdn.co/image/ab67616d0000b2739bd93cc6e406b820dfff691f
+                        albumUrl: https://open.spotify.com/album/0pgrg7phBbnwGJ2HBEl9EG?si=8Gk-vOKsSkKZjmcJMqYWNg
+                        playable: true
+                        copyright:
+                        - text: 2025 IRL Angel
+                          type: C
+                        - text: 2025 IRL Angel
+                          type: P
+                        artists:
+                        - artistId: 14xRX3JR8H4RWh8R7V3fvZ
+                          displayName: Miguel Angeles
+                          profileUrl: https://open.spotify.com/artist/14xRX3JR8H4RWh8R7V3fvZ?si=61lIxRD8RnaCw6JmJPB9pg
+                          avatarUrl: https://i.scdn.co/image/ab6761610000e5eb9784901e4c2fb5e2e59bf7b2
+                        trackCount: 3
+                        tracks:
+                        - trackId: 0LfCnR4s7l6T4TyCNNsHBs
+                          title: AN IMPERRFECT BODY
+                          trackNumber: 1
+                          discNumber: 1
+                          durationMs: 184109
+                          explicit: false
+                          playCount: 131166
+                          artists:
+                          - artistId: 14xRX3JR8H4RWh8R7V3fvZ
+                            displayName: Miguel Angeles
+                        - trackId: 0QTlqcwzdieh3MNe8vvMsn
+                          title: NOVEMBERR
+                          trackNumber: 2
+                          discNumber: 1
+                          durationMs: 170666
+                          explicit: true
+                          playCount: 267713
+                          artists:
+                          - artistId: 14xRX3JR8H4RWh8R7V3fvZ
+                            displayName: Miguel Angeles
+                        - trackId: 3bJBq2NNe7C2b118sDVvAL
+                          title: 2GETHERR
+                          trackNumber: 3
+                          discNumber: 1
+                          durationMs: 104347
+                          explicit: false
+                          playCount: 29923
+                          artists:
+                          - artistId: 14xRX3JR8H4RWh8R7V3fvZ
+                            displayName: Miguel Angeles
+                          - artistId: 6MOR8WtiHGBvFm3DmjXzga
+                            displayName: F3lix
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      album: null
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query or bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1SpotifyAlbum
+      x-operation-id-source: derived
+  /v1/spotify/track:
+    get:
+      tags:
+      - Spotify
+      summary: Get Spotify track
+      description: Get a Spotify track by id or track URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Optional Spotify track id for the request.
+        required: false
+        description: Optional Spotify track id for the request.
+        name: trackId
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Optional Spotify track URL for the request.
+        required: false
+        description: Optional Spotify track URL for the request.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Track lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the track was found.
+                      track:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - spotify
+                            description: Platform for this track.
+                          trackId:
+                            type: string
+                            minLength: 1
+                            description: Stable Spotify track identifier.
+                          title:
+                            type: string
+                            minLength: 1
+                            description: Track title.
+                          durationMs:
+                            type: integer
+                            minimum: 0
+                            description: Track duration in milliseconds.
+                          trackNumber:
+                            type: integer
+                            description: Track number on the album when available.
+                            exclusiveMinimum: 0
+                          explicit:
+                            type: boolean
+                            description: Whether the track is marked explicit when available.
+                          playable:
+                            type: boolean
+                            description: Whether the track is playable in the current context.
+                          playCount:
+                            type: integer
+                            minimum: 0
+                            description: Play count when available.
+                          mediaType:
+                            type: string
+                            minLength: 1
+                            description: Media type when available.
+                          previewUrl:
+                            type: string
+                            minLength: 1
+                            description: Short audio preview URL when available.
+                          trackUrl:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Spotify track URL.
+                        required:
+                        - platform
+                        - trackId
+                        - title
+                        - durationMs
+                        - playable
+                        - trackUrl
+                        description: Track details when available.
+                      album:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          albumId:
+                            type: string
+                            minLength: 1
+                            description: Spotify album identifier.
+                          title:
+                            type: string
+                            minLength: 1
+                            description: Album title.
+                          albumType:
+                            type: string
+                            minLength: 1
+                            description: Album type when available.
+                          releaseYear:
+                            type: integer
+                            description: Release year when available.
+                          releaseDateIso:
+                            type: string
+                            minLength: 1
+                            description: Release date ISO string when available.
+                          coverArtUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Best available album cover image URL when available.
+                          albumUrl:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Spotify album URL when available.
+                          trackCount:
+                            type: integer
+                            minimum: 0
+                            description: Number of tracks on the album when available.
+                        required:
+                        - albumId
+                        - title
+                        description: Album details when available.
+                      artists:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            artistId:
+                              type: string
+                              minLength: 1
+                              description: Spotify artist identifier.
+                            displayName:
+                              type: string
+                              minLength: 1
+                              description: Artist display name.
+                            avatarUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Best available artist avatar URL when available.
+                            profileUrl:
+                              type: string
+                              minLength: 1
+                              description: Canonical public Spotify artist profile URL when available.
+                          required:
+                          - artistId
+                          - displayName
+                          description: Artist credited on a Spotify track.
+                        description: Artists credited on the track (may be empty).
+                    required:
+                    - lookupStatus
+                    - track
+                    - album
+                    - artists
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      track:
+                        platform: spotify
+                        trackId: 1ITJflybJsfarsUtiBvkfK
+                        title: Shoulda Never (feat. USHER)
+                        durationMs: 186112
+                        trackNumber: 8
+                        explicit: true
+                        playable: true
+                        playCount: 9025068
+                        mediaType: AUDIO
+                        trackUrl: https://open.spotify.com/track/1ITJflybJsfarsUtiBvkfK?si=3f6njaWoSd2gebBjT6oxLw
+                      album:
+                        albumId: 2xkYTmqjear3lSGydIn7wh
+                        title: Kehlani
+                        albumType: ALBUM
+                        releaseYear: 2026
+                        releaseDateIso: '2026-04-24T00:00:00Z'
+                        coverArtUrl: https://i.scdn.co/image/ab67616d0000b273d4ffe3d4cddee37b9fd6ffcd
+                        albumUrl: https://open.spotify.com/album/2xkYTmqjear3lSGydIn7wh?si=TbunmmSTTeSU1TeyGphIEg
+                        trackCount: 17
+                      artists:
+                      - artistId: 0cGUm45nv7Z6M6qdXYQGTX
+                        displayName: Kehlani
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5ebcf865d7d399a41e1bd036149
+                        profileUrl: https://open.spotify.com/artist/0cGUm45nv7Z6M6qdXYQGTX
+                      - artistId: 23zg3TcAtWQy7J6upgbUnj
+                        displayName: USHER
+                        avatarUrl: https://i.scdn.co/image/ab6761610000e5ebb13684907cd609d10d41f0b8
+                        profileUrl: https://open.spotify.com/artist/23zg3TcAtWQy7J6upgbUnj
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      track: null
+                      album: null
+                      artists: []
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query or bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1SpotifyTrack
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)

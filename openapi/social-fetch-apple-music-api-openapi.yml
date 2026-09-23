@@ -1,0 +1,3327 @@
+openapi: 3.2.0
+info:
+  title: Social Fetch Public Apple Music API
+  version: 1.0.0
+  description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
+servers:
+- url: https://api.socialfetch.dev
+  description: API origin
+tags:
+- name: Apple Music
+paths:
+  /v1/apple-music/search:
+    get:
+      tags:
+      - Apple Music
+      summary: Search Apple Music
+      description: Search the Apple Music catalog by keyword.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 512
+          description: Search query text for Apple Music catalog results.
+        required: true
+        description: Search query text for Apple Music catalog results.
+        name: query
+        in: query
+      - schema:
+          type: string
+          enum:
+          - all
+          - song
+          - album
+          - artist
+          - playlist
+          - station
+          - music_video
+          - radio_episode
+          description: Catalog result type to return. Omit to search across types (treated as all).
+        required: false
+        description: Catalog result type to return. Omit to search across types (treated as all).
+        name: type
+        in: query
+      responses:
+        '200':
+          description: Search results for the requested query.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      query:
+                        type: string
+                        minLength: 1
+                        description: Search query string evaluated for this response.
+                      type:
+                        type: string
+                        enum:
+                        - all
+                        - song
+                        - album
+                        - artist
+                        - playlist
+                        - station
+                        - music_video
+                        - radio_episode
+                        description: Result type applied for this response.
+                      artists:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            artistId:
+                              type: string
+                              minLength: 1
+                              description: Stable Apple Music artist identifier.
+                            displayName:
+                              type: string
+                              minLength: 1
+                              description: Artist display name.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public Apple Music artist URL when available.
+                            artworkUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Best available square artwork image URL when available.
+                          required:
+                          - artistId
+                          - displayName
+                          - url
+                          - artworkUrl
+                          description: An artist in Apple Music search results.
+                        description: Matching Apple Music artists.
+                      albums:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            albumId:
+                              type: string
+                              minLength: 1
+                              description: Stable Apple Music album identifier.
+                            title:
+                              type: string
+                              minLength: 1
+                              description: Album title.
+                            artistName:
+                              type:
+                              - string
+                              - 'null'
+                              description: Primary artist display name when available.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public Apple Music album URL when available.
+                            trackCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Number of tracks on the album when available.
+                            artworkUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Best available square artwork image URL when available.
+                            explicit:
+                              type:
+                              - boolean
+                              - 'null'
+                              description: Whether the album is marked explicit when available.
+                          required:
+                          - albumId
+                          - title
+                          - artistName
+                          - url
+                          - trackCount
+                          - artworkUrl
+                          - explicit
+                          description: An album in Apple Music search results.
+                        description: Matching Apple Music albums.
+                      songs:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            trackId:
+                              type: string
+                              minLength: 1
+                              description: Stable Apple Music song identifier.
+                            title:
+                              type: string
+                              minLength: 1
+                              description: Song title.
+                            artistName:
+                              type:
+                              - string
+                              - 'null'
+                              description: Primary artist display name when available.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public Apple Music song URL when available.
+                            durationMs:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Track duration in milliseconds when available.
+                            artworkUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Best available square artwork image URL when available.
+                            explicit:
+                              type:
+                              - boolean
+                              - 'null'
+                              description: Whether the track is marked explicit when available.
+                            previewUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Short audio preview URL when available.
+                          required:
+                          - trackId
+                          - title
+                          - artistName
+                          - url
+                          - durationMs
+                          - artworkUrl
+                          - explicit
+                          - previewUrl
+                          description: A song in Apple Music search results.
+                        description: Matching Apple Music songs.
+                      playlists:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            playlistId:
+                              type: string
+                              minLength: 1
+                              description: Stable Apple Music playlist identifier.
+                            title:
+                              type: string
+                              minLength: 1
+                              description: Playlist title.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public Apple Music playlist URL when available.
+                            artworkUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Best available square artwork image URL when available.
+                          required:
+                          - playlistId
+                          - title
+                          - url
+                          - artworkUrl
+                          description: A playlist in Apple Music search results.
+                        description: Matching Apple Music playlists.
+                      stations:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            stationId:
+                              type: string
+                              minLength: 1
+                              description: Stable Apple Music station identifier.
+                            title:
+                              type: string
+                              minLength: 1
+                              description: Station title.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public Apple Music station URL when available.
+                            artworkUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Best available square artwork image URL when available.
+                          required:
+                          - stationId
+                          - title
+                          - url
+                          - artworkUrl
+                          description: A station in Apple Music search results.
+                        description: Matching Apple Music stations.
+                      musicVideos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            musicVideoId:
+                              type: string
+                              minLength: 1
+                              description: Stable Apple Music music video identifier.
+                            title:
+                              type: string
+                              minLength: 1
+                              description: Music video title.
+                            artistName:
+                              type:
+                              - string
+                              - 'null'
+                              description: Primary artist display name when available.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public Apple Music music video URL when available.
+                            artworkUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Best available square artwork image URL when available.
+                            explicit:
+                              type:
+                              - boolean
+                              - 'null'
+                              description: Whether the music video is marked explicit when available.
+                          required:
+                          - musicVideoId
+                          - title
+                          - artistName
+                          - url
+                          - artworkUrl
+                          - explicit
+                          description: A music video in Apple Music search results.
+                        description: Matching Apple Music music videos.
+                      radioEpisodes:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            radioEpisodeId:
+                              type: string
+                              minLength: 1
+                              description: Stable Apple Music radio episode identifier.
+                            title:
+                              type: string
+                              minLength: 1
+                              description: Radio episode title.
+                            artistName:
+                              type:
+                              - string
+                              - 'null'
+                              description: Primary artist display name when available.
+                            url:
+                              type:
+                              - string
+                              - 'null'
+                              description: Canonical public Apple Music radio episode URL when available.
+                            artworkUrl:
+                              type:
+                              - string
+                              - 'null'
+                              description: Best available square artwork image URL when available.
+                            explicit:
+                              type:
+                              - boolean
+                              - 'null'
+                              description: Whether the radio episode is marked explicit when available.
+                          required:
+                          - radioEpisodeId
+                          - title
+                          - artistName
+                          - url
+                          - artworkUrl
+                          - explicit
+                          description: A radio episode in Apple Music search results.
+                        description: Matching Apple Music radio episodes.
+                      totalResults:
+                        type: integer
+                        minimum: 0
+                        description: Count of result rows returned in this response across all sections.
+                    required:
+                    - query
+                    - type
+                    - artists
+                    - albums
+                    - songs
+                    - playlists
+                    - stations
+                    - musicVideos
+                    - radioEpisodes
+                    - totalResults
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                results:
+                  value:
+                    data:
+                      query: taylor swift
+                      type: song
+                      artists: []
+                      albums: []
+                      songs:
+                      - trackId: '1590368457'
+                        title: 22 (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/22-taylors-version/1590368448?i=1590368457
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368886'
+                        title: Message In A Bottle (Taylor's Version) [From The Vault]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/message-in-a-bottle-taylors-version-from-the-vault/1590368448?i=1590368886
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368453'
+                        title: Red (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/red-taylors-version/1590368448?i=1590368453
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368461'
+                        title: We Are Never Ever Getting Back Together (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/we-are-never-ever-getting-back-together-taylors-version/1590368448?i=1590368461
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368455'
+                        title: I Knew You Were Trouble (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/i-knew-you-were-trouble-taylors-version/1590368448?i=1590368455
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368893'
+                        title: The Very First Night (Taylor's Version) [From The Vault]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/the-very-first-night-taylors-version-from-the-vault/1590368448?i=1590368893
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368754'
+                        title: Better Man (Taylor's Version) [From The Vault]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/better-man-taylors-version-from-the-vault/1590368448?i=1590368754
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1541905893'
+                        title: cardigan
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/cardigan/1541905871?i=1541905893
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/dd/6a/2f/dd6a2fec-2476-b44a-f2cc-8a2736143d8c/20UM1IM08851.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368762'
+                        title: Nothing New (Taylor's Version) [From The Vault] [feat. Phoebe Bridgers]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/nothing-new-taylors-version-from-the-vault-feat/1590368448?i=1590368762
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368456'
+                        title: All Too Well (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/all-too-well-taylors-version/1590368448?i=1590368456
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368894'
+                        title: All Too Well (10 Minute Version) [Taylor's Version] [From The Vault]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/all-too-well-10-minute-version-taylors-version-from/1590368448?i=1590368894
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                        previewUrl: null
+                      - trackId: '1742058094'
+                        title: Florida!!! (feat. Florence + the Machine)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/florida-feat-florence-the-machine/1742057774?i=1742058094
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/a4/86/59/a486593a-53c9-1c2a-5122-8f25339f7359/24UMGIM44778.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                        previewUrl: null
+                      - trackId: '1590368889'
+                        title: I Bet You Think About Me (Taylor's Version) [From The Vault] [feat. Chris Stapleton]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/i-bet-you-think-about-me-taylors-version-from-the/1590368448?i=1590368889
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                        previewUrl: null
+                      - trackId: '1590368892'
+                        title: Run (Taylor's Version) [From The Vault] [feat. Ed Sheeran]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/run-taylors-version-from-the-vault-feat-ed-sheeran/1590368448?i=1590368892
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1541904691'
+                        title: the 1
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/the-1/1541904688?i=1541904691
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/0f/a0/14/0fa0144d-6cd5-792a-1589-3e1f0c25db49/20UM1IM08851.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                        previewUrl: null
+                      - trackId: '1590368465'
+                        title: Sad Beautiful Tragic (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/sad-beautiful-tragic-taylors-version/1590368448?i=1590368465
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368740'
+                        title: Everything Has Changed (Taylor's Version) [feat. Ed Sheeran]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/everything-has-changed-taylors-version-feat-ed-sheeran/1590368448?i=1590368740
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368450'
+                        title: State Of Grace (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/state-of-grace-taylors-version/1590368448?i=1590368450
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368747'
+                        title: Come Back...Be Here (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/come-back-be-here-taylors-version/1590368448?i=1590368747
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368463'
+                        title: The Last Time (Taylor's Version) [feat. Gary Lightbody]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/the-last-time-taylors-version-feat-gary-lightbody/1590368448?i=1590368463
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      playlists: []
+                      stations: []
+                      musicVideos: []
+                      radioEpisodes: []
+                      totalResults: 20
+                    meta:
+                      requestId: req_9957d122-2591-4b59-8dd7-d8d36cdfdae0
+                      creditsCharged: 1
+                      version: v1
+                mixed:
+                  value:
+                    data:
+                      query: taylor swift
+                      type: all
+                      artists:
+                      - artistId: '159260351'
+                        displayName: Taylor Swift
+                        url: https://music.apple.com/us/artist/taylor-swift/159260351
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/70/30/3b/70303b1c-4744-57b7-27be-5cb94a8fc3cb/ami-identity-994af5c375f4c3aa96cd6ced4a700799-2025-09-26T18-27-12.403Z_cropped.png/1200x1200bb.jpg
+                      - artistId: '690319057'
+                        displayName: Dan + Shay
+                        url: https://music.apple.com/us/artist/dan-shay/690319057
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages211/v4/c2/1c/94/c21c9454-68a1-c684-6bbc-6be3d141dbe7/ami-identity-da1de433f8cabc891f22036698c8b6c7-2026-05-14T15-57-58.064Z_cropped.png/1200x1200bb.jpg
+                      - artistId: '281070699'
+                        displayName: Florence + the Machine
+                        url: https://music.apple.com/us/artist/florence-the-machine/281070699
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages211/v4/e3/34/00/e3340015-2eea-8e3b-de17-22b175f15f6a/ami-identity-5e67cf4707105e30d7f452b1de6f19e5-2025-08-19T10-57-53.200Z_cropped.png/1200x1200bb.jpg
+                      - artistId: '602767352'
+                        displayName: Lorde
+                        url: https://music.apple.com/us/artist/lorde/602767352
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/76/ca/e2/76cae283-f3ba-aa7f-6256-1817e9b5179f/ami-identity-2d92b3a772aa3368c092544fed8cac42-2026-06-26T22-33-16.704Z_cropped.png/1200x1200bb.jpg
+                      - artistId: '3300203'
+                        displayName: Rascal Flatts
+                        url: https://music.apple.com/us/artist/rascal-flatts/3300203
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages211/v4/a8/54/fd/a854fd24-b67f-e9a4-4221-2ba2748cbf11/ami-identity-7ce6c14a3e8d27acc20e6b0e45b4c63e-2025-01-31T05-12-40.483Z_cropped.png/1200x1200bb.jpg
+                      - artistId: '1084576956'
+                        displayName: Brett Young
+                        url: https://music.apple.com/us/artist/brett-young/1084576956
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/b3/7e/44/b37e44a1-c454-907d-8739-c8df57a4ba78/ami-identity-34e14f2e6977df8038259d35a0b97781-2025-04-11T04-36-22.128Z_cropped.png/1200x1200bb.jpg
+                      - artistId: '1168567308'
+                        displayName: Conan Gray
+                        url: https://music.apple.com/us/artist/conan-gray/1168567308
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages211/v4/b6/41/e5/b641e510-a0f7-2b47-d0eb-7f0de40da994/ami-identity-501fae298d84a5606e4634ff5abdd848-2025-05-22T14-28-46.870Z_cropped.png/1200x1200bb.jpg
+                      - artistId: '1552521489'
+                        displayName: PinkPantheress
+                        url: https://music.apple.com/us/artist/pinkpantheress/1552521489
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/15/ef/7d/15ef7db9-e60a-5097-7de1-9684e442cc59/ami-identity-0e3e2a860a106797bf20c03ba8e4ea3b-2025-04-03T15-10-14.141Z_cropped.png/1200x1200bb.jpg
+                      - artistId: '112115157'
+                        displayName: Power Music Workout
+                        url: https://music.apple.com/us/artist/power-music-workout/112115157
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/15/ac/0e/15ac0eba-0134-9103-3120-ebedb3b8dae1/pr_source.png/1200x1200bb.jpg
+                      - artistId: '1821786625'
+                        displayName: Taylor Swift DV
+                        url: https://music.apple.com/us/artist/taylor-swift-dv/1821786625
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/a4/19/a6/a419a64f-2f00-3f9b-0f24-de8aafc8a11e/0.jpg/1200x1200ac.jpg
+                      - artistId: '1462793893'
+                        displayName: Disco Lines
+                        url: https://music.apple.com/us/artist/disco-lines/1462793893
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages122/v4/d1/d7/04/d1d704c2-2875-9f63-fa41-57cced3e86fc/1e8bd3b8-92d2-45d9-a6a8-b28c583b138d_ami-identity-4e743c11b118aa7d0648086cbd3b5a21-2022-11-28T01-23-32.703Z_cropped.png/1200x1200bb.jpg
+                      - artistId: '1739510581'
+                        displayName: Luke Muzzic
+                        url: https://music.apple.com/us/artist/luke-muzzic/1739510581
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/3c/03/51/3c0351b2-73ab-b81e-5e10-62a74a8daa4c/5063535911215_cover.jpg/1200x1200ac.jpg
+                      - artistId: '1752134'
+                        displayName: Chris Stapleton
+                        url: https://music.apple.com/us/artist/chris-stapleton/1752134
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features115/v4/4b/4f/b0/4b4fb07e-8690-16cf-06fe-b3f259a077e8/pr_source.png/1200x1200bb.jpg
+                      - artistId: '260799074'
+                        displayName: Sylk E Fyne
+                        url: https://music.apple.com/us/artist/sylk-e-fyne/260799074
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music60/v4/91/09/8b/91098b7b-480a-ce26-6033-108c1d9b930e/mzm.cckrxslt.jpg/1200x1200ac.jpg
+                      - artistId: '1854629995'
+                        displayName: Swift Taylor
+                        url: https://music.apple.com/us/artist/swift-taylor/1854629995
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/62/83/0f/62830f7b-c600-aaf1-b886-4428ff3f8d1d/199900096401.jpg/1200x1200ac.jpg
+                      - artistId: '1865952014'
+                        displayName: Taylor Swift Tribute Songs
+                        url: https://music.apple.com/us/artist/taylor-swift-tribute-songs/1865952014
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/f3/69/70/f3697002-0508-7d32-bb03-77753e781162/artwork.jpg/1200x1200ac.jpg
+                      albums:
+                      - albumId: '1440933849'
+                        title: reputation
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/reputation/1440933849
+                        trackCount: 15
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/eb/e6/06/ebe606da-e00f-82d3-47f3-b79904eed541/17UM1IM24651.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - albumId: '1468058165'
+                        title: Lover
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/lover/1468058165
+                        trackCount: 18
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/49/3d/ab/493dab54-f920-9043-6181-80993b8116c9/19UMGIM53909.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - albumId: '1440935467'
+                        title: '1989'
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/1989/1440935467
+                        trackCount: 13
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/89/4a/4a/894a4ab9-b0b0-9ea5-ca41-8da0b9b79453/14UMDIM03405.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - albumId: '1650841512'
+                        title: Midnights (3am Edition)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/midnights-3am-edition/1650841512
+                        trackCount: 20
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/59/13/5c/59135ccc-8425-415c-7f89-8aeada60088e/22UM1IM22440.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - albumId: '1528112358'
+                        title: folklore (deluxe version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/folklore-deluxe-version/1528112358
+                        trackCount: 17
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/b5/80/dc/b580dca0-349d-036b-e09b-bd849f6affd8/20UMGIM64216.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - albumId: '1544268281'
+                        title: evermore
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/evermore/1544268281
+                        trackCount: 15
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/bd/dd/54/bddd543b-4e0f-007b-1398-5fef90b963c3/20UM1IM14847.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - albumId: '1524801260'
+                        title: folklore
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/folklore/1524801260
+                        trackCount: 16
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/ca/f3/67/caf367a5-2cf6-6b2e-a891-97dc57b19f08/20UMGIM64216.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - albumId: '1590368448'
+                        title: Red (Taylor’s Version) [+ A Message from Taylor]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/red-taylors-version-a-message-from-taylor/1590368448
+                        trackCount: 31
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - albumId: '1547315522'
+                        title: evermore (deluxe version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/evermore-deluxe-version/1547315522
+                        trackCount: 17
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/44/e3/94/44e3945f-d613-09f8-538a-aba063d59358/20UM1IM14847.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - albumId: '1713845538'
+                        title: 1989 (Taylor's Version) [Deluxe]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/1989-taylors-version-deluxe/1713845538
+                        trackCount: 22
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/8e/35/6c/8e356cc2-0be4-b83b-d29e-b578623df2ac/23UM1IM34052.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - albumId: '1708308989'
+                        title: 1989 (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/1989-taylors-version/1708308989
+                        trackCount: 21
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/11/a6/80/11a680e6-2e48-08fa-5e87-3f18e838d31f/23UM1IM11868.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - albumId: '1440913923'
+                        title: Taylor Swift (Bonus Track Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/taylor-swift-bonus-track-version/1440913923
+                        trackCount: 15
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/be/e1/48/bee148d6-d16c-d8f7-0173-d6cf6d684aa1/08PNDIM00678.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - albumId: '1690839749'
+                        title: Speak Now (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/speak-now-taylors-version/1690839749
+                        trackCount: 23
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/9f/3c/0a/9f3c0a60-f9e0-a34e-60e5-0be1f182896b/23UMGIM63932.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - albumId: '1833328839'
+                        title: The Life of a Showgirl
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/the-life-of-a-showgirl/1833328839
+                        trackCount: 13
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/2d/46/e0/2d46e0bc-8ab9-85dd-4b56-ee6951351034/25UM1IM19577.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - albumId: '1838810949'
+                        title: The Life of a Showgirl
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/the-life-of-a-showgirl/1838810949
+                        trackCount: 12
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/58/8f/a9/588fa9a2-7cc5-f02c-9ce6-c986e0dc1c15/25UM1IM19577.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - albumId: '1440935340'
+                        title: Red
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/red/1440935340
+                        trackCount: 16
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/25/0d/7e/250d7e42-3a2f-19ac-f865-f1e04a4a1f97/12UMDIM01007.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - albumId: '1689131527'
+                        title: Midnights (The Til Dawn Edition)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/midnights-the-til-dawn-edition/1689131527
+                        trackCount: 23
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/a6/85/b9/a685b9f8-dad3-2ed7-58b2-ab7f64304505/23UMGIM58157.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - albumId: '1552791073'
+                        title: Fearless (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/fearless-taylors-version/1552791073
+                        trackCount: 26
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/c3/d0/1c/c3d01c88-73e7-187e-fd62-e1744de979a6/21UMGIM09915.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - albumId: '1742057774'
+                        title: 'THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY'
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/the-tortured-poets-department-the-anthology/1742057774
+                        trackCount: 31
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/a4/86/59/a486593a-53c9-1c2a-5122-8f25339f7359/24UMGIM44778.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - albumId: '1649434004'
+                        title: Midnights
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/midnights/1649434004
+                        trackCount: 14
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/3d/01/f2/3d01f2e5-5a08-835f-3d30-d031720b2b80/22UM1IM07364.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                      songs:
+                      - trackId: '1590368457'
+                        title: 22 (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/22-taylors-version/1590368448?i=1590368457
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368886'
+                        title: Message In A Bottle (Taylor's Version) [From The Vault]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/message-in-a-bottle-taylors-version-from-the-vault/1590368448?i=1590368886
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368453'
+                        title: Red (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/red-taylors-version/1590368448?i=1590368453
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368461'
+                        title: We Are Never Ever Getting Back Together (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/we-are-never-ever-getting-back-together-taylors-version/1590368448?i=1590368461
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368455'
+                        title: I Knew You Were Trouble (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/i-knew-you-were-trouble-taylors-version/1590368448?i=1590368455
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368893'
+                        title: The Very First Night (Taylor's Version) [From The Vault]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/the-very-first-night-taylors-version-from-the-vault/1590368448?i=1590368893
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368754'
+                        title: Better Man (Taylor's Version) [From The Vault]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/better-man-taylors-version-from-the-vault/1590368448?i=1590368754
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1541905893'
+                        title: cardigan
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/cardigan/1541905871?i=1541905893
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/dd/6a/2f/dd6a2fec-2476-b44a-f2cc-8a2736143d8c/20UM1IM08851.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368762'
+                        title: Nothing New (Taylor's Version) [From The Vault] [feat. Phoebe Bridgers]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/nothing-new-taylors-version-from-the-vault-feat/1590368448?i=1590368762
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368456'
+                        title: All Too Well (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/all-too-well-taylors-version/1590368448?i=1590368456
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368894'
+                        title: All Too Well (10 Minute Version) [Taylor's Version] [From The Vault]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/all-too-well-10-minute-version-taylors-version-from/1590368448?i=1590368894
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                        previewUrl: null
+                      - trackId: '1742058094'
+                        title: Florida!!! (feat. Florence + the Machine)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/florida-feat-florence-the-machine/1742057774?i=1742058094
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/a4/86/59/a486593a-53c9-1c2a-5122-8f25339f7359/24UMGIM44778.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                        previewUrl: null
+                      - trackId: '1590368889'
+                        title: I Bet You Think About Me (Taylor's Version) [From The Vault] [feat. Chris Stapleton]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/i-bet-you-think-about-me-taylors-version-from-the/1590368448?i=1590368889
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                        previewUrl: null
+                      - trackId: '1590368892'
+                        title: Run (Taylor's Version) [From The Vault] [feat. Ed Sheeran]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/run-taylors-version-from-the-vault-feat-ed-sheeran/1590368448?i=1590368892
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1541904691'
+                        title: the 1
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/the-1/1541904688?i=1541904691
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/0f/a0/14/0fa0144d-6cd5-792a-1589-3e1f0c25db49/20UM1IM08851.rgb.jpg/1200x1200bb.jpg
+                        explicit: true
+                        previewUrl: null
+                      - trackId: '1590368465'
+                        title: Sad Beautiful Tragic (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/sad-beautiful-tragic-taylors-version/1590368448?i=1590368465
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368740'
+                        title: Everything Has Changed (Taylor's Version) [feat. Ed Sheeran]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/everything-has-changed-taylors-version-feat-ed-sheeran/1590368448?i=1590368740
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368450'
+                        title: State Of Grace (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/state-of-grace-taylors-version/1590368448?i=1590368450
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368747'
+                        title: Come Back...Be Here (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/come-back-be-here-taylors-version/1590368448?i=1590368747
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      - trackId: '1590368463'
+                        title: The Last Time (Taylor's Version) [feat. Gary Lightbody]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/album/the-last-time-taylors-version-feat-gary-lightbody/1590368448?i=1590368463
+                        durationMs: null
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/15/38/9b/15389bf4-8074-06c3-11ee-655b5453af68/21UM1IM25046.rgb.jpg/1200x1200bb.jpg
+                        explicit: false
+                        previewUrl: null
+                      playlists:
+                      - playlistId: pl.5ee36529155e499f85267b533100af29
+                        title: Vitamin String Quartet's Taylor Swift, Bridgerton, and Beyond 2025 Tour Set List
+                        url: https://music.apple.com/us/playlist/vitamin-string-quartets-taylor-swift-bridgerton-and/pl.5ee36529155e499f85267b533100af29
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/dd/6d/86/dd6d8662-7276-3e8b-dd3a-63e49fab4900/ami-identity-a3528dd2744d74cd20922c9480a38d6c-2025-10-08T22-22-11.473Z_cropped.png/1200x1200SC.FPSL02.jpg?l=en-US
+                      - playlistId: pl.3950454ced8c45a3b0cc693c2a7db97b
+                        title: Taylor Swift Essentials
+                        url: https://music.apple.com/us/playlist/taylor-swift-essentials/pl.3950454ced8c45a3b0cc693c2a7db97b
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features211/v4/8e/0b/63/8e0b63c8-c873-6a4d-7664-cfbc69252b3d/f939be24-8b16-432b-8eb9-ee708fae127e.png/1200x1200cc.jpg
+                      - playlistId: pl.57891bdd1bc840948374f1c4cbe9c840
+                        title: Taylor Swift’s Eras Tour Set List
+                        url: https://music.apple.com/us/playlist/taylor-swifts-eras-tour-set-list/pl.57891bdd1bc840948374f1c4cbe9c840
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/70/30/3b/70303b1c-4744-57b7-27be-5cb94a8fc3cb/ami-identity-994af5c375f4c3aa96cd6ced4a700799-2025-09-26T18-27-12.403Z_cropped.png/1200x1200SC.FPSL02.jpg?l=en-US
+                      - playlistId: pl.c17d394f7a1b4949b0e667d0717ed01d
+                        title: 'Taylor Swift: Fitness+ Spotlight'
+                        url: https://music.apple.com/us/playlist/taylor-swift-fitness-spotlight/pl.c17d394f7a1b4949b0e667d0717ed01d
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features211/v4/06/ec/04/06ec0496-3095-9ae0-9893-4a4ec675e8a3/cf1589b0-5981-4811-b2bf-5998dd46600a.png/1200x1200SC.FPMAF01.jpg?l=en-US
+                      - playlistId: pl.2a3975d2994d4182a0cedcfa71700211
+                        title: 'Taylor Swift: Summer Era'
+                        url: https://music.apple.com/us/playlist/taylor-swift-summer-era/pl.2a3975d2994d4182a0cedcfa71700211
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features221/v4/60/c8/29/60c82909-fa6b-62a6-0f8c-d4cbb019e44d/acbc04ab-33e9-44b6-9e89-80cf20271cdd.png/1200x1200SC.FPMAF01.jpg?l=en-US
+                      - playlistId: pl.c1fefbc1e441486488f359234be231fb
+                        title: 'Taylor Swift: Love Songs'
+                        url: https://music.apple.com/us/playlist/taylor-swift-love-songs/pl.c1fefbc1e441486488f359234be231fb
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/70/30/3b/70303b1c-4744-57b7-27be-5cb94a8fc3cb/ami-identity-994af5c375f4c3aa96cd6ced4a700799-2025-09-26T18-27-12.403Z_cropped.png/1200x1200SC.FPLS03.jpg?l=en-US
+                      - playlistId: pl.a2d1734dfce442af83e5b4442b6b43ee
+                        title: 'Taylor Swift: Winter Warmers'
+                        url: https://music.apple.com/us/playlist/taylor-swift-winter-warmers/pl.a2d1734dfce442af83e5b4442b6b43ee
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features/v4/f4/b8/42/f4b842be-40c4-88aa-6753-eb57b1e6974f/f6d9a072-9fd4-441b-aa81-684468168099.png/1200x1200SC.FPMAF01.jpg?l=en-US
+                      - playlistId: pl.6929cc16ba9e48878fcabb6af6412d0a
+                        title: Taylor Swift Video Essentials
+                        url: https://music.apple.com/us/playlist/taylor-swift-video-essentials/pl.6929cc16ba9e48878fcabb6af6412d0a
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features/v4/47/b6/f6/47b6f648-c977-64a5-dc0f-be21868f0881/9ffe5757-6abd-40c2-b9ae-1d590342e0e2.png/1200x1200cc.jpg
+                      - playlistId: pl.5331b4cd060a4dc09150232688ccab6b
+                        title: 'Taylor Swift: Deep Cuts'
+                        url: https://music.apple.com/us/playlist/taylor-swift-deep-cuts/pl.5331b4cd060a4dc09150232688ccab6b
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/70/30/3b/70303b1c-4744-57b7-27be-5cb94a8fc3cb/ami-identity-994af5c375f4c3aa96cd6ced4a700799-2025-09-26T18-27-12.403Z_cropped.png/1200x1200SC.FPDC03.jpg?l=en-US
+                      - playlistId: pl.118558b73d9b48e78faf181a9ffa1e0e
+                        title: Taylor Swift’s Favorite Songs
+                        url: https://music.apple.com/us/playlist/taylor-swifts-favorite-songs/pl.118558b73d9b48e78faf181a9ffa1e0e
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features211/v4/21/e4/ea/21e4eab9-9a85-ce29-2e99-6e978571f080/80dd9be0-8992-4ba9-9756-f2f7313823ff.png/1200x1200cc.jpg
+                      - playlistId: pl.ae7cd2db31fc4d519725b6747b9074a5
+                        title: Playlist by ME!
+                        url: https://music.apple.com/us/playlist/playlist-by-me/pl.ae7cd2db31fc4d519725b6747b9074a5
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features115/v4/9f/5a/c6/9f5ac643-f72a-7b7e-a2fd-2c0a22ca82b6/U0MtTVMtV1ctUGxheWxpc3RfYnlfTUVfLUFEQU1fSUQ9MTQ2NDc0ODg5NS5wbmc.png/1200x1200SC.FPMAF01.jpg?l=en-US
+                      - playlistId: pl.ca7c0fe7264749c5afbc68234cd03a18
+                        title: Taylor Swift’s Glitter Gel Pen Songs
+                        url: https://music.apple.com/us/playlist/taylor-swifts-glitter-gel-pen-songs/pl.ca7c0fe7264749c5afbc68234cd03a18
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features/v4/31/2d/a0/312da005-512e-2e60-81b0-fa42df45bc63/275ede58-d051-46e7-bf1f-b437055c49f6.png/1200x1200SC.FPMAF01.jpg?l=en-US
+                      - playlistId: pl.674964a1c81a4e4992abaac44e294dce
+                        title: 'Taylor Swift: The Songwriters'
+                        url: https://music.apple.com/us/playlist/taylor-swift-the-songwriters/pl.674964a1c81a4e4992abaac44e294dce
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/70/30/3b/70303b1c-4744-57b7-27be-5cb94a8fc3cb/ami-identity-994af5c375f4c3aa96cd6ced4a700799-2025-09-26T18-27-12.403Z_cropped.png/1200x1200SC.FPTSW02.jpg?l=en-US
+                      - playlistId: pl.21cf787657de4f698407c532d13b7bba
+                        title: 'Taylor Swift: Chill'
+                        url: https://music.apple.com/us/playlist/taylor-swift-chill/pl.21cf787657de4f698407c532d13b7bba
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/70/30/3b/70303b1c-4744-57b7-27be-5cb94a8fc3cb/ami-identity-994af5c375f4c3aa96cd6ced4a700799-2025-09-26T18-27-12.403Z_cropped.png/1200x1200SC.FPCHL02.jpg?l=en-US
+                      - playlistId: pl.75986455fe8a4688ac29f386a0f512a4
+                        title: Taylor Swift Radio
+                        url: https://music.apple.com/us/playlist/taylor-swift-radio/pl.75986455fe8a4688ac29f386a0f512a4
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/SG-MQ-US-032-Image000001/v4/18/2f/ed/182fed86-b06b-1280-cf7c-a0ce57b73078/image/1200x1200bb.jpg
+                      - playlistId: pl.b3ce40c76aa74750ab0de825f0886be2
+                        title: Taylor Swift’s Fountain Pen Songs
+                        url: https://music.apple.com/us/playlist/taylor-swifts-fountain-pen-songs/pl.b3ce40c76aa74750ab0de825f0886be2
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features/v4/54/3f/df/543fdf46-baf5-bf8e-2f42-fefdd2804526/317cfe25-ab5c-405e-9bcf-77e2e1648780.png/1200x1200SC.FPMAF01.jpg?l=en-US
+                      - playlistId: pl.22facbab002e46fb8f2a7f722996948e
+                        title: 'Taylor Swift: Influences'
+                        url: https://music.apple.com/us/playlist/taylor-swift-influences/pl.22facbab002e46fb8f2a7f722996948e
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/70/30/3b/70303b1c-4744-57b7-27be-5cb94a8fc3cb/ami-identity-994af5c375f4c3aa96cd6ced4a700799-2025-09-26T18-27-12.403Z_cropped.png/1200x1200SC.FPINF03.jpg?l=en-US
+                      - playlistId: pl.92311f71afb24b2aaa441c99b709feae
+                        title: 'Taylor Swift: Sing'
+                        url: https://music.apple.com/us/playlist/taylor-swift-sing/pl.92311f71afb24b2aaa441c99b709feae
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/70/30/3b/70303b1c-4744-57b7-27be-5cb94a8fc3cb/ami-identity-994af5c375f4c3aa96cd6ced4a700799-2025-09-26T18-27-12.403Z_cropped.png/1200x1200SC.FPSING02.jpg?l=en-US
+                      - playlistId: pl.71e5789b8e754fcdb475e2302a98e819
+                        title: Inspired by Taylor Swift
+                        url: https://music.apple.com/us/playlist/inspired-by-taylor-swift/pl.71e5789b8e754fcdb475e2302a98e819
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/70/30/3b/70303b1c-4744-57b7-27be-5cb94a8fc3cb/ami-identity-994af5c375f4c3aa96cd6ced4a700799-2025-09-26T18-27-12.403Z_cropped.png/1200x1200SC.FPINS03.jpg?l=en-US
+                      - playlistId: pl.ba281021091a4bd39f99a7e553d8fa1e
+                        title: 'Taylor Swift: Summer Vibes & Happy Songs'
+                        url: https://music.apple.com/us/playlist/taylor-swift-summer-vibes-happy-songs/pl.ba281021091a4bd39f99a7e553d8fa1e
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/yip1eL9fK7uCQC9bYzEmMg/1200x1200bb.jpg
+                      stations:
+                      - stationId: ra.1542659588
+                        title: 'Taylor Swift: Apple Music Awards 2020 Day 2'
+                        url: https://music.apple.com/us/station/taylor-swift-apple-music-awards-2020-day-2/ra.1542659588
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features114/v4/4b/2f/c8/4b2fc809-3fc8-d07b-3f71-9fce6f9bdb7f/U0MtTVQtV1ctSExTLUp1c3QgZm9yIFRheWxvci5wbmc.png/1200x1200sr.jpg
+                      - stationId: ra.1660332548
+                        title: planet taylor swift & friends
+                        url: https://music.apple.com/us/station/planet-taylor-swift-friends/ra.1660332548
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/78/4e/1f/784e1fbf-ced3-e1db-b33d-3481fd576259/WorldDetails16566700713566187159.png/1200x1200bb.jpg
+                      - stationId: ra.1874948486
+                        title: Taylor Swift Radio
+                        url: https://music.apple.com/us/station/taylor-swift-radio/ra.1874948486
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/2c/91/66/2c9166b9-6172-6ac5-231a-1f7e5c335cec/WorldDetails2793397877673276455.png/1200x1200bb.jpg
+                      - stationId: ra.1653270748
+                        title: NRJ TAYLOR SWIFT
+                        url: https://music.apple.com/us/station/nrj-taylor-swift/ra.1653270748
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/c7/a0/5e/c7a05e59-1773-81b7-69a6-bdd5f435f5cc/WorldDetails17916579933316455424.jpeg/1200x1200bb.jpg
+                      musicVideos:
+                      - musicVideoId: '1690841286'
+                        title: Surprise Announcement (Taylor's Version)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/surprise-announcement-taylors-version/1690841286
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video116/v4/a1/8a/c5/a18ac573-372d-58ce-5321-db63eead1062/23UMGIM63544.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1845446611'
+                        title: The Fate of Ophelia
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/the-fate-of-ophelia/1845446611
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video211/v4/fe/d9/a8/fed9a8ad-13fc-7408-a739-2d80d3714876/25UM1IM51274.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1874387735'
+                        title: Opalite
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/opalite/1874387735
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video211/v4/0d/72/ce/0d72ce84-a2c3-864d-ab62-2d6ee8d63697/26UMGIM11601.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1468647174'
+                        title: You Need To Calm Down
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/you-need-to-calm-down/1468647174
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video123/v4/1b/64/29/1b64297a-b315-fbe4-61a9-a841a93548c0/19UMGIM53855.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1452859903'
+                        title: Thug Story (CMT Awards)
+                        artistName: T-Pain, Taylor Swift, Nash Overstreet, R. K. Follese
+                        url: https://music.apple.com/us/music-video/thug-story-cmt-awards/1452859903
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video211/v4/af/e3/e4/afe3e4cb-4154-b35a-4541-f3707946fccd/09UMDIM00395.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1742247789'
+                        title: Fortnight (feat. Post Malone)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/fortnight-feat-post-malone/1742247789
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video221/v4/a6/ff/7c/a6ff7cc4-b45d-49c1-bb21-ec08c3948869/24UMGIM42850.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1477498160'
+                        title: Lover
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/lover/1477498160
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video123/v4/99/d0/00/99d000c9-efaf-720c-0534-8aedc6dd0a96/19UMGIM76676.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1445010473'
+                        title: Wildest Dreams
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/wildest-dreams/1445010473
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video49/v4/6e/5d/d4/6e5dd4e4-0355-89b9-20fe-9859e5274a20/15UMDIM00510_1_1.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1651517092'
+                        title: Bejeweled
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/bejeweled/1651517092
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video122/v4/83/06/ff/8306ff54-9375-3220-242c-594cd26cd9b9/22UM1IM21537.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1650836460'
+                        title: Anti-Hero
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/anti-hero/1650836460
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video122/v4/77/8e/77/778e77d1-59ef-0be7-616e-8b7ef186e8a4/22UM1IM21531.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1651516874'
+                        title: Anti-Hero
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/anti-hero/1651516874
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video112/v4/fe/61/45/fe6145f7-53c0-8eb2-e877-7cfea2763b7d/22UM1IM21531.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1833329009'
+                        title: And, baby, that’s show business for you
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/and-baby-thats-show-business-for-you/1833329009
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video211/v4/64/af/6b/64af6b79-fc3b-347b-11a8-039815b9c41e/25UM1IM20144.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1595423414'
+                        title: State Of Grace (Taylor's Version) [Lyric Video]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/state-of-grace-taylors-version-lyric-video/1595423414
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video116/v4/10/28/a3/1028a3b4-0a30-9e69-c4be-48096d2aa54a/21UM1IM39922.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1742249027'
+                        title: Florida!!! (feat. Florence + the Machine) [Lyric Video]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/florida-feat-florence-the-machine-lyric-video/1742249027
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video211/v4/b8/0b/8c/b80b8cad-d7c6-ae2d-ab2a-3a8013084631/24UMGIM42838.crop.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - musicVideoId: '1651517203'
+                        title: Anti-Hero (Lyric Video)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/anti-hero-lyric-video/1651517203
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video112/v4/ad/c1/1d/adc11d8d-e8d3-3fc1-d11c-a5c539f87786/22UM1IM20555.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1595423430'
+                        title: We Are Never Ever Getting Back Together (Taylor's Version) [Lyric Video]
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/we-are-never-ever-getting-back-together-taylors-version/1595423430
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video126/v4/8d/0c/f6/8d0cf689-ae05-8742-846e-14c1e8671dd1/21UM1IM39929.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1843998892'
+                        title: The Fate of Ophelia (Lyric Video)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/the-fate-of-ophelia-lyric-video/1843998892
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video211/v4/80/c5/e5/80c5e5ac-684a-f06b-1692-27885ce0ee8d/25UM1IM53274.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1843999008'
+                        title: Actually Romantic (Lyric Video)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/actually-romantic-lyric-video/1843999008
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video221/v4/68/1f/c9/681fc95a-df9c-b964-edf8-4cb772f3b975/25UM1IM53270.crop.jpg/1200x1200bb.jpg
+                        explicit: true
+                      - musicVideoId: '1843998897'
+                        title: Elizabeth Taylor (Lyric Video)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/elizabeth-taylor-lyric-video/1843998897
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video211/v4/ef/d4/ba/efd4ba7d-2326-0de5-676c-358c806cd06e/25UM1IM53281.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      - musicVideoId: '1843998899'
+                        title: Opalite (Lyric Video)
+                        artistName: Taylor Swift
+                        url: https://music.apple.com/us/music-video/opalite-lyric-video/1843998899
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Video221/v4/57/23/ce/5723ce65-efc9-1743-f8ac-5562f764c53b/25UM1IM53275.crop.jpg/1200x1200bb.jpg
+                        explicit: false
+                      radioEpisodes:
+                      - radioEpisodeId: ra.1649631546
+                        title: Taylor Swift
+                        artistName: New Music Daily Radio
+                        url: https://music.apple.com/us/station/taylor-swift/ra.1649631546
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features112/v4/82/f1/22/82f12210-8a57-1a89-c407-8fb75408bc9b/453721ab-6294-4e9e-83ca-f5e4bb34fb70.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1713985170
+                        title: 'Taylor Swift: folklore and evermore'
+                        artistName: The Country Chart Show
+                        url: https://music.apple.com/us/station/taylor-swift-folklore-and-evermore/ra.1713985170
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features126/v4/2d/84/fc/2d84fcd0-5c98-ff9f-7ad3-818f28c10b6f/67109611-7f06-44cc-abd0-32557c68d8bf.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1738080111
+                        title: Taylor Swift
+                        artistName: New Music Daily Radio
+                        url: https://music.apple.com/us/station/taylor-swift/ra.1738080111
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features/v4/68/4c/ac/684cac44-ae08-3d11-a73d-135ab063e5fa/cc75276d-6e0c-4d53-a138-6f8298d51931.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1596431989
+                        title: Taylor Swift & Chris Stapleton
+                        artistName: Today’s Country Radio
+                        url: https://music.apple.com/us/station/taylor-swift-chris-stapleton/ra.1596431989
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features126/v4/b7/c6/88/b7c688df-252b-5394-c70b-68ac43b1fc7d/U0MtTVMtV1ctVG9kYXlzX0NvdW50cnlfUmFkaW8tRVAxMDQtVGF5bG9yX1N3aWZ0X0ZlYXQsX0NocmlzX19TdGFwbGV0b24ucG5n.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1552512331
+                        title: Dua Lipa
+                        artistName: New Music Daily Radio
+                        url: https://music.apple.com/us/station/dua-lipa/ra.1552512331
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features124/v4/68/ba/97/68ba9737-6605-475f-f258-a7d5a74b90fe/U0MtTVMtV1ctTk1EUmFkaW8tRVA2MS1EdWFMaXBhLnBuZw.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1711439413
+                        title: Taylor Swift
+                        artistName: New Music Daily Radio
+                        url: https://music.apple.com/us/station/taylor-swift/ra.1711439413
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features126/v4/b8/cf/97/b8cf9718-a724-f069-a657-06ecb9e8b881/2f318a74-1f80-4bbc-8dcc-3c111371d7b8.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1842393806
+                        title: Taylor Swift
+                        artistName: New Music Daily Radio
+                        url: https://music.apple.com/us/station/taylor-swift/ra.1842393806
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features221/v4/59/eb/a4/59eba4a6-6316-8bce-4cf6-c3d2c6d3abba/d8c4f990-24ae-4bd9-b428-ec49a6270f10.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1719665907
+                        title: Taylor Swift
+                        artistName: Apple Music Today
+                        url: https://music.apple.com/us/station/taylor-swift/ra.1719665907
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features126/v4/c4/d3/79/c4d3791e-9e15-6e9c-0228-ea33a55e9182/24fe0c8e-7167-4504-bc11-6339d7d8b3a1.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1697380260
+                        title: Taylor Swift
+                        artistName: Apple Music Today
+                        url: https://music.apple.com/us/station/taylor-swift/ra.1697380260
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features116/v4/03/e3/e2/03e3e211-59ed-fa7a-3c38-00a43a1410a1/d7369146-95b9-4e38-94b4-f9ec5dd4a52f.png/1200x1200sr.jpg
+                        explicit: true
+                      - radioEpisodeId: ra.1446751534
+                        title: Taylor Swift Essentials Live
+                        artistName: Essentials Radio
+                        url: https://music.apple.com/us/station/taylor-swift-essentials-live/ra.1446751534
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features118/v4/da/a4/8a/daa48aa2-06f5-71ed-abff-a3a3920513ae/pr_source.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1719685302
+                        title: 'Taylor Swift: The Year That Was'
+                        artistName: Apple Music Specials
+                        url: https://music.apple.com/us/station/taylor-swift-the-year-that-was/ra.1719685302
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features126/v4/81/57/ca/8157ca15-5361-3884-6d07-1b7ac3174f73/1bbc6646-73cd-41c7-9590-cd589217a4d8.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1733749956
+                        title: Taylor Swift, Ice Spice
+                        artistName: Apple Music Today
+                        url: https://music.apple.com/us/station/taylor-swift-ice-spice/ra.1733749956
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features112/v4/a6/ea/02/a6ea029e-d002-c6a7-7354-dd3336ce4d95/a8439404-cdb7-480f-bcf6-4234c68ae505.png/1200x1200sr.jpg
+                        explicit: true
+                      - radioEpisodeId: ra.1760030000
+                        title: Celebrating Five Years of Taylor’s Lover
+                        artistName: Apple Music Today
+                        url: https://music.apple.com/us/station/celebrating-five-years-of-taylors-lover/ra.1760030000
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features211/v4/72/57/48/725748a2-9472-d574-c53c-0e0121523ebc/eefdf6a5-10ca-490c-80b5-110bd0c6752a.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1760026191
+                        title: “Shake It Off” Came Out 10 Years Ago Today
+                        artistName: Apple Music Today
+                        url: https://music.apple.com/us/station/shake-it-off-came-out-10-years-ago-today/ra.1760026191
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features221/v4/fa/ba/dc/fabadc0b-5343-fc3c-8431-b92e4c310cba/59543639-49b1-4cde-9edd-cc259acfbd4e.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1756606495
+                        title: Taylor Swift’s Quarantine Classic
+                        artistName: Apple Music Today
+                        url: https://music.apple.com/us/station/taylor-swifts-quarantine-classic/ra.1756606495
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features211/v4/b3/5f/f6/b35ff62a-4098-7b8f-8c17-99ad2b998740/3aa17ac8-48f1-47ab-b411-3f382b26b08d.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1745191935
+                        title: 'No. 18: Taylor Swift’s 1989 (Taylor’s Version)'
+                        artistName: 100 Best Albums
+                        url: https://music.apple.com/us/station/no-18-taylor-swifts-1989-taylors-version/ra.1745191935
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features211/v4/9f/4a/c2/9f4ac29f-fda3-e94f-edc9-5ecda0a8c61e/107df88b-7d10-4667-a099-4af3e96b5054.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1561860304
+                        title: 'New Music: Taylor Swift'
+                        artistName: Today’s Country Radio
+                        url: https://music.apple.com/us/station/new-music-taylor-swift/ra.1561860304
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features114/v4/3a/b9/be/3ab9be86-4ba6-2481-6e25-96662ab7666c/MDAgU0MtTVMtV1ctVG9kYXnigJlzX0NvdW50cnlfUmFkaW8tRVA3MC1UYXlsb3JTd2lmdC5wbmc.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1714656493
+                        title: 1989 (Taylor’s Version) and reputation
+                        artistName: The Global Chart Show
+                        url: https://music.apple.com/us/station/1989-taylors-version-and-reputation/ra.1714656493
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features116/v4/4a/33/e2/4a33e2bf-4cb4-91fe-58e6-144844170eb0/956279d3-6f9a-4454-ac8d-f8be7b715f7a.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1620962692
+                        title: 'Oct. 14: Taylor Swift'
+                        artistName: Apple Music Today
+                        url: https://music.apple.com/us/station/oct-14-taylor-swift/ra.1620962692
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features126/v4/ab/24/d7/ab24d7d3-ccb0-6142-9421-cd296e695ded/255add49-304f-45d0-921b-55ebc4ba81d3.png/1200x1200sr.jpg
+                        explicit: false
+                      - radioEpisodeId: ra.1593740731
+                        title: Taylor Swift
+                        artistName: New Music Daily Radio
+                        url: https://music.apple.com/us/station/taylor-swift/ra.1593740731
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Features126/v4/21/bd/3a/21bd3a4a-47d1-9c24-1b3d-d01d38eaf3e8/U0MtTVMtV1ctRXAxMDAtVGF5bG9yU3dpZnQtUmFkaW8tQURBTV9JRD0xMDUzMTY1ODU3LnBuZw.png/1200x1200sr.jpg
+                        explicit: false
+                      totalResults: 120
+                    meta:
+                      requestId: req_78a18bb9-7ca3-4a4a-888c-8dcfd30a56db
+                      creditsCharged: 1
+                      version: v1
+                empty:
+                  value:
+                    data:
+                      query: zzzxnotarealapplemusicquery999
+                      type: song
+                      artists: []
+                      albums: []
+                      songs: []
+                      playlists: []
+                      stations: []
+                      musicVideos: []
+                      radioEpisodes: []
+                      totalResults: 0
+                    meta:
+                      requestId: req_4221298c-ab39-49d8-9187-633502857910
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query or bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1AppleMusicSearch
+      x-operation-id-source: derived
+  /v1/apple-music/artist:
+    get:
+      tags:
+      - Apple Music
+      summary: Get Apple Music artist
+      description: Get an Apple Music artist by id or artist URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Optional Apple Music artist id for the request.
+        required: false
+        description: Optional Apple Music artist id for the request.
+        name: artistId
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Optional Apple Music artist URL for the request.
+        required: false
+        description: Optional Apple Music artist URL for the request.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Artist lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the artist was found.
+                      artist:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - apple_music
+                            description: Platform for this artist.
+                          artistId:
+                            type: string
+                            minLength: 1
+                            description: Stable Apple Music artist identifier.
+                          displayName:
+                            type: string
+                            minLength: 1
+                            description: Public display name for the artist.
+                          profileUrl:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Apple Music artist profile URL.
+                          artworkUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Best available square artwork image URL when available.
+                          editorialNotes:
+                            type:
+                            - string
+                            - 'null'
+                            description: Editorial notes for the artist when available.
+                        required:
+                        - platform
+                        - artistId
+                        - displayName
+                        - profileUrl
+                        - artworkUrl
+                        - editorialNotes
+                        description: Artist details when available.
+                      topSongs:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            songId:
+                              type: string
+                              minLength: 1
+                              description: Stable Apple Music song identifier.
+                            title:
+                              type: string
+                              minLength: 1
+                              description: Song title.
+                            artistName:
+                              type:
+                              - string
+                              - 'null'
+                              description: Primary artist display name when available.
+                            songUrl:
+                              type: string
+                              minLength: 1
+                              description: Canonical public Apple Music song URL.
+                            durationMs:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Song duration in milliseconds when available.
+                          required:
+                          - songId
+                          - title
+                          - artistName
+                          - songUrl
+                          - durationMs
+                          description: Top song associated with an Apple Music artist.
+                        description: Top songs for the artist.
+                      albums:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            albumId:
+                              type: string
+                              minLength: 1
+                              description: Stable Apple Music album identifier.
+                            title:
+                              type: string
+                              minLength: 1
+                              description: Album title.
+                            subtitle:
+                              type:
+                              - string
+                              - 'null'
+                              description: Album subtitle, typically the artist name, when available.
+                            trackCount:
+                              type:
+                              - integer
+                              - 'null'
+                              minimum: 0
+                              description: Number of tracks on the album when available.
+                            albumUrl:
+                              type: string
+                              minLength: 1
+                              description: Canonical public Apple Music album URL.
+                          required:
+                          - albumId
+                          - title
+                          - subtitle
+                          - trackCount
+                          - albumUrl
+                          description: Album associated with an Apple Music artist.
+                        description: Albums for the artist.
+                      musicVideos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            videoId:
+                              type: string
+                              minLength: 1
+                              description: Stable Apple Music music video identifier.
+                            title:
+                              type: string
+                              minLength: 1
+                              description: Music video title.
+                            videoUrl:
+                              type: string
+                              minLength: 1
+                              description: Canonical public Apple Music music video URL.
+                          required:
+                          - videoId
+                          - title
+                          - videoUrl
+                          description: Music video associated with an Apple Music artist.
+                        description: Music videos for the artist.
+                      playlists:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            playlistId:
+                              type: string
+                              minLength: 1
+                              description: Stable Apple Music playlist identifier.
+                            title:
+                              type: string
+                              minLength: 1
+                              description: Playlist title.
+                            playlistUrl:
+                              type: string
+                              minLength: 1
+                              description: Canonical public Apple Music playlist URL.
+                          required:
+                          - playlistId
+                          - title
+                          - playlistUrl
+                          description: Playlist associated with an Apple Music artist.
+                        description: Playlists for the artist.
+                    required:
+                    - lookupStatus
+                    - artist
+                    - topSongs
+                    - albums
+                    - musicVideos
+                    - playlists
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      artist:
+                        platform: apple_music
+                        artistId: '159260351'
+                        displayName: Taylor Swift
+                        profileUrl: https://music.apple.com/us/artist/taylor-swift/159260351
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/AMCArtistImages221/v4/70/30/3b/70303b1c-4744-57b7-27be-5cb94a8fc3cb/ami-identity-994af5c375f4c3aa96cd6ced4a700799-2025-09-26T18-27-12.403Z_cropped.png/1200x1200bb.jpg
+                        editorialNotes: null
+                      topSongs:
+                      - songId: '6775527443'
+                        title: I Knew It, I Knew You (From "Toy Story 5")
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/i-knew-it-i-knew-you-from-toy-story-5/6775527442?i=6775527443
+                        durationMs: 178186
+                      - songId: '1440933520'
+                        title: Style
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/style/1440933512?i=1440933520
+                        durationMs: 231000
+                      - songId: '1833328840'
+                        title: The Fate of Ophelia
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/the-fate-of-ophelia/1833328839?i=1833328840
+                        durationMs: 226074
+                      - songId: '1468058171'
+                        title: Cruel Summer
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/cruel-summer/1468058165?i=1468058171
+                        durationMs: 178426
+                      - songId: '1833328845'
+                        title: Opalite
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/opalite/1833328839?i=1833328845
+                        durationMs: 235356
+                      - songId: '1468058173'
+                        title: Lover
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/lover/1468058165?i=1468058173
+                        durationMs: 221300
+                      - songId: '1524801944'
+                        title: august
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/august/1524801260?i=1524801944
+                        durationMs: 261923
+                      - songId: '1440925035'
+                        title: You Belong With Me
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/you-belong-with-me/1440924803?i=1440925035
+                        durationMs: 231133
+                      - songId: '1452859410'
+                        title: Love Story
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/love-story/1452859090?i=1452859410
+                        durationMs: 235280
+                      - songId: '1440935808'
+                        title: Blank Space
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/blank-space/1440935467?i=1440935808
+                        durationMs: 231833
+                      - songId: '1440934255'
+                        title: Look What You Made Me Do
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/look-what-you-made-me-do/1440933849?i=1440934255
+                        durationMs: 211859
+                      - songId: '1524801580'
+                        title: cardigan
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/cardigan/1524801260?i=1524801580
+                        durationMs: 239560
+                      - songId: '1468058704'
+                        title: You Need To Calm Down
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/you-need-to-calm-down/1468058165?i=1468058704
+                        durationMs: 171352
+                      - songId: '1440934254'
+                        title: Delicate
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/delicate/1440933849?i=1440934254
+                        durationMs: 232251
+                      - songId: '1440936016'
+                        title: Shake It Off
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/shake-it-off/1440935467?i=1440936016
+                        durationMs: 219209
+                      - songId: '1440934248'
+                        title: '...Ready For It?'
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/ready-for-it/1440933849?i=1440934248
+                        durationMs: 208198
+                      - songId: '1524801587'
+                        title: exile (feat. Bon Iver)
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/exile-feat-bon-iver/1524801260?i=1524801587
+                        durationMs: 285634
+                      - songId: '1440936036'
+                        title: Wildest Dreams
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/wildest-dreams/1440935467?i=1440936036
+                        durationMs: 220433
+                      - songId: '1590368894'
+                        title: All Too Well (10 Minute Version) [Taylor's Version] [From The Vault]
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/all-too-well-10-minute-version-taylors-version-from/1590368448?i=1590368894
+                        durationMs: 613000
+                      - songId: '1742057775'
+                        title: Fortnight (feat. Post Malone)
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/fortnight-feat-post-malone/1742057774?i=1742057775
+                        durationMs: 228966
+                      - songId: '1524801274'
+                        title: the 1
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/the-1/1524801260?i=1524801274
+                        durationMs: 210252
+                      - songId: '1833328847'
+                        title: Father Figure
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/father-figure/1833328839?i=1833328847
+                        durationMs: 212777
+                      - songId: '1649434498'
+                        title: Karma
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/karma/1649434004?i=1649434498
+                        durationMs: 204852
+                      - songId: '1544268298'
+                        title: willow
+                        artistName: Taylor Swift
+                        songUrl: https://music.apple.com/us/album/willow/1544268281?i=1544268298
+                        durationMs: 214707
+                      albums:
+                      - albumId: '1875381397'
+                        title: Opalite (Official Music Video Extended Versions) - Single
+                        subtitle: '2026'
+                        trackCount: 4
+                        albumUrl: https://music.apple.com/us/album/opalite-official-music-video-extended-versions-single/1875381397
+                      - albumId: '1850496031'
+                        title: The Life of a Showgirl + Acoustic Collection
+                        subtitle: '2025'
+                        trackCount: 19
+                        albumUrl: https://music.apple.com/us/album/the-life-of-a-showgirl-acoustic-collection/1850496031
+                      - albumId: '1838810949'
+                        title: The Life of a Showgirl
+                        subtitle: '2025'
+                        trackCount: 12
+                        albumUrl: https://music.apple.com/us/album/the-life-of-a-showgirl/1838810949
+                      - albumId: '1742057774'
+                        title: 'THE TORTURED POETS DEPARTMENT: THE ANTHOLOGY'
+                        subtitle: '2024'
+                        trackCount: 31
+                        albumUrl: https://music.apple.com/us/album/the-tortured-poets-department-the-anthology/1742057774
+                      - albumId: '1713845538'
+                        title: 1989 (Taylor's Version) [Deluxe]
+                        subtitle: '2023'
+                        trackCount: 22
+                        albumUrl: https://music.apple.com/us/album/1989-taylors-version-deluxe/1713845538
+                      - albumId: '1690839749'
+                        title: Speak Now (Taylor's Version)
+                        subtitle: '2023'
+                        trackCount: 23
+                        albumUrl: https://music.apple.com/us/album/speak-now-taylors-version/1690839749
+                      - albumId: '1689131527'
+                        title: Midnights (The Til Dawn Edition)
+                        subtitle: '2022'
+                        trackCount: 23
+                        albumUrl: https://music.apple.com/us/album/midnights-the-til-dawn-edition/1689131527
+                      - albumId: '1590368448'
+                        title: Red (Taylor’s Version) [+ A Message from Taylor]
+                        subtitle: '2021'
+                        trackCount: 31
+                        albumUrl: https://music.apple.com/us/album/red-taylors-version-a-message-from-taylor/1590368448
+                      - albumId: '1552791073'
+                        title: Fearless (Taylor's Version)
+                        subtitle: '2021'
+                        trackCount: 26
+                        albumUrl: https://music.apple.com/us/album/fearless-taylors-version/1552791073
+                      - albumId: '1547315522'
+                        title: evermore (deluxe version)
+                        subtitle: '2020'
+                        trackCount: 17
+                        albumUrl: https://music.apple.com/us/album/evermore-deluxe-version/1547315522
+                      musicVideos:
+                      - videoId: '1896866486'
+                        title: I Knew It, I Knew You (From "Toy Story 5")
+                        videoUrl: https://music.apple.com/us/music-video/i-knew-it-i-knew-you-from-toy-story-5/1896866486
+                      - videoId: '1878230275'
+                        title: Opalite (BUNT. Remix)
+                        videoUrl: https://music.apple.com/us/music-video/opalite-bunt-remix/1878230275
+                      - videoId: '1878230450'
+                        title: Opalite (Chris Lake Remix)
+                        videoUrl: https://music.apple.com/us/music-video/opalite-chris-lake-remix/1878230450
+                      - videoId: '1878230438'
+                        title: Opalite (Ely Oaks Remix)
+                        videoUrl: https://music.apple.com/us/music-video/opalite-ely-oaks-remix/1878230438
+                      - videoId: '1878233375'
+                        title: Opalite (Skream Remix)
+                        videoUrl: https://music.apple.com/us/music-video/opalite-skream-remix/1878233375
+                      - videoId: '1875381399'
+                        title: Opalite (Extended Version Part 1)
+                        videoUrl: https://music.apple.com/us/music-video/opalite-extended-version-part-1/1875381399
+                      - videoId: '1875381400'
+                        title: Opalite (Extended Version Part 2)
+                        videoUrl: https://music.apple.com/us/music-video/opalite-extended-version-part-2/1875381400
+                      - videoId: '1874387735'
+                        title: Opalite
+                        videoUrl: https://music.apple.com/us/music-video/opalite/1874387735
+                      - videoId: '1875381401'
+                        title: Opalite
+                        videoUrl: https://music.apple.com/us/music-video/opalite/1875381401
+                      - videoId: '1843999008'
+                        title: Actually Romantic (Lyric Video)
+                        videoUrl: https://music.apple.com/us/music-video/actually-romantic-lyric-video/1843999008
+                      playlists:
+                      - playlistId: pl.3950454ced8c45a3b0cc693c2a7db97b
+                        title: Taylor Swift Essentials
+                        playlistUrl: https://music.apple.com/us/playlist/taylor-swift-essentials/pl.3950454ced8c45a3b0cc693c2a7db97b
+                      - playlistId: pl.6929cc16ba9e48878fcabb6af6412d0a
+                        title: Taylor Swift Video Essentials
+                        playlistUrl: https://music.apple.com/us/playlist/taylor-swift-video-essentials/pl.6929cc16ba9e48878fcabb6af6412d0a
+                      - playlistId: pl.57891bdd1bc840948374f1c4cbe9c840
+                        title: Taylor Swift’s Eras Tour Set List
+                        playlistUrl: https://music.apple.com/us/playlist/taylor-swifts-eras-tour-set-list/pl.57891bdd1bc840948374f1c4cbe9c840
+                      - playlistId: pl.86b27a0f4ccc481288958f5ee3c4d226
+                        title: I Love You, It’s Ruining My Life Songs
+                        playlistUrl: https://music.apple.com/us/playlist/i-love-you-its-ruining-my-life-songs/pl.86b27a0f4ccc481288958f5ee3c4d226
+                      - playlistId: pl.2a3975d2994d4182a0cedcfa71700211
+                        title: 'Taylor Swift: Summer Era'
+                        playlistUrl: https://music.apple.com/us/playlist/taylor-swift-summer-era/pl.2a3975d2994d4182a0cedcfa71700211
+                      - playlistId: pl.ca7c0fe7264749c5afbc68234cd03a18
+                        title: Taylor Swift’s Glitter Gel Pen Songs
+                        playlistUrl: https://music.apple.com/us/playlist/taylor-swifts-glitter-gel-pen-songs/pl.ca7c0fe7264749c5afbc68234cd03a18
+                      - playlistId: pl.43222633fa6b4868b2ba6aa260903e5f
+                        title: I Can Do It with a Broken Heart Songs
+                        playlistUrl: https://music.apple.com/us/playlist/i-can-do-it-with-a-broken-heart-songs/pl.43222633fa6b4868b2ba6aa260903e5f
+                      - playlistId: pl.fcbd4836593343a490bea5e343fca3cf
+                        title: Old Habits Die Screaming Songs
+                        playlistUrl: https://music.apple.com/us/playlist/old-habits-die-screaming-songs/pl.fcbd4836593343a490bea5e343fca3cf
+                      - playlistId: pl.455d78fed003473787886679c686fdcd
+                        title: Am I Allowed to Cry? Songs
+                        playlistUrl: https://music.apple.com/us/playlist/am-i-allowed-to-cry-songs/pl.455d78fed003473787886679c686fdcd
+                      - playlistId: pl.c1fefbc1e441486488f359234be231fb
+                        title: 'Taylor Swift: Love Songs'
+                        playlistUrl: https://music.apple.com/us/playlist/taylor-swift-love-songs/pl.c1fefbc1e441486488f359234be231fb
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      artist: null
+                      topSongs: []
+                      albums: []
+                      musicVideos: []
+                      playlists: []
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query or bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1AppleMusicArtist
+      x-operation-id-source: derived
+  /v1/apple-music/album:
+    get:
+      tags:
+      - Apple Music
+      summary: Get Apple Music album
+      description: Get an Apple Music album by id or album URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Optional Apple Music album id for the request.
+        required: false
+        description: Optional Apple Music album id for the request.
+        name: albumId
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Optional Apple Music album URL for the request.
+        required: false
+        description: Optional Apple Music album URL for the request.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Album lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the album was found.
+                      album:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - apple_music
+                            description: Platform for this album.
+                          albumId:
+                            type: string
+                            minLength: 1
+                            description: Stable Apple Music album identifier.
+                          title:
+                            type: string
+                            minLength: 1
+                            description: Album title.
+                          coverArtUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Best available square cover image URL when available.
+                          albumUrl:
+                            type: string
+                            minLength: 1
+                            description: Canonical public Apple Music album URL.
+                          artists:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                artistId:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Apple Music artist id when available.
+                                displayName:
+                                  type: string
+                                  minLength: 1
+                                  description: Artist display name on this album.
+                                profileUrl:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Canonical public Apple Music artist URL when available.
+                              required:
+                              - artistId
+                              - displayName
+                              - profileUrl
+                              description: Artist credited on an Apple Music album.
+                            description: Album artists when available.
+                          trackCount:
+                            type: integer
+                            minimum: 0
+                            description: Number of tracks on the album.
+                          releaseInfo:
+                            type:
+                            - string
+                            - 'null'
+                            description: Publisher release text when available (date, duration, copyright).
+                          tracks:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                trackId:
+                                  type: string
+                                  minLength: 1
+                                  description: Stable Apple Music song identifier.
+                                title:
+                                  type: string
+                                  minLength: 1
+                                  description: Track title.
+                                trackNumber:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  description: Track number on the album when available.
+                                  exclusiveMinimum: 0
+                                durationMs:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  minimum: 0
+                                  description: Track duration in milliseconds when available.
+                                discNumber:
+                                  type:
+                                  - integer
+                                  - 'null'
+                                  description: Disc number for this track when available.
+                                  exclusiveMinimum: 0
+                                explicit:
+                                  type:
+                                  - boolean
+                                  - 'null'
+                                  description: Whether the track is marked explicit when available.
+                                albumId:
+                                  type:
+                                  - string
+                                  - 'null'
+                                  description: Apple Music album id this track belongs to when available.
+                              required:
+                              - trackId
+                              - title
+                              - trackNumber
+                              - durationMs
+                              - discNumber
+                              - explicit
+                              - albumId
+                              description: Track on an Apple Music album.
+                            description: Album tracks in track order.
+                        required:
+                        - platform
+                        - albumId
+                        - title
+                        - coverArtUrl
+                        - albumUrl
+                        - artists
+                        - trackCount
+                        - releaseInfo
+                        - tracks
+                        description: Album details when available.
+                    required:
+                    - lookupStatus
+                    - album
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      album:
+                        platform: apple_music
+                        albumId: '1468058165'
+                        title: Lover
+                        coverArtUrl: https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/49/3d/ab/493dab54-f920-9043-6181-80993b8116c9/19UMGIM53909.rgb.jpg/1200x1200bb.jpg
+                        albumUrl: https://music.apple.com/us/album/lover/1468058165
+                        artists:
+                        - artistId: '159260351'
+                          displayName: Taylor Swift
+                          profileUrl: https://music.apple.com/us/artist/taylor-swift/159260351
+                        trackCount: 18
+                        releaseInfo: 'August 23, 2019
+
+                          18 songs, 1 hour 1 minute
+
+                          ℗ 2019 Taylor Swift'
+                        tracks:
+                        - trackId: '1468058169'
+                          title: I Forgot That You Existed
+                          trackNumber: 1
+                          durationMs: 170651
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058171'
+                          title: Cruel Summer
+                          trackNumber: 2
+                          durationMs: 178426
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058173'
+                          title: Lover
+                          trackNumber: 3
+                          durationMs: 221300
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058176'
+                          title: The Man
+                          trackNumber: 4
+                          durationMs: 190363
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058177'
+                          title: The Archer
+                          trackNumber: 5
+                          durationMs: 211235
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058178'
+                          title: I Think He Knows
+                          trackNumber: 6
+                          durationMs: 173396
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058180'
+                          title: Miss Americana & The Heartbreak Prince
+                          trackNumber: 7
+                          durationMs: 234137
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058181'
+                          title: Paper Rings
+                          trackNumber: 8
+                          durationMs: 222407
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058184'
+                          title: Cornelia Street
+                          trackNumber: 9
+                          durationMs: 287267
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058185'
+                          title: Death By A Thousand Cuts
+                          trackNumber: 10
+                          durationMs: 198530
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058696'
+                          title: London Boy
+                          trackNumber: 11
+                          durationMs: 190239
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058699'
+                          title: Soon You’ll Get Better (feat. The Chicks)
+                          trackNumber: 12
+                          durationMs: 201590
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058701'
+                          title: False God
+                          trackNumber: 13
+                          durationMs: 200310
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058704'
+                          title: You Need To Calm Down
+                          trackNumber: 14
+                          durationMs: 171352
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058705'
+                          title: Afterglow
+                          trackNumber: 15
+                          durationMs: 223295
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058706'
+                          title: ME! (feat. Brendon Urie of Panic! At The Disco)
+                          trackNumber: 16
+                          durationMs: 193000
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058707'
+                          title: It’s Nice To Have A Friend
+                          trackNumber: 17
+                          durationMs: 150435
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                        - trackId: '1468058708'
+                          title: Daylight
+                          trackNumber: 18
+                          durationMs: 293435
+                          discNumber: 1
+                          explicit: false
+                          albumId: '1468058165'
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      album: null
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query or bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1AppleMusicAlbum
+      x-operation-id-source: derived
+  /v1/apple-music/track:
+    get:
+      tags:
+      - Apple Music
+      summary: Get Apple Music track
+      description: Get an Apple Music track by id or track URL.
+      security:
+      - ApiKeyAuth: []
+      - {}
+      x-socialfetch-agent-hints:
+        disambiguation: Album URLs must include i={songId} to identify the song. Use GET /v1/apple-music/album for album lookups.
+      x-socialfetch-pricing:
+        version: 1
+        baseCredits: 1
+        surcharges: []
+        maxCredits: 1
+        normalizationFailureCredits: 1
+      x-socialfetch-credits-pricing: 1 credit per successful request.
+      parameters:
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Optional Apple Music song id for the request.
+        required: false
+        description: Optional Apple Music song id for the request.
+        name: trackId
+        in: query
+      - schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: Optional Apple Music song URL for the request.
+        required: false
+        description: Optional Apple Music song URL for the request.
+        name: url
+        in: query
+      responses:
+        '200':
+          description: Track lookup result.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      lookupStatus:
+                        type: string
+                        enum:
+                        - found
+                        - not_found
+                        description: Whether the track was found.
+                      track:
+                        type:
+                        - object
+                        - 'null'
+                        properties:
+                          platform:
+                            type: string
+                            enum:
+                            - apple_music
+                            description: Platform for this track.
+                          trackId:
+                            type: string
+                            minLength: 1
+                            description: Stable Apple Music song identifier.
+                          title:
+                            type: string
+                            minLength: 1
+                            description: Track title.
+                          durationMs:
+                            type:
+                            - integer
+                            - 'null'
+                            minimum: 0
+                            description: Track duration in milliseconds when available.
+                          trackNumber:
+                            type:
+                            - integer
+                            - 'null'
+                            description: Track number on the album when available.
+                            exclusiveMinimum: 0
+                          explicit:
+                            type:
+                            - boolean
+                            - 'null'
+                            description: Whether the track is marked explicit when available.
+                          artistName:
+                            type:
+                            - string
+                            - 'null'
+                            description: Primary artist display name when available.
+                          albumTitle:
+                            type:
+                            - string
+                            - 'null'
+                            description: Album title when available.
+                          artworkUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Best available square artwork image URL when available.
+                          previewUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Short audio preview URL when available.
+                          trackUrl:
+                            type:
+                            - string
+                            - 'null'
+                            description: Canonical public Apple Music song URL when available.
+                        required:
+                        - platform
+                        - trackId
+                        - title
+                        - durationMs
+                        - trackNumber
+                        - explicit
+                        - artistName
+                        - albumTitle
+                        - artworkUrl
+                        - previewUrl
+                        - trackUrl
+                        description: Track details when available.
+                    required:
+                    - lookupStatus
+                    - track
+                    description: Endpoint-specific response payload.
+                  meta:
+                    type: object
+                    properties:
+                      requestId:
+                        type: string
+                        minLength: 1
+                        description: Unique request identifier for tracing this API call.
+                      creditsCharged:
+                        type: integer
+                        minimum: 0
+                        description: Credits charged for this request.
+                      version:
+                        type: string
+                        enum:
+                        - v1
+                        description: Public API version that served the response.
+                      cached:
+                        type: boolean
+                        description: True when served from shared response cache. Credits still apply (full endpoint price); Age header may be present.
+                    required:
+                    - requestId
+                    - creditsCharged
+                    - version
+                    description: Metadata describing the request and billing outcome.
+                required:
+                - data
+                - meta
+                description: Standard success response envelope.
+              examples:
+                found:
+                  value:
+                    data:
+                      lookupStatus: found
+                      track:
+                        platform: apple_music
+                        trackId: '1468058169'
+                        title: I Forgot That You Existed
+                        durationMs: null
+                        trackNumber: null
+                        explicit: false
+                        artistName: Taylor Swift
+                        albumTitle: Lover
+                        artworkUrl: https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/49/3d/ab/493dab54-f920-9043-6181-80993b8116c9/19UMGIM53909.rgb.jpg/1200x1200bb.jpg
+                        previewUrl: null
+                        trackUrl: https://music.apple.com/us/song/i-forgot-that-you-existed/1468058169
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                found_by_album_url:
+                  value:
+                    data:
+                      lookupStatus: found
+                      track:
+                        platform: apple_music
+                        trackId: '1468058169'
+                        title: I Forgot That You Existed
+                        durationMs: 170651
+                        trackNumber: 1
+                        explicit: false
+                        artistName: Taylor Swift
+                        albumTitle: null
+                        artworkUrl: null
+                        previewUrl: https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview221/v4/9c/e2/97/9ce2976a-b1c8-aa80-3e94-f4562cbad53e/mzaf_13898706762824220632.plus.aac.ep.m4a
+                        trackUrl: https://music.apple.com/us/album/i-forgot-that-you-existed/1468058165?i=1468058169
+                    meta:
+                      requestId: req_01example
+                      creditsCharged: 1
+                      version: v1
+                not_found:
+                  value:
+                    data:
+                      lookupStatus: not_found
+                      track: null
+                    meta:
+                      requestId: req_01example_nf
+                      creditsCharged: 1
+                      version: v1
+        '400':
+          description: Invalid query or bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - bad_request
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: bad_request
+                  message: Example message.
+                  requestId: req_01example
+        '401':
+          description: Missing or invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unauthorized
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: unauthorized
+                  message: Example message.
+                  requestId: req_01example
+        '402':
+          description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - insufficient_credits
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: insufficient_credits
+                  message: Example message.
+                  requestId: req_01example
+        '500':
+          description: Unexpected or billing error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - internal_error
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: internal_error
+                  message: Example message.
+                  requestId: req_01example
+        '502':
+          description: Lookup could not be completed from the response (unexpected or invalid data).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - lookup_failed
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: lookup_failed
+                  message: Example message.
+                  requestId: req_01example
+        '503':
+          description: Service temporarily unavailable; safe to retry with backoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - temporarily_unavailable
+                        description: Machine-readable error code for the failed request.
+                      message:
+                        type: string
+                        description: Human-readable error message. May change over time; do not parse it. Use `error.code` and the HTTP status for programmatic handling.
+                      requestId:
+                        type: string
+                        description: Unique request identifier for tracing the failed API call.
+                      checkoutUrl:
+                        type: string
+                        format: uri
+                        description: Optional one-click checkout URL when credits are exhausted and a conversion offer is available.
+                    required:
+                    - code
+                    - message
+                    - requestId
+                    description: Error details for the failed request.
+                required:
+                - error
+                description: Standard error response envelope.
+              example:
+                error:
+                  code: temporarily_unavailable
+                  message: Example message.
+                  requestId: req_01example
+      operationId: getV1AppleMusicTrack
+      x-operation-id-source: derived
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key (`sfk_...`)
