@@ -1,6 +1,6 @@
 openapi: 3.2.0
 info:
-  title: Social Fetch Public Linked In API
+  title: Social Fetch Public LinkedIn API
   version: 1.0.0
   description: 'REST API for Social Fetch. Versioned routes under `/v1` accept `x-api-key` credits or x402 USDC on Base (walk-up, no key). OpenAPI: https://api.socialfetch.dev/openapi.json. x402 discovery: https://api.socialfetch.dev/.well-known/x402. MCP: https://api.socialfetch.dev/mcp (POST). Docs and agent guide: https://www.socialfetch.dev/docs and https://www.socialfetch.dev/llms.txt.'
 servers:
