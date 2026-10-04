@@ -479,6 +479,8 @@ apis:
   humanURL: https://www.socialfetch.dev/docs
   baseURL: https://api.socialfetch.dev
   tags:
+  - LinkedIn
+  tags_raw:
   - Linked In
   properties:
   - type: OpenAPI
@@ -519,6 +521,9 @@ x-generated:
   confidence: 97
   at: '2026-09-10T22:01:43.630Z'
 common:
+- type: CapabilityMap
+  url: capabilities/social-fetch-capability-edges.yml
+  name: Social Fetch Business Capability Map
 - type: MCPServer
   url: https://api.socialfetch.dev/mcp
 - type: AgentSkill
