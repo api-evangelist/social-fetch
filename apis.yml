@@ -479,8 +479,6 @@ apis:
   humanURL: https://www.socialfetch.dev/docs
   baseURL: https://api.socialfetch.dev
   tags:
-  - LinkedIn
-  tags_raw:
   - Linked In
   properties:
   - type: OpenAPI
