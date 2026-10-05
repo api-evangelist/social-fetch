@@ -1,0 +1,26 @@
+slug: social-fetch
+provider: Social Fetch
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 1
+edges:
+- tag: tiktok
+  spec_file: social-fetch-tiktok-api-openapi.yml
+  capability_id: BC-400.30
+  capability_id_l1: BC-400
+  capability_name: Market Intelligence Management
+  confidence: 0.7
+  evidence: GET /v1/tiktok/profiles/{handle}/audience  Get TikTok profile audience; GET /v1/tiktok/profiles/{handle}/engagement  Get
+    TikTok profile engagement audit
+  reason: Audience composition, engagement audits, follower graphs and hashtag/keyword search over public
+    TikTok data — explicitly analytical social-listening and creator-vetting signal, which is market/customer
+    intelligence.
